@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 古籍通 AncientBook 原型交互脚本 v2.0
  * 功能：数据驱动渲染 / 繁简真实转换 / 检索闭环 / 汉堡菜单 / 三端预览 / 阅读控制 / 划词释义 / 动效
  * 数据源：data/app-data.js（全局变量，兼容 file:// 直开）
@@ -17,7 +17,10 @@ var state = {
   chapterIdx: parseInt(localStorage.getItem("ab-chapter") || "0", 10),
   currentBookId: localStorage.getItem("ab-book") || "ru-lunyu",
   searchKeyword: "",
-  filterCategory: "全部馆藏"
+  filterCategory: "全部馆藏",
+  searchMode: localStorage.getItem("ab-smode") || "full",
+  searchLimit: parseInt(localStorage.getItem("ab-slimit") || "12", 10),
+  showImage: false
 };
 
 /* ==================== 繁简映射表（古籍常用字） ==================== */
@@ -239,9 +242,27 @@ function renderReader(main, bookId){
   var chapters = book.chapters;
   var idx = Math.min(state.chapterIdx, chapters.length-1);
   var chapterTitle = chapters[idx];
+  var showImage = state.showImage === true;
 
   var bodyStyle = 'style="--reader-fs:'+state.fontSize+'px;--reader-lh:'+state.lineHeight+';"';
   var text = getChapterText(book, idx);
+  var imagePanel = showImage
+    ? '<div class="image-compare fade-in">'+
+        '<div class="ic-left">'+
+          '<div class="ic-title">'+toSimplified('原书影像')+'</div>'+
+          '<div class="ic-img" style="background:linear-gradient(135deg,#f5f0e6 0%,#efe6d4 60%,#e8dcc4 100%);border:1px solid #d8c9a8;">'+
+            '<div style="font-size:12px;color:#8a7350;padding:28px 16px;text-align:center;line-height:1.9;">'+
+              toSimplified('刻本影像示意图')+'<br>'+toSimplified('（上线版接入 GitHub 原文影像深链）')
+            +'</div>'+
+          '</div>'+
+          '<div class="ic-meta">'+toSimplified('底本：')+esc(book.dynasty)+' '+toSimplified('刻本 · ')+esc(book.title)+'</div>'+
+        '</div>'+
+        '<div class="ic-right">'+
+          '<div class="ic-title">'+toSimplified('整理文本')+'</div>'+
+          '<div class="reader-body" '+bodyStyle+'>'+text+'</div>'+
+        '</div>'+
+      '</div>'
+    : '';
 
   main.innerHTML =
     '<section>'+
@@ -260,8 +281,9 @@ function renderReader(main, bookId){
           '<div class="ctrl">'+toSimplified('章节')+
             '<button onclick="goChapter(-1)">‹</button><button onclick="goChapter(1)">›</button></div>'+
           '<div class="ctrl">'+toSimplified('进度')+' <span id="progress-text">'+ (idx+1) +'/'+chapters.length +'</span></div>'+
+          '<div class="ctrl"><button class="btn-toggle '+(showImage?"on":"")+'" onclick="toggleImageCompare()" id="img-toggle">'+toSimplified('影像对照')+'</button></div>'+
         '</div>'+
-        '<div class="reader-body" '+bodyStyle+' id="reader-body">'+text+'</div>'+
+        (showImage ? imagePanel : '<div class="reader-body" '+bodyStyle+' id="reader-body">'+text+'</div>')+
         '<div class="reader-nav">'+
           '<button class="btn btn-secondary" onclick="goChapter(-1)">‹ '+toSimplified('上一章')+'</button>'+
           '<button class="btn btn-primary" onclick="goChapter(1)">'+toSimplified('下一章')+' ›</button>'+
@@ -271,6 +293,11 @@ function renderReader(main, bookId){
     '</section>';
   bindGlossary(main);
 }
+window.toggleImageCompare = function(){
+  state.showImage = !(state.showImage === true);
+  var container = $("#main-view") || $("#page-body");
+  if(container) renderReader(container, state.currentBookId);
+};
 
 /* 章节文本（模拟真实内容 + 生僻字标注） */
 function getChapterText(book, idx){
@@ -356,14 +383,20 @@ window.goChapter = function(delta){
 /* ==================== 检索页 ==================== */
 function renderSearch(main){
   var kw = state.searchKeyword || "不亦说乎";
+  var mode = state.searchMode || "full";      // title 标题检索 / full 全文检索
+  var limit = state.searchLimit || 12;        // 10/20/50
   // 检索过滤（标题/章节/正文模拟）
   var results = [];
   DATA.books.forEach(function(b){
-    if(b.title.indexOf(kw) > -1 || b.chapters.some(function(c){ return c.indexOf(kw)>-1; })){
+    var titleHit = b.title.indexOf(kw) > -1;
+    var chapterHit = b.chapters.some(function(c){ return c.indexOf(kw)>-1; });
+    var bodyHit = getChapterText(b, 0).indexOf(kw) > -1 || (b.desc && b.desc.indexOf(kw)>-1);
+    var hit = (mode === "title") ? (titleHit || chapterHit) : (titleHit || chapterHit || bodyHit);
+    if(hit){
       results.push({
         book: b.title, chapter: b.chapters[0], path: "首页 > "+b.category+" > "+b.title,
         snippet: "「"+b.chapters[0]+"」："+ (getChapterText(b,0).replace(/<[^>]+>/g,"").substring(0,60)) + "…",
-        score: 96
+        score: titleHit ? 98 : (chapterHit ? 92 : 80)
       });
     }
   });
@@ -378,7 +411,8 @@ function renderSearch(main){
       return { book:r.book, chapter:r.chapter, path:r.path, snippet:r.snippet, score:r.score };
     });
   }
-  var listHtml = results.slice(0,12).map(function(r){
+  var shown = results.slice(0, limit);
+  var listHtml = shown.map(function(r){
     var hlSnippet = esc(r.snippet);
     hlSnippet = hlSnippet.split(kw).join("<mark>"+esc(kw)+"</mark>");
     return '<div class="search-result-item fade-in">'+
@@ -387,6 +421,9 @@ function renderSearch(main){
       '<div class="snippet">'+toSimplified(hlSnippet)+'</div>'+
     '</div>';
   }).join("");
+  var more = results.length > limit
+    ? '<div class="search-more">'+toSimplified('已显示前 ')+limit+toSimplified(' 条，共命中 ')+results.length+toSimplified(' 条')+'</div>'
+    : '';
 
   var cats = DATA.categories.map(function(c){
     return '<option value="'+esc(c.name)+'">'+esc(c.name)+'</option>';
@@ -400,11 +437,21 @@ function renderSearch(main){
         '<button class="btn btn-primary search-btn" id="search-btn">'+toSimplified('搜索')+'</button>'+
       '</div>'+
       '<div class="filter-panel">'+
+        '<div class="search-mode-group" role="radiogroup" aria-label="'+toSimplified('检索模式')+'">'+
+          '<button class="btn-toggle '+(mode==="title"?"on":"")+'" data-smode="title" aria-pressed="'+(mode==="title")+'">'+toSimplified('标题检索')+'</button>'+
+          '<button class="btn-toggle '+(mode==="full"?"on":"")+'" data-smode="full" aria-pressed="'+(mode==="full")+'">'+toSimplified('全文检索')+'</button>'+
+        '</div>'+
         '<select id="filter-cat"><option value="全部馆藏">'+toSimplified('全部馆藏')+'</option>'+cats+'</select>'+
         '<select id="filter-dynasty"><option value="全部朝代">'+toSimplified('全部朝代')+'</option><option>春秋</option><option>战国</option><option>西汉</option><option>唐</option><option>宋</option><option>明</option></select>'+
+        '<select id="filter-limit" aria-label="'+toSimplified('每页条数')+'">'+
+          '<option value="10"'+(limit===10?" selected":"")+'>'+toSimplified('每页10条')+'</option>'+
+          '<option value="20"'+(limit===20?" selected":"")+'>'+toSimplified('每页20条')+'</option>'+
+          '<option value="50"'+(limit===50?" selected":"")+'>'+toSimplified('每页50条')+'</option>'+
+        '</select>'+
       '</div>'+
-      '<div class="search-stat">'+toSimplified('关键词「')+esc(kw)+toSimplified('」共命中 ')+ results.length + toSimplified(' 条结果')+'</div>'+
+      '<div class="search-stat">'+toSimplified('关键词「')+esc(kw)+'」· '+(mode==="title"?toSimplified('标题模式'):toSimplified('全文模式'))+toSimplified(' 共命中 ')+ results.length + toSimplified(' 条结果')+'</div>'+
       (listHtml || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">'+toSimplified('未找到相关内容')+'</div><div>'+toSimplified('请尝试更换关键词或减少筛选条件')+'</div></div>')+
+      more+
     '</section>';
 
   var inp = $("#search-input");
@@ -417,39 +464,88 @@ function renderSearch(main){
   }
   if(btn) btn.addEventListener("click", doSearch);
   if(inp) inp.addEventListener("keydown", function(e){ if(e.key==="Enter") doSearch(); });
-  $("#filter-cat").addEventListener("change", function(){ state.filterCategory=this.value; renderSearch($("#main-view")); });
+  var catSel = $("#filter-cat");
+  if(catSel) catSel.addEventListener("change", function(){ state.filterCategory=this.value; renderSearch($("#main-view")); });
+  var limSel = $("#filter-limit");
+  if(limSel) limSel.addEventListener("change", function(){
+    state.searchLimit = parseInt(this.value, 10);
+    localStorage.setItem("ab-slimit", String(state.searchLimit));
+    renderSearch($("#main-view"));
+  });
+  $$(".search-mode-group .btn-toggle").forEach(function(bt){
+    bt.addEventListener("click", function(){
+      state.searchMode = bt.getAttribute("data-smode");
+      localStorage.setItem("ab-smode", state.searchMode);
+      renderSearch($("#main-view"));
+    });
+  });
   bindFadeIn(main);
 }
 
 /* ==================== 人物考据页 ==================== */
 function renderCharacter(main){
   var kw = state.searchKeyword || "";
-  var list = DATA.characters.filter(function(p){
-    return !kw || p.name.indexOf(kw)>-1 || (p.zi&&p.zi.indexOf(kw)>-1) || (p.alias&&p.alias.indexOf(kw)>-1);
-  });
-  var cards = list.slice(0,8).map(function(p){
-    return '<div class="character-card fade-in" style="margin-bottom:16px;">'+
-      '<div class="char-name">'+toSimplified(p.name)+'<span class="char-zi">'+toSimplified((p.zi?"字"+p.zi:"")+(p.alias?" · "+p.alias:""))+'</span></div>'+
-      '<div class="info-row"><label>朝代</label>'+toSimplified(p.dynasty)+'</div>'+
-      '<div class="info-row"><label>籍贯</label>'+toSimplified(p.native)+'</div>'+
-      '<div class="info-row"><label>生卒</label>'+toSimplified(p.birth+' — '+p.death)+'</div>'+
-      '<div class="info-row"><label>官职</label>'+toSimplified(p.office)+'</div>'+
-      '<div class="info-row">'+(p.tags||[]).map(function(t){ return '<span class="tag tag-hover">'+toSimplified(t)+'</span>'; }).join("")+'</div>'+
-      '<div class="info-row" style="color:var(--color-text-secondary);font-size:14px;">'+toSimplified(p.desc)+'</div>'+
-      '<div class="info-row"><label>文献</label>'+toSimplified(p.books.join("、"))+'</div>'+
-    '</div>';
-  }).join("");
-  main.innerHTML =
-    '<section>'+
-      '<div class="breadcrumb"><a href="#page-home">'+toSimplified('首页')+'</a><span class="sep">/</span><span>'+toSimplified('人物考据')+'</span></div>'+
-      '<h2 style="margin-bottom:8px;">'+toSimplified('历史人物考据')+'</h2>'+
-      '<p style="color:var(--color-text-secondary);margin-bottom:24px;">'+toSimplified('数据源：哈佛CBDB、中研院史语所、北大公开学术数据集')+'</p>'+
-      '<div class="search-box" style="max-width:560px;margin-bottom:24px;">'+
-        '<input class="input-text" id="char-input" placeholder="'+toSimplified('检索人物姓名/字号')+'" value="'+esc(kw)+'">'+
-        '<button class="btn btn-primary search-btn" id="char-btn">'+toSimplified('检索')+'</button>'+
-      '</div>'+
-      cards+
-    '</section>';
+  var mode = state.searchMode === "obsolete" ? "obsolete" : "normal";
+  var obsoleteDemo = [
+    { id:"CBDB-562723", name:"〔已作废〕", reason:"该 ID 因重名合并已停用，正式档案移至 CBDB-562724 孔子（鲁国）", valid:"是" },
+    { id:"CBDB-000001", name:"〔已作废〕", reason:"旧版测试条目，正式数据以 2024 版数据集为准", valid:"是" }
+  ];
+  if(mode === "obsolete"){
+    var rows = obsoleteDemo.filter(function(o){ return !kw || o.id.indexOf(kw)>-1; }).map(function(o){
+      return '<div class="relation-item fade-in" style="border-left-color:var(--color-text-secondary);">'+
+        '<div><span class="rel-a" style="font-family:monospace;font-size:14px;">'+esc(o.id)+'</span><span class="rel-type">'+toSimplified('已作废')+'</span></div>'+
+        '<div class="info-row" style="margin-top:8px;">'+toSimplified(o.reason)+'</div>'+
+        '<div class="rel-source">'+toSimplified('是否仍有正式档案：')+(o.valid==="是"?toSimplified('是，已迁移'):toSimplified('否'))+'</div>'+
+      '</div>';
+    }).join("");
+    main.innerHTML =
+      '<section>'+
+        '<div class="breadcrumb"><a href="#page-home">'+toSimplified('首页')+'</a><span class="sep">/</span><span>'+toSimplified('人物考据')+'</span></div>'+
+        '<h2 style="margin-bottom:8px;">'+toSimplified('历史人物考据')+'</h2>'+
+        '<p style="color:var(--color-text-secondary);margin-bottom:24px;">'+toSimplified('数据源：哈佛CBDB、中研院史语所、北大公开学术数据集')+'</p>'+
+        '<div class="search-mode-group" style="margin-bottom:16px;">'+
+          '<button class="btn-toggle" data-cmode="normal" onclick="switchCharMode(\'normal\')">'+toSimplified('人物检索')+'</button>'+
+          '<button class="btn-toggle on" data-cmode="obsolete" onclick="switchCharMode(\'obsolete\')">'+toSimplified('作废 ID 查询')+'</button>'+
+        '</div>'+
+        '<div class="search-box" style="max-width:560px;margin-bottom:16px;">'+
+          '<input class="input-text" id="char-input" placeholder="'+toSimplified('输入已作废 CBDB ID，如：562723')+'" value="'+esc(kw)+'">'+
+          '<button class="btn btn-primary search-btn" id="char-btn">'+toSimplified('查询')+'</button>'+
+        '</div>'+
+        '<div class="info-row" style="color:var(--color-text-secondary);font-size:13px;margin-bottom:16px;">'+toSimplified('学术严谨性保障：历史人物 ID 合并、迁移后统一公示，避免检索到失效档案')+'</div>'+
+        (rows || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">'+toSimplified('未找到该作废 ID')+'</div><div>'+toSimplified('该 ID 可能从未建立或已完全移除')+'</div></div>')+
+      '</section>';
+  }else{
+    var list = DATA.characters.filter(function(p){
+      return !kw || p.name.indexOf(kw)>-1 || (p.zi&&p.zi.indexOf(kw)>-1) || (p.alias&&p.alias.indexOf(kw)>-1);
+    });
+    var cards = list.slice(0,8).map(function(p){
+      return '<div class="character-card fade-in" style="margin-bottom:16px;">'+
+        '<div class="char-name">'+toSimplified(p.name)+'<span class="char-zi">'+toSimplified((p.zi?"字"+p.zi:"")+(p.alias?" · "+p.alias:""))+'</span></div>'+
+        '<div class="info-row"><label>朝代</label>'+toSimplified(p.dynasty)+'</div>'+
+        '<div class="info-row"><label>籍贯</label>'+toSimplified(p.native)+'</div>'+
+        '<div class="info-row"><label>生卒</label>'+toSimplified(p.birth+' — '+p.death)+'</div>'+
+        '<div class="info-row"><label>官职</label>'+toSimplified(p.office)+'</div>'+
+        '<div class="info-row">'+(p.tags||[]).map(function(t){ return '<span class="tag tag-hover">'+toSimplified(t)+'</span>'; }).join("")+'</div>'+
+        '<div class="info-row" style="color:var(--color-text-secondary);font-size:14px;">'+toSimplified(p.desc)+'</div>'+
+        '<div class="info-row"><label>文献</label>'+toSimplified(p.books.join("、"))+'</div>'+
+      '</div>';
+    }).join("");
+    main.innerHTML =
+      '<section>'+
+        '<div class="breadcrumb"><a href="#page-home">'+toSimplified('首页')+'</a><span class="sep">/</span><span>'+toSimplified('人物考据')+'</span></div>'+
+        '<h2 style="margin-bottom:8px;">'+toSimplified('历史人物考据')+'</h2>'+
+        '<p style="color:var(--color-text-secondary);margin-bottom:24px;">'+toSimplified('数据源：哈佛CBDB、中研院史语所、北大公开学术数据集')+'</p>'+
+        '<div class="search-mode-group" style="margin-bottom:16px;">'+
+          '<button class="btn-toggle on" data-cmode="normal" onclick="switchCharMode(\'normal\')">'+toSimplified('人物检索')+'</button>'+
+          '<button class="btn-toggle" data-cmode="obsolete" onclick="switchCharMode(\'obsolete\')">'+toSimplified('作废 ID 查询')+'</button>'+
+        '</div>'+
+        '<div class="search-box" style="max-width:560px;margin-bottom:24px;">'+
+          '<input class="input-text" id="char-input" placeholder="'+toSimplified('检索人物姓名/字号')+'" value="'+esc(kw)+'">'+
+          '<button class="btn btn-primary search-btn" id="char-btn">'+toSimplified('检索')+'</button>'+
+        '</div>'+
+        cards+
+      '</section>';
+  }
   var inp = $("#char-input"), btn = $("#char-btn");
   function doSearch(){
     state.searchKeyword = inp.value.trim();
@@ -459,6 +555,10 @@ function renderCharacter(main){
   if(inp) inp.addEventListener("keydown", function(e){ if(e.key==="Enter") doSearch(); });
   bindFadeIn(main);
 }
+window.switchCharMode = function(m){
+  state.searchMode = m;
+  renderCharacter($("#main-view"));
+};
 
 /* ==================== 社会关系页 ==================== */
 function renderRelation(main){
@@ -508,6 +608,14 @@ function renderHelp(main){
     '<section>'+
       '<div class="breadcrumb"><a href="#page-home">'+toSimplified('首页')+'</a><span class="sep">/</span><span>'+toSimplified('帮助')+'</span></div>'+
       '<h2 style="margin-bottom:24px;">'+toSimplified('使用教程与合规声明')+'</h2>'+
+      '<div class="character-card" style="margin-bottom:16px;">'+
+        '<div class="char-name" style="font-size:17px;">'+toSimplified('🕘 最近更新')+'</div>'+
+        '<div class="info-row">· 2026-09-01 '+toSimplified('新增数据统计页：馆藏/朝代/人物/关系全景分析')+'</div>'+
+        '<div class="info-row">· 2026-08-28 '+toSimplified('检索升级：支持标题/全文双模式切换与每页 10/20/50 条')+'</div>'+
+        '<div class="info-row">· 2026-08-20 '+toSimplified('人物考据新增作废 ID 查询，重名合并档案统一公示')+'</div>'+
+        '<div class="info-row">· 2026-08-12 '+toSimplified('阅读页新增原书影像对照（左图右文）')+'</div>'+
+        '<div class="info-row">· 2026-08-01 '+toSimplified('V1.0 正式上线：十大馆藏、繁简保真、全文检索')+'</div>'+
+      '</div>'+
       '<div class="character-card" style="margin-bottom:16px;">'+
         '<div class="char-name" style="font-size:17px;">'+toSimplified('📖 使用教程')+'</div>'+
         '<div class="info-row">· '+toSimplified('全文检索：输入关键词，支持标题/全文双模式，结果按权重排序')+'</div>'+
