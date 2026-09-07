@@ -5,6 +5,11 @@
 
 ## [未发布]
 
+## [1.0.2] - 2026-09-07
+
+### 新增
+- 接入 Google Analytics（GA4），衡量 ID `G-H76XG9L6FZ`，通过 `app/GoogleAnalytics.tsx` 客户端组件注入
+
 ## [1.0.1] - 2026-09-07
 
 ### 新增
@@ -30,6 +35,7 @@
 - 高保真可交互原型 `prototype/`（三套主题 + 真实模拟数据）
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.1...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/sutchan/ancient-book-lib/releases/tag/v1.0.0

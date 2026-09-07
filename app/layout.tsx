@@ -1,7 +1,9 @@
+// app/layout.tsx v1.0.2
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Analytics from "@/components/Analytics";
 
 export const metadata: Metadata = {
   title: "古籍通 AncientBook｜开源古籍文献检索阅读平台",
@@ -28,6 +30,7 @@ export default function RootLayout({
           <main className="main-content">{children}</main>
           <Footer />
         </div>
+        <Analytics />
       </body>
     </html>
   );
