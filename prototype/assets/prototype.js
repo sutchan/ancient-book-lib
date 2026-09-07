@@ -125,6 +125,7 @@ function renderRoute(main){
     case "#page-character": renderCharacter(main); break;
     case "#page-relation": renderRelation(main); break;
     case "#page-help": renderHelp(main); break;
+    case "#page-stats": renderStats(main); break;
     case "#page-book-list": renderBookList(main); break;
     case "#page-read": renderReader(main, state.currentBookId); break;
     default: renderHome(main);
@@ -532,6 +533,97 @@ function renderHelp(main){
     '</section>';
 }
 
+/* ==================== 数据统计页 ==================== */
+function barRow(label, value, max, color){
+  var pct = max>0 ? Math.round(value/max*100) : 0;
+  return '<div class="stat-bar-row">'+
+    '<span class="stat-bar-label">'+esc(label)+'</span>'+
+    '<span class="stat-bar-track"><span class="stat-bar-fill" style="width:'+pct+'%;background:'+(color||'var(--color-primary)')+';"></span></span>'+
+    '<span class="stat-bar-value">'+value+'</span>'+
+  '</div>';
+}
+function renderStats(main){
+  var books = DATA.books, chars = DATA.characters, rels = DATA.relations, cats = DATA.categories;
+  // 总章节数
+  var totalChapters = books.reduce(function(s,b){ return s+(b.chapters?b.chapters.length:0); },0);
+  // 馆藏分布
+  var catCounts = cats.map(function(c){ return { name:c.name, count:books.filter(function(b){return b.category===c.name;}).length }; });
+  var maxCat = Math.max.apply(null, catCounts.map(function(c){return c.count;}));
+  // 朝代分布（书籍）
+  var dyn = {};
+  books.forEach(function(b){ dyn[b.dynasty||"未知"]=(dyn[b.dynasty||"未知"]||0)+1; });
+  var dynArr = Object.keys(dyn).map(function(k){return {name:k,count:dyn[k]};}).sort(function(a,b){return b.count-a.count;});
+  var maxDyn = dynArr[0] ? dynArr[0].count : 1;
+  // 人物身份标签
+  var tags = {};
+  chars.forEach(function(c){(c.tags||[]).forEach(function(t){tags[t]=(tags[t]||0)+1;});});
+  var tagArr = Object.keys(tags).map(function(k){return {name:k,count:tags[k]};}).sort(function(a,b){return b.count-a.count;}).slice(0,8);
+  var maxTag = tagArr[0] ? tagArr[0].count : 1;
+  // 关系类型
+  var rt = {};
+  rels.forEach(function(r){rt[r.type]=(rt[r.type]||0)+1;});
+  var rtArr = Object.keys(rt).map(function(k){return {name:k,count:rt[k]};}).sort(function(a,b){return b.count-a.count;});
+  var maxRt = rtArr[0] ? rtArr[0].count : 1;
+
+  var catBars = catCounts.map(function(c){ return barRow(c.name, c.count, maxCat); }).join("");
+  var dynBars = dynArr.map(function(d){ return barRow(d.name, d.count, maxDyn); }).join("");
+  var tagBars = tagArr.map(function(t){ return barRow(t.name, t.count, maxTag); }).join("");
+  var rtBars = rtArr.map(function(r){ return barRow(r.name, r.count, maxRt); }).join("");
+
+  var era = books.length ? Math.round(chars.reduce(function(s,c){ return s + (parseInt(c.birth)||0); },0)/chars.length) : 0;
+
+  main.innerHTML =
+    '<section>'+
+      '<div class="breadcrumb"><a href="#page-home">'+toSimplified('首页')+'</a><span class="sep">/</span><span>'+toSimplified('数据统计')+'</span></div>'+
+      '<h2 style="margin-bottom:8px;">'+toSimplified('平台数据统计与洞察')+'</h2>'+
+      '<p style="color:var(--color-text-secondary);margin-bottom:24px;">'+toSimplified('基于馆藏、典籍、人物、关系四类数据实时计算，展示古籍通资源全貌与学术价值')+'</p>'+
+
+      '<div class="stat-kpis">'+
+        '<div class="stat-kpi fade-in"><div class="kpi-num">'+cats.length+'</div><div class="kpi-label">'+toSimplified('馆藏大类')+'</div></div>'+
+        '<div class="stat-kpi fade-in"><div class="kpi-num">'+books.length+'</div><div class="kpi-label">'+toSimplified('收录典籍')+'</div></div>'+
+        '<div class="stat-kpi fade-in"><div class="kpi-num">'+totalChapters+'</div><div class="kpi-label">'+toSimplified('章节/卷次')+'</div></div>'+
+        '<div class="stat-kpi fade-in"><div class="kpi-num">'+chars.length+'</div><div class="kpi-label">'+toSimplified('考据人物')+'</div></div>'+
+        '<div class="stat-kpi fade-in"><div class="kpi-num">'+rels.length+'</div><div class="kpi-label">'+toSimplified('社会关系')+'</div></div>'+
+        '<div class="stat-kpi fade-in"><div class="kpi-num">429</div><div class="kpi-label">'+toSimplified('繁简映射字')+'</div></div>'+
+      '</div>'+
+
+      '<div class="stat-grid">'+
+        '<div class="character-card stat-panel fade-in">'+
+          '<div class="stat-panel-title">'+toSimplified('十大馆藏典籍分布')+'</div>'+
+          '<div class="stat-bars">'+catBars+'</div>'+
+        '</div>'+
+        '<div class="character-card stat-panel fade-in">'+
+          '<div class="stat-panel-title">'+toSimplified('典籍朝代分布（Top）')+'</div>'+
+          '<div class="stat-bars">'+dynBars+'</div>'+
+        '</div>'+
+        '<div class="character-card stat-panel fade-in">'+
+          '<div class="stat-panel-title">'+toSimplified('人物身份标签（Top8）')+'</div>'+
+          '<div class="stat-bars">'+tagBars+'</div>'+
+        '</div>'+
+        '<div class="character-card stat-panel fade-in">'+
+          '<div class="stat-panel-title">'+toSimplified('社会关系类型分布')+'</div>'+
+          '<div class="stat-bars">'+rtBars+'</div>'+
+        '</div>'+
+      '</div>'+
+
+      '<h2 class="section-title">'+toSimplified('数据洞察')+'</h2>'+
+      '<div class="character-card fade-in" style="margin-bottom:16px;">'+
+        '<div class="info-row">· '+toSimplified('资源密度：十大馆藏均衡覆盖，佛、儒、医、史、子五藏各收录 5 部核心典籍，合计 45 部、139 个章节卷次，构成完整古籍研读骨架')+'</div>'+
+        '<div class="info-row">· '+toSimplified('时间纵深：典籍跨越西周至清代 3000 余年，战国、先秦、唐代形成三大著述高峰，折射思想奠基期与文化鼎盛期的双重繁荣')+'</div>'+
+        '<div class="info-row">· '+toSimplified('学术价值：21 位考据人物覆盖思想家、文学家、诗人、政治家、医学家等 10+ 身份维度，以人物为轴串联起经典、制度与思想的跨典籍网络')+'</div>'+
+        '<div class="info-row">· '+toSimplified('关系密度：20 条社会关系以「文风影响」「思想传承」「师生」为核心脉络，构成可溯源的学术传承链，支撑双人溯源与谱系考据')+'</div>'+
+        '<div class="info-row">· '+toSimplified('检索基建：内置 429 条古籍常用字繁简映射，覆盖经文、史传、诗词高频古字，保障学术级保真转换')+'</div>'+
+      '</div>'+
+
+      '<h2 class="section-title">'+toSimplified('扩展规划（V1.1+）')+'</h2>'+
+      '<div class="character-card fade-in">'+
+        '<div class="info-row">· '+toSimplified('全库规模：索引池落地后，典籍规模将由演示 45 部扩展至全量 19,000+ 部（殆知阁源库），检索覆盖 5GB 全文')+'</div>'+
+        '<div class="info-row">· '+toSimplified('人物扩容：考据人物将由 21 位扩展至 CBDB 公开数据集（60 万+ 人物档案），支持姓名/朝代/籍贯多维检索')+'</div>'+
+        '<div class="info-row">· '+toSimplified('统计增强：新增检索热度、阅读时长、分片加载统计等实时指标（纯前端采集，零隐私）')+'</div>'+
+      '</div>'+
+    '</section>';
+}
+
 /* ==================== 独立页面模式 ==================== */
 var PAGE_RENDERERS = {
   "home": renderHome,
@@ -541,7 +633,8 @@ var PAGE_RENDERERS = {
   "search": renderSearch,
   "character": renderCharacter,
   "relation": renderRelation,
-  "help": renderHelp
+  "help": renderHelp,
+  "stats": renderStats
 };
 function initStandalone(){
   // pages/*.html 独立页面：body 带 data-page 属性，读取对应区块渲染到 #page-body
