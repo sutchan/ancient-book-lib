@@ -82,7 +82,7 @@ export default function SearchClient({ initialKeyword }: { initialKeyword?: stri
         shown.map((r, i) => (
           <div className="search-result-item" key={i}>
             <div className="result-title">
-              <Link href={r.kind === "book" ? `/read/${encodeURIComponent(r.book)}` : "/character"}>
+              <Link href={r.kind === "book" ? `/read/${r.book}` : "/character"}>
                 {toSimplified(r.book)} · {toSimplified(r.chapter)}
               </Link>
             </div>

@@ -13,7 +13,7 @@ interface ReaderClientProps {
 
 export default function ReaderClient({ bookTitle }: ReaderClientProps) {
   const book: Book =
-    data.books.find((b) => b.title === decodeURIComponent(bookTitle)) || data.books[0];
+    data.books.find((b) => b.title === bookTitle) || data.books[0];
   const [chapterIdx, setChapterIdx] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [lineHeight, setLineHeight] = useState(1.8);

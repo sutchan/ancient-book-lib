@@ -28,7 +28,7 @@ export default function BookListPage() {
         <div key={cat.id} style={{ marginBottom: 32 }}>
           <h3 className="section-title">{cat.name}</h3>
           {books.map((b, i) => (
-            <Link key={b.id} href={`/read/${encodeURIComponent(b.title)}`} className="book-item">
+            <Link key={b.id} href={`/read/${b.title}`} className="book-item">
               <div className="book-index">{i + 1}</div>
               <div>
                 <div className="book-title">{b.title}</div>
