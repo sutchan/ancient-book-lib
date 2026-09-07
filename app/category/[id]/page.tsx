@@ -36,7 +36,7 @@ export default function CategoryPage({ params }: Props) {
         {cat.desc} · 共收录 {books.length} 部典籍
       </p>
       {books.map((b, i) => (
-        <Link key={b.id} href={`/read/${b.title}`} className="book-item">
+        <Link key={b.id} href={`/book/${b.id}`} className="book-item">
           <div className="book-index">{i + 1}</div>
           <div>
             <div className="book-title">{b.title}</div>

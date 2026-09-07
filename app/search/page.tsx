@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import SearchClient from "@/components/SearchClient";
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function SearchPage() {
-  return <SearchClient />;
+  return (
+    <Suspense fallback={<div className="empty-state">检索加载中…</div>}>
+      <SearchClient />
+    </Suspense>
+  );
 }

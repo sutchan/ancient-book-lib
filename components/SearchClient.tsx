@@ -119,7 +119,13 @@ export default function SearchClient() {
         shown.map((r, i) => (
           <div className="search-result-item" key={i}>
             <div className="result-title">
-              <Link href={r.kind === "book" ? `/book/${encodeURIComponent(r.book)}` : "/character"}>
+              <Link
+                href={
+                  r.kind === "book"
+                    ? `/book/${data.books.find((b) => b.title === r.book)?.id ?? ""}`
+                    : "/character"
+                }
+              >
                 {toSimplified(r.book)} · {toSimplified(r.chapter)}
               </Link>
             </div>
