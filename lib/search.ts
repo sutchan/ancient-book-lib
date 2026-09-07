@@ -4,6 +4,7 @@
  */
 import type { Book, Character } from "./types";
 import data from "./data-generated";
+import { T2S_MAP as T2S_SINGLE } from "./t2s";
 
 export interface SearchResult {
   kind: "book" | "character";
@@ -145,4 +146,102 @@ export const CHUNK_SIZE = 4 * 1024; // 2–4KB/片
 export function chunkPlan(totalBytes: number) {
   const chunks = Math.ceil(totalBytes / CHUNK_SIZE);
   return { chunks, ranges: Array.from({ length: chunks }, (_, i) => [i * CHUNK_SIZE, Math.min((i + 1) * CHUNK_SIZE - 1, totalBytes - 1)] as [number, number]) };
+}
+
+/* ============================================================
+ * 生产数据接入：HTTP Range 分片懒加载 + 倒排索引加载
+ * 对应 PRD「纯静态无数据库」架构的检索链路：
+ *   构建期 build-index.mjs --fulltext 生成 index/*.json
+ *   运行时前端按字节范围（Range）分片拉取正文，不整本下载
+ * ============================================================ */
+
+/** 按 HTTP Range 拉取指定字节区间（GitHub RAW / 任意静态托管均支持 Range） */
+export async function fetchChunk(
+  url: string,
+  start: number,
+  end: number,
+  signal?: AbortSignal
+): Promise<string> {
+  const res = await fetch(url, {
+    headers: { Range: `bytes=${start}-${end}` },
+    signal,
+  });
+  if (!res.ok && res.status !== 206) {
+    throw new Error(`Range 请求失败: HTTP ${res.status}`);
+  }
+  return await res.text();
+}
+
+/** 懒加载正文：按分片清单逐片拉取，命中后即返回（演示数据直接回退本地样本） */
+export async function loadChapterText(
+  bookTitle: string,
+  chapterIdx: number,
+  baseUrl = ""
+): Promise<string> {
+  // 演示数据：未发布真实 TXT 时回退内置样本
+  const demo = getChapterText(
+    data.books.find((b) => b.title === bookTitle) || data.books[0],
+    chapterIdx
+  );
+  try {
+    const manifestRes = await fetch(`${baseUrl}/index/chunk-manifest.json`);
+    if (!manifestRes.ok) return demo;
+    const manifest = await manifestRes.json();
+    const book = manifest[bookTitle];
+    const chapter = book?.chapters?.[chapterIdx];
+    if (!chapter) return demo;
+    const parts: string[] = [];
+    const plan = chunkPlan(chapter.size);
+    for (const [s, e] of plan.ranges) {
+      parts.push(await fetchChunk(`${baseUrl}/text/${book.id}.txt`, chapter.start + s, chapter.start + e));
+    }
+    return parts.join("");
+  } catch {
+    return demo; // 网络/部署限制时优雅降级
+  }
+}
+
+/** 加载倒排索引（构建期产物），未命中时返回 null */
+export async function loadInvertedIndex(baseUrl = ""): Promise<Record<string, Record<string, number[]>> | null> {
+  try {
+    const res = await fetch(`${baseUrl}/index/inverted-index.json`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+/** 基于倒排索引的全文检索（前端内存，毫秒级） */
+export function searchByIndex(
+  kw: string,
+  index: Record<string, Record<string, number[]>> | null,
+  limit = 20
+): SearchResult[] {
+  if (!index) return searchAll(kw, "full", limit);
+  const q = kw.trim();
+  if (!q) return [];
+  const hits = index[q] || index[toSimplifiedChar(q)] || {};
+  const results: SearchResult[] = [];
+  for (const [bookTitle, chapters] of Object.entries(hits)) {
+    const book = data.books.find((b) => b.title === bookTitle);
+    if (!book) continue;
+    results.push({
+      kind: "book",
+      book: bookTitle,
+      chapter: book.chapters[chapters[0]],
+      path: `首页 > ${book.category} > ${bookTitle}`,
+      snippet: getChapterText(book, chapters[0]).slice(0, 60) + "…",
+      score: 95 - results.length,
+    });
+  }
+  return results.sort((a, b) => b.score - a.score).slice(0, limit);
+}
+
+/** 简体化单个查询字符（用于索引键命中） */
+function toSimplifiedChar(text: string): string {
+  return text
+    .split("")
+    .map((c) => T2S_SINGLE[c] || c)
+    .join("");
 }
