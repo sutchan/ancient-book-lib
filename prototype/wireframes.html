@@ -3,132 +3,263 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>组件库规范｜Wireframes</title>
-<link rel="stylesheet" href="./assets/prototype.css"/>
+<title>组件库规范 Wireframes｜古籍通 AncientBook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./assets/theme-color.css"/>
+<link rel="stylesheet" href="./assets/prototype.css"/>
 <style>
 .wireframe-wrap{max-width:1200px;margin:0 auto;padding:40px 20px;}
 .section-block{margin-bottom:48px;border-bottom:1px solid var(--color-border);padding-bottom:32px;}
-.demo-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;align-items:center;}
-.desc-note{font-size:14px;color:var(--color-text-secondary);margin-top:8px;}
-h2{margin-bottom:12px;}
-h3{margin-top:24px;margin-bottom:8px;}
-pre{background:#efefef;padding:12px;border-radius:6px;overflow-x:auto;}
+.demo-row{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;align-items:flex-start;}
+.desc-note{font-size:14px;color:var(--color-text-secondary);margin-top:8px;line-height:1.8;}
+h1{font-size:26px;margin-bottom:8px;}
+h2{font-size:22px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+h2::before{content:"";width:4px;height:20px;background:var(--color-primary);border-radius:2px;}
+h3{font-size:16px;margin-top:24px;margin-bottom:10px;color:var(--color-primary);}
+pre{background:var(--color-card-bg);border:1px solid var(--color-border);padding:14px;border-radius:6px;overflow-x:auto;font-size:13px;line-height:1.7;}
+pre code{font-family:Consolas,monospace;}
+.theme-switch-row{display:flex;gap:10px;margin:16px 0 8px;}
+.state-group{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.state-label{font-size:12px;color:var(--color-text-secondary);}
+.spec-tag{font-size:12px;background:rgba(140,49,48,0.08);color:var(--color-primary);border-radius:4px;padding:2px 8px;margin-left:6px;}
+.spec-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:14px;background:var(--color-card-bg);}
+.spec-table th,.spec-table td{border:1px solid var(--color-border);padding:10px 12px;text-align:left;}
+.spec-table th{background:rgba(140,49,48,0.05);font-weight:600;}
+.usage-list li{margin:6px 0;line-height:1.8;}
 </style>
 </head>
 <body data-theme="light">
 <div class="wireframe-wrap">
   <h1>古籍通｜组件库规范 Wireframes</h1>
-  <p>版本：V1.0｜全部组件严格遵循UI设计规范，禁止私自修改样式参数</p>
+  <p style="color:var(--color-text-secondary);">版本：V2.0｜全部组件严格遵循 UI/UX 全局设计规范，禁止私自修改样式参数</p>
+  <div class="theme-switch-row">
+    <button class="btn-toggle on" data-wf-theme="light">日间主题</button>
+    <button class="btn-toggle" data-wf-theme="paper">护眼主题</button>
+    <button class="btn-toggle" data-wf-theme="dark">深色主题</button>
+  </div>
 
+  <!-- ============ 一、基础组件 ============ -->
   <div class="section-block">
     <h2>一、基础组件</h2>
-    <h3>按钮 Button</h3>
+
+    <h3>1.1 按钮 Button <span class="spec-tag">圆角6px</span><span class="spec-tag">高度32-40px</span></h3>
     <div class="demo-row">
-      <button class="btn btn-primary">主要按钮</button>
-      <button class="btn btn-secondary">次要按钮</button>
-      <button class="btn btn-ghost">幽灵按钮</button>
-      <button class="btn btn-disabled" disabled>禁用按钮</button>
+      <div class="state-group"><button class="btn btn-primary">主要按钮</button><span class="state-label">Default</span></div>
+      <div class="state-group"><button class="btn btn-primary">主要按钮</button><span class="state-label">Hover</span></div>
+      <div class="state-group"><button class="btn btn-primary">主要按钮</button><span class="state-label">Active</span></div>
+      <div class="state-group"><button class="btn btn-disabled" disabled>禁用按钮</button><span class="state-label">Disabled</span></div>
+      <div class="state-group"><button class="btn btn-secondary">次要按钮</button><span class="state-label">Secondary</span></div>
+      <div class="state-group"><button class="btn btn-ghost">幽灵按钮</button><span class="state-label">Ghost</span></div>
     </div>
     <div class="desc-note">
-      使用规则：primary用于确认、搜索；secondary普通操作；ghost用于返回、次要跳转；disabled不可交互。全局圆角6px。
+      使用规则：primary 用于确认/搜索主操作；secondary 普通操作；ghost 用于返回/次要跳转；disabled 不可交互。
+      Hover 微透明 0.9，Active 缩放 0.97，过渡 0.2s。点击区域最小 40×32px，移动端 ≥44px。
     </div>
 
-    <h3>输入框 Input</h3>
+    <h3>1.2 输入框 Input <span class="spec-tag">聚焦主色描边</span></h3>
     <div class="demo-row">
-      <input class="input-text" placeholder="请输入关键词"/>
-      <input class="input-text" placeholder="禁用状态" disabled/>
+      <div style="width:260px;">
+        <input class="input-text" placeholder="默认状态" style="margin-bottom:10px;"/>
+        <input class="input-text" placeholder="聚焦状态" style="margin-bottom:10px;"/>
+        <input class="input-text" placeholder="禁用状态" disabled/>
+      </div>
     </div>
+    <div class="desc-note">聚焦态：主色描边 + 2px 主色柔光（box-shadow rgba(140,49,48,0.12)）；禁用态 opacity 0.5。</div>
 
-    <h3>搜索框 Search</h3>
+    <h3>1.3 搜索框 Search <span class="spec-tag">输入框+主按钮组合</span></h3>
     <div class="demo-row">
-      <div class="search-box">
-        <input class="input-text" placeholder="全文检索古籍..."/>
-        <button class="btn btn-primary">搜索</button>
+      <div class="search-box" style="max-width:560px;">
+        <input class="input-text" placeholder="全文检索古籍，支持繁简互通"/>
+        <button class="btn btn-primary search-btn">搜索</button>
       </div>
     </div>
 
-    <h3>标签 Tag</h3>
+    <h3>1.4 标签 Tag <span class="spec-tag">圆角4px</span></h3>
     <div class="demo-row">
-      <span class="tag tag-default">普通标签</span>
-      <span class="tag tag-active">选中</span>
+      <div class="state-group"><span class="tag tag-default">默认标签</span><span class="state-label">Default</span></div>
+      <div class="state-group"><span class="tag tag-hover">悬停标签</span><span class="state-label">Hover</span></div>
+      <div class="state-group"><span class="tag tag-active">选中标签</span><span class="state-label">Active</span></div>
+    </div>
+
+    <h3>1.5 单选下拉 Select <span class="spec-tag">检索筛选使用</span></h3>
+    <div class="demo-row">
+      <select class="input-text" style="width:200px;">
+        <option>全部馆藏</option>
+        <option>佛藏</option>
+        <option>儒藏</option>
+        <option>史藏</option>
+      </select>
     </div>
   </div>
 
+  <!-- ============ 二、复合组件 ============ -->
   <div class="section-block">
     <h2>二、复合组件</h2>
-    <h3>卡片 Card</h3>
+
+    <h3>2.1 卡片 Card <span class="spec-tag">hover上浮3px</span></h3>
     <div class="demo-row">
-      <div class="card" style="width:260px;">
+      <div class="card" style="width:240px;">
         <div class="card-body">
-          <h4>馆藏卡片示例</h4>
-          <p class="desc-note">经部古籍合集</p>
+          <div class="card-title">儒藏</div>
+          <div class="card-desc">儒家经典 · 修齐治平，共收录 6 部典籍</div>
+        </div>
+      </div>
+      <div class="card" style="width:240px;opacity:0.5;">
+        <div class="card-body">
+          <div class="card-title">已下架馆藏</div>
+          <div class="card-desc">Disabled 状态展示</div>
+        </div>
+      </div>
+    </div>
+    <div class="desc-note">hover：translateY(-3px) + 0.06 低阴影；active：translateY(-1px)。卡片圆角 6px。</div>
+
+    <h3>2.2 面包屑 Breadcrumb</h3>
+    <div class="demo-row">
+      <div class="breadcrumb" style="margin-bottom:0;">
+        <a href="#">首页</a><span class="sep">/</span><a href="#">儒藏</a><span class="sep">/</span><a href="#">论语</a><span class="sep">/</span><span>学而篇第一</span>
+      </div>
+    </div>
+
+    <h3>2.3 列表项 Book-Item <span class="spec-tag">hover左移8px</span></h3>
+    <div class="demo-row" style="width:100%;">
+      <div style="width:100%;">
+        <div class="book-item">
+          <div class="book-index">儒</div>
+          <div><div class="book-title">论语</div><div class="book-meta">春秋 · 孔子弟子及再传弟子 · 4 章节</div></div>
+        </div>
+        <div class="book-item">
+          <div class="book-index">史</div>
+          <div><div class="book-title">史记</div><div class="book-meta">西汉 · 司马迁 · 3 章节</div></div>
         </div>
       </div>
     </div>
 
-    <h3>面包屑 Breadcrumb</h3>
-    <div class="demo-row">
-      <div class="breadcrumb">
-        <a href="#">首页</a>
-        <span>/</span>
-        <a href="#">经部</a>
-        <span>/</span>
-        <span>论语</span>
+    <h3>2.4 检索结果项 Search-Result-Item <span class="spec-tag">命中高亮</span></h3>
+    <div class="demo-row" style="width:100%;">
+      <div style="width:100%;">
+        <div class="search-result-item">
+          <div class="result-title"><a href="#">论语 · 学而篇第一</a></div>
+          <div class="path-info"><span>首页 &gt; 儒藏 &gt; 论语</span><span class="score-badge">98</span></div>
+          <div class="snippet">子曰：学而时习之，<mark>不亦说乎</mark>？有朋自远方来，不亦乐乎？</div>
+        </div>
       </div>
     </div>
 
-    <h3>空状态 Empty</h3>
-    <div class="demo-row">
-      <div class="empty-state">暂无检索结果</div>
-    </div>
-
-    <h3>加载状态 Loading</h3>
-    <div class="demo-row">
-      <div class="loading-state">加载中…</div>
+    <h3>2.5 空状态 / 加载状态</h3>
+    <div class="demo-row" style="width:100%;">
+      <div class="empty-state" style="width:48%;border:1px solid var(--color-border);border-radius:6px;">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">未找到相关内容</div>
+        <div>请尝试更换关键词或减少筛选条件</div>
+      </div>
+      <div style="width:48%;">
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-line" style="width:60%;"></div>
+        <div class="skeleton skeleton-line" style="width:80%;"></div>
+        <div class="skeleton skeleton-line" style="width:40%;"></div>
+        <div class="desc-note">骨架屏：加载状态，shimmer 1.2s 循环</div>
+      </div>
     </div>
   </div>
 
+  <!-- ============ 三、业务组件 ============ -->
   <div class="section-block">
     <h2>三、业务组件（古籍通专属）</h2>
-    <h3>书籍列表项 Book-Item</h3>
-<pre>
-&lt;div class="book-item"&gt;
-  &lt;a href="#"&gt;论语&lt;/a&gt;
-  &lt;div class="meta"&gt;经部 · 春秋时期&lt;/div&gt;
-&lt;/div&gt;
-</pre>
 
-    <h3>检索结果项 Search-Result-Item</h3>
-<pre>
-&lt;div class="search-result-item"&gt;
-  &lt;h4&gt;&lt;a href="#"&gt;论语·学而篇&lt;/a&gt;&lt;/h4&gt;
-  &lt;div class="path-info"&gt;首页 &gt; 经部 &gt; 论语&lt;/div&gt;
-  &lt;div class="snippet"&gt;子曰：学而时习之，&lt;mark&gt;不亦说乎&lt;/mark&gt;…&lt;/div&gt;
-&lt;/div&gt;
-</pre>
+    <h3>3.1 馆藏分类卡片 Category-Card</h3>
+    <div class="demo-row">
+      <div class="card category-card">
+        <div class="cat-icon">儒</div>
+        <div class="cat-name">儒藏</div>
+        <div class="cat-desc">儒家经典 · 修齐治平 · 6 部</div>
+      </div>
+      <div class="card category-card">
+        <div class="cat-icon">医</div>
+        <div class="cat-name">医藏</div>
+        <div class="cat-desc">医学方书 · 济世活人 · 5 部</div>
+      </div>
+    </div>
 
-    <h3>人物档案卡片 Character-Card</h3>
-<pre>
-&lt;div class="character-card"&gt;
-  &lt;h3&gt;孔子｜孔丘&lt;/h3&gt;
-  &lt;div class="info-row"&gt;&lt;label&gt;朝代：&lt;/label&gt;春秋&lt;/div&gt;
-  &lt;div class="info-row"&gt;&lt;label&gt;籍贯：&lt;/label&gt;鲁国陬邑&lt;/div&gt;
-&lt;/div&gt;
-</pre>
+    <h3>3.2 人物档案卡片 Character-Card</h3>
+    <div class="demo-row">
+      <div class="character-card" style="width:340px;">
+        <div class="char-name">孔子<span class="char-zi">字仲尼 · 孔丘</span></div>
+        <div class="info-row"><label>朝代</label>春秋</div>
+        <div class="info-row"><label>籍贯</label>鲁国陬邑</div>
+        <div class="info-row"><label>生卒</label>公元前551年 — 公元前479年</div>
+        <div class="info-row"><label>官职</label>鲁国大司寇</div>
+        <div class="info-row"><span class="tag tag-hover">思想家</span><span class="tag tag-hover">教育家</span><span class="tag tag-hover">儒家</span></div>
+      </div>
+    </div>
+
+    <h3>3.3 关系项 Relation-Item</h3>
+    <div class="demo-row" style="width:100%;">
+      <div style="width:100%;">
+        <div class="relation-item">
+          <div><span class="rel-a">孔子</span><span class="rel-type">师生</span><span class="rel-a" style="margin-left:10px;">颜回</span></div>
+          <div class="info-row" style="margin-top:8px;">颜回为孔子最得意门生，孔子赞其「贤哉回也」。</div>
+          <div class="rel-source">📖 史料出处：《论语·先进》《史记·仲尼弟子列传》</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>3.4 阅读工具栏 Reader-Toolbar <span class="spec-tag">字号/行距/章节/进度</span></h3>
+    <div class="demo-row" style="width:100%;">
+      <div class="reader-toolbar" style="width:100%;margin-bottom:0;">
+        <div class="ctrl">字号<button>A-</button><button>A+</button></div>
+        <div class="ctrl">行距<button>疏</button><button>密</button></div>
+        <div class="ctrl">章节<button>‹</button><button>›</button></div>
+        <div class="ctrl">进度 <span>1/4</span></div>
+      </div>
+    </div>
   </div>
 
+  <!-- ============ 四、组件尺寸与规范速查 ============ -->
   <div class="section-block">
-    <h2>四、组件使用强制规则</h2>
-    <ul>
-      <li>所有组件优先复用，禁止重复写独立样式；</li>
-      <li>颜色全部使用CSS变量，禁止写死色值；</li>
-      <li>hover、active、disabled状态必须完整实现；</li>
-      <li>移动端全部组件点击区域≥44px；</li>
-      <li>三套主题下组件表现必须全部兼容；</li>
-      <li>禁止增加多余装饰、阴影、动画。</li>
+    <h2>四、组件尺寸与规范速查表</h2>
+    <table class="spec-table">
+      <tr><th>类别</th><th>组件</th><th>关键规范</th><th>状态要求</th></tr>
+      <tr><td>基础</td><td>按钮</td><td>圆角6px；高32/40px；间距8-16px</td><td>default/hover/active/disabled 四态</td></tr>
+      <tr><td>基础</td><td>输入框</td><td>内边距10px 12px；聚焦主色描边+柔光</td><td>default/focus/disabled</td></tr>
+      <tr><td>基础</td><td>标签</td><td>圆角4px；字号13px</td><td>default/hover/active</td></tr>
+      <tr><td>复合</td><td>卡片</td><td>圆角6px；hover上浮3px+低阴影</td><td>default/hover/active</td></tr>
+      <tr><td>复合</td><td>列表项</td><td>底部1px分割线；hover左移8px</td><td>default/hover</td></tr>
+      <tr><td>复合</td><td>检索结果</td><td>命中<mark>高亮</mark>；路径+评分徽标</td><td>default/hover</td></tr>
+      <tr><td>业务</td><td>馆藏卡片</td><td>图标52px圆形；hover反色</td><td>default/hover</td></tr>
+      <tr><td>业务</td><td>人物档案</td><td>结构化字段；标签组展示</td><td>default/hover</td></tr>
+      <tr><td>业务</td><td>阅读工具栏</td><td>按钮28×28px；主色反馈</td><td>default/hover/active</td></tr>
+    </table>
+  </div>
+
+  <!-- ============ 五、组件使用强制规则 ============ -->
+  <div class="section-block">
+    <h2>五、组件使用强制规则</h2>
+    <ul class="usage-list">
+      <li>① 所有组件优先复用全局组件库，禁止重复写独立样式；</li>
+      <li>② 颜色全部使用 CSS 变量（var(--color-*)），禁止写死色值；</li>
+      <li>③ hover、active、disabled、focus 四态必须完整实现；</li>
+      <li>④ 移动端所有组件点击区域 ≥44px；</li>
+      <li>⑤ 三套主题（日间/护眼/深色）下组件表现必须全部兼容；</li>
+      <li>⑥ 禁止增加多余装饰、阴影、动画（仅允许 hover 微效与骨架屏）；</li>
+      <li>⑦ 正文一律衬线字体（Noto Serif SC），UI 控件可无衬线；</li>
+      <li>⑧ 间距遵循 8/16/24px 三级规范，禁止随意改值。</li>
     </ul>
   </div>
 </div>
+
+<script>
+// 主题切换演示
+(function(){
+  var btns = document.querySelectorAll("[data-wf-theme]");
+  btns.forEach(function(b){
+    b.addEventListener("click", function(){
+      document.body.setAttribute("data-theme", b.getAttribute("data-wf-theme"));
+      btns.forEach(function(x){ x.classList.toggle("on", x===b); });
+    });
+  });
+})();
+</script>
 </body>
 </html>
