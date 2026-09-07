@@ -29,7 +29,7 @@ npm -v
 ### 2. 克隆项目仓库
 
 ```bash
-git clone https://github.com/yourname/ancient-book-lib.git
+git clone https://github.com/sutchan/ancient-book-lib.git
 cd ancient-book-lib
 ```
 
@@ -94,5 +94,17 @@ npm run start
 ## 四、开发提交规范提醒
 
 - 提交信息格式：`feat: 新增功能` / `fix: 修复缺陷` 等
-- 提交前必须通过 lint 与类型检查
+- 提交前必须通过 lint 与类型检查（`npx tsc --noEmit`）
 - 禁止提交 console.log 调试代码与敏感信息
+
+## 五、社区协作文档入口
+
+| 文档 | 用途 |
+| - | - |
+| `.github/CONTRIBUTING.md` | 贡献指南：架构边界、分支与提交规范、PR 流程 |
+| `.github/CODE_OF_CONDUCT.md` | 行为准则 |
+| `.github/SECURITY.md` | 安全策略与漏洞私下报告方式 |
+| `.github/SUPPORT.md` | 支持与帮助、常见问题速查 |
+| `CHANGELOG.md` | 版本更新日志 |
+
+提交 Issue 时请使用 `.github/ISSUE_TEMPLATE/` 中的模板（缺陷 / 功能建议 / 内容勘误）。

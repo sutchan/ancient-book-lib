@@ -1,0 +1,111 @@
+name: 🐛 功能缺陷报告
+description: 提交可复现的功能问题（页面报错、检索异常、阅读/分片加载失败等）
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请先查看 [支持与帮助](https://github.com/sutchan/ancient-book-lib/blob/main/.github/SUPPORT.md) 与 [已有 Issue](https://github.com/sutchan/ancient-book-lib/issues?q=is%3Aissue)。
+        **安全相关问题请不要在此公开提交**，请走 [私密安全公告](https://github.com/sutchan/ancient-book-lib/security/advisories/new)。
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 问题现象
+      description: 清晰描述出现的问题
+      placeholder: 在检索页输入关键字后，结果列表为空白且无报错提示
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 请给出可稳定复现的最小步骤
+      placeholder: |
+        1. 打开 /search 页面
+        2. 输入「论语」
+        3. 点击检索按钮
+        4. 出现空白结果
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+      placeholder: 应返回包含「论语」的典籍列表
+    validations:
+      required: true
+
+  - type: input
+    id: page
+    attributes:
+      label: 涉及页面 / 路由
+      placeholder: "/search、/read、/character ..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 严重程度
+      options:
+        - P0 核心功能不可用（无法浏览/检索/阅读）
+        - P1 主要功能受影响但有替代路径
+        - P2 次要功能或体验问题
+        - P3 文案、样式等轻微问题
+    validations:
+      required: true
+
+  - type: input
+    id: env-os
+    attributes:
+      label: 操作系统
+      placeholder: Windows 11 / macOS 14 / iOS 17 ...
+    validations:
+      required: true
+
+  - type: input
+    id: env-browser
+    attributes:
+      label: 浏览器及版本
+      placeholder: Chrome 128 / Edge 127 / Safari 17 ...
+    validations:
+      required: true
+
+  - type: input
+    id: env-device
+    attributes:
+      label: 设备类型
+      placeholder: 桌面端 / 平板 / 手机
+    validations:
+      required: false
+
+  - type: textarea
+    id: console
+    attributes:
+      label: 控制台报错 / 网络请求
+      description: 打开浏览器开发者工具，粘贴 Console 或 Network 中的报错
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图或录屏
+      description: 可直接拖拽图片到此处
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已搜索历史 Issue，确认不是重复问题
+          required: true
+        - label: 我确认该问题不含安全漏洞细节
+          required: true

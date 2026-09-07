@@ -2,10 +2,54 @@
 
 **开源古籍文献检索阅读平台**
 
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=nextdotjs)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![架构](https://img.shields.io/badge/架构-纯静态%20·%20零数据库-2e9e6b)](docs/02-架构与开发规范/项目架构设计文档.md)
+[![开源](https://img.shields.io/badge/开源-公益非商用-blue)](docs/01-项目基础说明/开源合规声明规范.md)
+[![贡献](https://img.shields.io/badge/贡献-欢迎%20PR-orange)](.github/CONTRIBUTING.md)
+
 - 工程仓库名：`ancient-book-lib`
 - 架构：纯静态 · 无数据库 · Next.js 14 SSG · 前端内存检索 · GitHub Range 分片懒加载
-- 资源：殆知阁开源十大藏库 5GB 纯TXT古籍
+- 资源：殆知阁开源十大藏库 5GB 纯 TXT 古籍
 - 定位：公益开源 · 零广告 · 零注册 · 零付费 · 零隐私收集
+- 当前版本：**v1.0.1**
+
+## 快速开始
+
+```bash
+git clone https://github.com/sutchan/ancient-book-lib.git
+cd ancient-book-lib
+npm install
+npm run dev              # 本地开发 http://localhost:3000
+```
+
+其他常用命令：
+
+```bash
+npm run build            # 静态构建，产物输出到 out/
+npm run build:index      # 由 prototype/data/app-data.js 生成 lib/data-generated.ts
+npx serve out            # 预览静态产物（开启 output: export，next start 不适用）
+npx tsc --noEmit         # TypeScript 类型检查
+```
+
+> Node.js ≥ 18（推荐 LTS 20.x）、npm ≥ 9。端口占用时可用 `npm run dev -- -p 3001`。
+
+原型预览：直接用浏览器打开 `prototype/prototype.html` 即可，无需启动服务。
+
+## 目录结构
+
+```plain
+ancient-book-lib/
+├── app/            # Next.js 页面（book-list / category / character / help /
+│                   # read / relation / search / stats，全部 SSG）
+├── components/     # 全局公共组件（Navbar、Footer、ReaderClient、SearchClient...）
+├── lib/            # 类型定义、检索引擎、繁简映射、生成数据
+├── scripts/        # 离线预处理脚本（build-index.mjs）
+├── prototype/      # 高保真可交互原型（prototype.html + pages/ + data/）
+├── public/         # 静态资源
+├── docs/           # 全套项目规范、PRD、任务清单、设计文档
+└── .github/        # 社区健康文件（贡献指南 / 行为准则 / 安全策略 / 支持 / 模板）
+```
 
 ## 项目文档导航
 
@@ -28,17 +72,22 @@ prototype/                高保真可交互原型
 └── data/                  真实业务模拟数据（书籍/检索/人物）
 ```
 
-## 快速开始
+## 参与共建
 
-```bash
-npm install
-npm run dev        # 本地开发 http://localhost:3000
-npm run build      # 静态构建
-npm run start      # 静态预览
-```
+| 文档 | 用途 |
+| - | - |
+| [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) | 贡献指南：环境搭建、架构边界、分支与提交规范、PR 流程 |
+| [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md) | 行为准则：社区互动规范与举报渠道 |
+| [`.github/SECURITY.md`](.github/SECURITY.md) | 安全策略：静态架构攻击面与漏洞私下报告方式 |
+| [`.github/SUPPORT.md`](.github/SUPPORT.md) | 支持与帮助：自助路径、提问渠道、常见问题 |
+| [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) | PR 模板与自检清单 |
+| [`CHANGELOG.md`](CHANGELOG.md) | 版本更新日志 |
 
-原型预览：直接浏览器打开 `prototype/prototype.html` 即可，无需启动服务。
+提交内容勘误（原文、繁简映射、人物考据）请使用专门的 [勘误模板](https://github.com/sutchan/ancient-book-lib/issues/new?template=content-errata.yml)，需附史料来源。
 
-## 开源协议
+## 开源协议与合规
 
-非商用公益开源项目，古籍资源遵循上游开源协议，学术数据遵循公开学术协议，仅供文化传播与学术研究使用。
+- 本项目为**非商用公益开源项目**，古籍资源遵循上游开源协议（殆知阁开源古籍资源）
+- 学术数据遵循哈佛 CBDB、中研院史语所、北大公开学术数据集的公开学术协议
+- 禁止商用、二次售卖、篡改后伪造成原创资料库
+- 仅供文化传播与学术研究使用，详见 [`docs/01-项目基础说明/开源合规声明规范.md`](docs/01-项目基础说明/开源合规声明规范.md)

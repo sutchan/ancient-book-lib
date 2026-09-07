@@ -40,6 +40,18 @@ npm run build
 npm run start
 ```
 
-## 5. 开源协议与声明
+## 5. 参与共建
+
+| 文档 | 用途 |
+| - | - |
+| [`.github/CONTRIBUTING.md`](../../.github/CONTRIBUTING.md) | 贡献指南 |
+| [`.github/CODE_OF_CONDUCT.md`](../../.github/CODE_OF_CONDUCT.md) | 行为准则 |
+| [`.github/SECURITY.md`](../../.github/SECURITY.md) | 安全策略 |
+| [`.github/SUPPORT.md`](../../.github/SUPPORT.md) | 支持与帮助 |
+| [`CHANGELOG.md`](../../CHANGELOG.md) | 版本更新日志 |
+
+## 6. 开源协议与声明
 
 本项目为**非商用公益开源项目**，所有古籍资源遵循上游开源规范，学术数据遵循公开学术协议，仅供文化传播与学术研究使用，禁止商用、倒卖、二次盈利。
+
+> **更新记录**：2026-09-07（v1.0.1）补充「参与共建」章节与社区协作文档入口。

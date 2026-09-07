@@ -1,0 +1,75 @@
+name: 📜 古籍内容 / 考据勘误
+description: 反馈原文错字、繁简映射错误、人物考据或分类归属问题（需附史料来源）
+title: "[勘误] "
+labels: ["content", "errata"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本项目坚持「原文保真、考据可溯源」。为保证学术严谨，**勘误必须提供依据来源**，无出处的修改恕难采纳。
+        参考：[开源合规声明规范](https://github.com/sutchan/ancient-book-lib/blob/main/docs/01-项目基础说明/开源合规声明规范.md)
+
+  - type: dropdown
+    id: errata-type
+    attributes:
+      label: 勘误类型
+      options:
+        - 古籍原文错字 / 缺字
+        - 繁简映射错误（古字、异体字、专有名词失真）
+        - 人物考据错误（生卒、官职、宦历）
+        - 社会关系错误
+        - 馆藏分类归属错误
+        - 典籍元信息错误（书名、作者、年代）
+        - 其他
+    validations:
+      required: true
+
+  - type: input
+    id: target
+    attributes:
+      label: 涉及对象
+      description: 书名 / 人物名 / 分类名
+      placeholder: 《论语》/ 朱熹 / 儒藏
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: 位置
+      description: 卷次、章节、页面路由或数据字段
+      placeholder: /read?book=... 第 3 卷 / characters[12].office
+    validations:
+      required: false
+
+  - type: textarea
+    id: current
+    attributes:
+      label: 当前内容
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: corrected
+    attributes:
+      label: 应为
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: 依据来源（必填）
+      description: 请给出可核查的史料或公开学术数据集出处，如 CBDB、中研院史语所、北大公开数据集、某版本影印本等
+      placeholder: 哈佛 CBDB 人物编号 xxx；《四部丛刊》影印本卷三；中华书局点校本 1980 年版 P.xx
+    validations:
+      required: true
+
+  - type: textarea
+    id: note
+    attributes:
+      label: 补充说明
+      description: 存在异说时请一并列出，便于保留异文而非直接改判
+    validations:
+      required: false
