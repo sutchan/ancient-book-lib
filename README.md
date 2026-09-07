@@ -1,4 +1,4 @@
-# 古籍通 AncientBook
+﻿# 古籍通 AncientBook
 
 **开源古籍文献检索阅读平台**
 
@@ -35,6 +35,19 @@ npx tsc --noEmit         # TypeScript 类型检查
 > Node.js ≥ 18（推荐 LTS 20.x）、npm ≥ 9。端口占用时可用 `npm run dev -- -p 3001`。
 
 原型预览：直接用浏览器打开 `prototype/prototype.html` 即可，无需启动服务。
+
+## 自动部署（GitHub Pages）
+
+本仓库内置 GitHub Actions 工作流（`.github/workflows/deploy.yml`），推送 `main` 分支自动执行：安装依赖 → 同步数据（`build:index`）→ 全量静态构建 → 单元测试 → 部署 GitHub Pages。
+
+启用步骤（一次性）：
+
+1. 打开仓库 **Settings → Pages**；
+2. **Source** 选择 **GitHub Actions**；
+3. 推送任意提交到 `main`，Actions 中的 `Build & Deploy to GitHub Pages` 工作流自动运行；
+4. 部署完成后访问 `https://<用户名>.github.io/ancient-book-lib/`。
+
+> 工作流仅对 `main` 分支推送/手动触发（`workflow_dispatch`）时部署；PR 只跑构建与测试，不部署。
 
 ## 目录结构
 
