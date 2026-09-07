@@ -95,6 +95,11 @@ img{max-width:100%;display:block;}
 .btn-toggle{padding:6px 12px;border-radius:6px;border:1px solid var(--color-border);background:transparent;color:var(--color-text);cursor:pointer;font-size:14px;transition:all 0.2s ease;}
 .btn-toggle:hover{border-color:var(--color-primary);color:var(--color-primary);}
 .btn-toggle.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+/* label 形式的模式单选按钮（首页搜索表单） */
+label.btn-toggle{display:inline-flex;align-items:center;gap:4px;user-select:none;position:relative;}
+label.btn-toggle input{position:absolute;opacity:0;pointer-events:none;}
+label.btn-toggle:has(input:checked){background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+label.btn-toggle:has(input:focus-visible){outline:2px solid var(--color-primary);outline-offset:2px;}
 .btn-sm{padding:4px 10px;font-size:13px;}
 
 .input-text{padding:10px 12px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-card-bg);color:var(--color-text);font-size:15px;width:100%;transition:border-color 0.2s ease,box-shadow 0.2s ease;}
@@ -166,6 +171,7 @@ img{max-width:100%;display:block;}
 .home-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 85% 20%,rgba(140,49,48,0.08) 0%,transparent 55%);}
 .hero-title{font-size:44px;font-weight:700;letter-spacing:8px;color:var(--color-text);margin-bottom:14px;}
 .hero-sub{font-size:16px;color:var(--color-text-secondary);margin-bottom:32px;letter-spacing:1px;}
+.hero-badge{display:inline-block;margin:-20px 0 28px;padding:4px 14px;font-size:12px;color:#8a5a30;background:rgba(206,167,106,0.16);border:1px solid rgba(206,167,106,0.45);border-radius:999px;letter-spacing:1px;}
 .hero-search{max-width:600px;margin:0 auto;background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:8px;padding:8px;box-shadow:0 6px 20px rgba(0,0,0,0.08);}
 .hero-search .input-text{border:none;background:transparent;font-size:16px;}
 .hero-search .input-text:focus{box-shadow:none;}

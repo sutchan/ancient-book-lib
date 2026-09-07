@@ -15,6 +15,22 @@ export interface SearchResult {
   score: number;
 }
 
+/** 高级检索筛选维度（PRD §4.3.2 多维组合筛选） */
+export interface SearchFilters {
+  category?: string; // 馆藏名称，如「儒藏」
+  dynasty?: string;  // 朝代，如「春秋」
+}
+
+/** 全馆藏去重朝代列表 */
+export function distinctDynasties(): string[] {
+  return Array.from(new Set(data.books.map((b) => b.dynasty).filter(Boolean))).sort();
+}
+
+/** 馆藏名称列表（与 categories 同名） */
+export function categoryNames(): string[] {
+  return data.categories.map((c) => c.name);
+}
+
 /** 章节正文（生产版由分片懒加载按字节范围拉取；演示版内置节选） */
 export function getChapterText(book: Book, idx: number): string {
   const title = book.title;
@@ -41,17 +57,20 @@ export function getChapterText(book: Book, idx: number): string {
   return paras[idx % paras.length];
 }
 
-/** 全文检索（标题/章节/正文/人物） */
+/** 全文检索（标题/章节/正文/人物），支持馆藏与朝代多维筛选 */
 export function searchAll(
   kw: string,
   mode: "title" | "full" = "full",
-  limit = 20
+  limit = 20,
+  filters: SearchFilters = {}
 ): SearchResult[] {
   const q = kw.trim();
   if (!q) return [];
   const results: SearchResult[] = [];
 
   for (const b of data.books) {
+    if (filters.category && b.category !== filters.category) continue;
+    if (filters.dynasty && b.dynasty !== filters.dynasty) continue;
     const titleHit = b.title.includes(q);
     const chapterHit = b.chapters.some((c) => c.includes(q));
     const bodyHit =
@@ -71,6 +90,7 @@ export function searchAll(
   }
 
   for (const p of data.characters) {
+    if (filters.dynasty && p.dynasty !== filters.dynasty) continue;
     if (p.name.includes(q) || (p.zi && p.zi.includes(q)) || (p.alias && p.alias.includes(q))) {
       results.push({
         kind: "character",

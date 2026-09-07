@@ -1,5 +1,6 @@
 import Link from "next/link";
 import data from "@/lib/data-generated";
+import { toSimplified } from "@/lib/t2s";
 
 export default function HomePage() {
   return (
@@ -7,19 +8,31 @@ export default function HomePage() {
       <div className="home-hero">
         <h1 className="hero-title">古籍通</h1>
         <p className="hero-sub">
-          开源公益古籍检索阅读与考据平台 · 十大馆藏 {data.books.length}+ 典籍全文在线
+          开源公益古籍检索阅读与考据平台 · 十大馆藏 {data.books.length} 部核心典籍在线
         </p>
-        <div className="search-box hero-search">
+        <p className="hero-badge">演示预览版 · 5GB 全量古籍接入推进中</p>
+        <form className="search-box hero-search" action="/search" method="get">
           <input
             className="input-text"
             name="q"
             placeholder="检索古籍书名、内容、人物"
             aria-label="检索关键词"
+            defaultValue=""
           />
-          <Link className="btn btn-primary search-btn" href="/search" prefetch>
+          <span className="search-mode-group" role="radiogroup" aria-label="检索模式">
+            <label className="btn-toggle">
+              <input type="radio" name="mode" value="full" defaultChecked />
+              <span>{toSimplified("全文")}</span>
+            </label>
+            <label className="btn-toggle">
+              <input type="radio" name="mode" value="title" />
+              <span>{toSimplified("标题")}</span>
+            </label>
+          </span>
+          <button className="btn btn-primary search-btn" type="submit">
             搜索
-          </Link>
-        </div>
+          </button>
+        </form>
       </div>
 
       <h2 className="section-title">十大馆藏</h2>

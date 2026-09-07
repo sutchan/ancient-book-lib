@@ -1,30 +1,45 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { searchAll } from "@/lib/search";
+import { useSearchParams } from "next/navigation";
+import { searchAll, distinctDynasties, categoryNames } from "@/lib/search";
 import { toSimplified } from "@/lib/t2s";
 import data from "@/lib/data-generated";
 
-export default function SearchClient({ initialKeyword }: { initialKeyword?: string }) {
-  const [kw, setKw] = useState(initialKeyword || "不亦说乎");
-  const [mode, setMode] = useState<"title" | "full">("full");
+export default function SearchClient() {
+  const sp = useSearchParams();
+  const [kw, setKw] = useState(sp.get("q") || "不亦说乎");
+  const [mode, setMode] = useState<"title" | "full">(
+    sp.get("mode") === "title" ? "title" : "full"
+  );
+  const [category, setCategory] = useState(sp.get("category") || "");
+  const [dynasty, setDynasty] = useState(sp.get("dynasty") || "");
   const [limit, setLimit] = useState(12);
-  const [results, setResults] = useState(() => searchAll(kw, "full", 12));
+  const [results, setResults] = useState(() =>
+    searchAll(kw, "full", 12, { category: "", dynasty: "" })
+  );
 
   const run = useCallback(
-    (q: string, m: "title" | "full", lim: number) => {
-      setResults(searchAll(q, m, lim));
+    (q: string, m: "title" | "full", cat: string, dyn: string, lim: number) => {
+      setResults(
+        searchAll(q, m, lim, {
+          category: cat || undefined,
+          dynasty: dyn || undefined,
+        })
+      );
     },
     []
   );
 
   useEffect(() => {
-    run(kw, mode, limit);
-  }, [kw, mode, limit, run]);
+    run(kw, mode, category, dynasty, limit);
+  }, [kw, mode, category, dynasty, limit, run]);
 
   const shown = results;
   const hasMore = results.length >= limit;
+  const dynasties = useMemo(() => distinctDynasties(), []);
+  const cats = useMemo(() => categoryNames(), []);
 
   return (
     <section>
@@ -41,7 +56,7 @@ export default function SearchClient({ initialKeyword }: { initialKeyword?: stri
           placeholder="输入关键词，如：论语、仁义、孔子"
           aria-label="检索关键词"
         />
-        <button className="btn btn-primary search-btn" onClick={() => run(kw, mode, limit)}>
+        <button className="btn btn-primary search-btn" onClick={() => run(kw, mode, category, dynasty, limit)}>
           搜索
         </button>
       </div>
@@ -62,6 +77,26 @@ export default function SearchClient({ initialKeyword }: { initialKeyword?: stri
             {toSimplified("全文检索")}
           </button>
         </div>
+        <select
+          aria-label="馆藏筛选"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="">全部馆藏</option>
+          {cats.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+        <select
+          aria-label="朝代筛选"
+          value={dynasty}
+          onChange={(e) => setDynasty(e.target.value)}
+        >
+          <option value="">全部朝代</option>
+          {dynasties.map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
+        </select>
         <select aria-label="每页条数" value={limit} onChange={(e) => setLimit(parseInt(e.target.value, 10))}>
           <option value={10}>每页10条</option>
           <option value={20}>每页20条</option>
@@ -69,7 +104,9 @@ export default function SearchClient({ initialKeyword }: { initialKeyword?: stri
         </select>
       </div>
       <div className="search-stat">
-        关键词「{kw}」· {mode === "title" ? "标题模式" : "全文模式"} 共命中 {data.books.length + data.characters.length} 部可检对象
+        关键词「{kw}」· {mode === "title" ? "标题模式" : "全文模式"}
+        {category && ` · ${category}`}
+        {dynasty && ` · ${dynasty}`} 共命中 {data.books.length + data.characters.length} 部可检对象
         （演示返回 {shown.length} 条）
       </div>
       {shown.length === 0 ? (
@@ -82,7 +119,7 @@ export default function SearchClient({ initialKeyword }: { initialKeyword?: stri
         shown.map((r, i) => (
           <div className="search-result-item" key={i}>
             <div className="result-title">
-              <Link href={r.kind === "book" ? `/read/${r.book}` : "/character"}>
+              <Link href={r.kind === "book" ? `/book/${encodeURIComponent(r.book)}` : "/character"}>
                 {toSimplified(r.book)} · {toSimplified(r.chapter)}
               </Link>
             </div>
