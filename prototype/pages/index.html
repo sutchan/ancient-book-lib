@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>首页｜古籍通原型</title>
+<link rel="stylesheet" href="../assets/prototype.css"/>
+<link rel="stylesheet" href="../assets/theme-color.css"/>
+</head>
+<body data-theme="light">
+<div class="app-container">
+  <header class="navbar">
+    <div class="nav-inner">
+      <a class="brand" href="./index.html">古籍通</a>
+      <nav class="nav-menu">
+        <a href="./index.html">首页</a>
+        <a href="./category.html">馆藏分类</a>
+        <a href="./search.html">检索</a>
+        <a href="./character.html">人物考据</a>
+        <a href="./relation.html">社会关系</a>
+        <a href="./help.html">帮助</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="btn-toggle" id="btn-toggle-simplified">繁体</button>
+        <button class="btn-toggle" id="btn-theme">主题</button>
+      </div>
+    </div>
+  </header>
+  <main class="main-content">
+    <div style="text-align:center;margin:60px 0;">
+      <h1>古籍通</h1>
+      <p style="color:var(--color-text-secondary);margin-bottom:32px;">开源公益古籍阅读与考据平台</p>
+      <div class="search-box" style="max-width:600px;margin:0 auto;">
+        <input class="input-text" placeholder="检索古籍书名、内容、人物">
+        <button class="btn btn-primary">搜索</button>
+      </div>
+    </div>
+    <h2 style="margin-bottom:16px;">馆藏分类</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;" id="category-grid"></div>
+  </main>
+  <footer class="footer"><div class="footer-inner"><p>古籍通 · MIT开源协议</p></div></footer>
+</div>
+<script>
+const categories = [
+  { name:"佛藏", desc:"佛家经典" }, { name:"儒藏", desc:"儒家经典" },
+  { name:"医藏", desc:"医学方书" }, { name:"史藏", desc:"史书地理" },
+  { name:"子藏", desc:"诸子百家" }, { name:"易藏", desc:"易学典籍" },
+  { name:"艺藏", desc:"艺术典籍" }, { name:"诗藏", desc:"诗词总集" },
+  { name:"道藏", desc:"道家典籍" }, { name:"集藏", desc:"文集总集" }
+];
+document.getElementById("category-grid").innerHTML = categories.map(c=>`
+  <div class="card"><div class="card-body">
+    <h4>${c.name}</h4>
+    <p style="color:var(--color-text-secondary);font-size:14px;margin-top:6px;">${c.desc}</p>
+  </div></div>`).join("");
+
+// 主题切换
+const list = ["light","paper","dark"];
+let idx = 0;
+document.getElementById("btn-theme").addEventListener("click",()=>{
+  idx = (idx+1)%list.length;
+  document.body.setAttribute("data-theme", list[idx]);
+});
+// 繁简切换
+let simplified = true;
+document.getElementById("btn-toggle-simplified").addEventListener("click",()=>{
+  simplified = !simplified;
+  document.getElementById("btn-toggle-simplified").innerText = simplified ? "繁体":"简体";
+});
+</script>
+</body>
+</html>

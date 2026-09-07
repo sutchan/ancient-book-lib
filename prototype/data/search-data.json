@@ -1,0 +1,30 @@
+{
+  "collection": "古籍通检索结果模拟数据",
+  "version": "1.0",
+  "results": [
+    {
+      "keyword": "不亦说乎",
+      "count": 3,
+      "items": [
+        {
+          "book": "论语",
+          "chapter": "学而篇",
+          "path": "首页 > 儒藏 > 论语",
+          "snippet": "子曰：学而时习之，<mark>不亦说乎</mark>？有朋自远方来，不亦乐乎？"
+        },
+        {
+          "book": "论语",
+          "chapter": "为政篇",
+          "path": "首页 > 儒藏 > 论语",
+          "snippet": "子曰：学而不思则罔，思而不学则殆。<mark>不亦说乎</mark>"
+        },
+        {
+          "book": "孟子",
+          "chapter": "梁惠王上",
+          "path": "首页 > 儒藏 > 孟子",
+          "snippet": "孟子见梁惠王，王曰：叟<mark>不亦说乎</mark>"
+        }
+      ]
+    }
+  ]
+}

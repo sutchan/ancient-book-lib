@@ -1,0 +1,28 @@
+{
+  "collection": "古籍通原型模拟数据",
+  "version": "1.0",
+  "categories": [
+    { "id": "fo", "name": "佛藏", "desc": "佛家经典", "books": ["金刚经", "心经", "法华经"] },
+    { "id": "ru", "name": "儒藏", "desc": "儒家经典", "books": ["论语", "孟子", "大学", "中庸"] },
+    { "id": "yi", "name": "医藏", "desc": "医学方书", "books": ["黄帝内经", "伤寒论", "本草纲目"] },
+    { "id": "shi", "name": "史藏", "desc": "史书地理", "books": ["史记", "资治通鉴", "汉书"] },
+    { "id": "zi", "name": "子藏", "desc": "诸子百家", "books": ["道德经", "庄子", "韩非子"] },
+    { "id": "yi2", "name": "易藏", "desc": "易学典籍", "books": ["周易", "易传"] },
+    { "id": "art", "name": "艺藏", "desc": "艺术典籍", "books": ["书谱", "画论"] },
+    { "id": "shi2", "name": "诗藏", "desc": "诗词总集", "books": ["诗经", "楚辞", "全唐诗"] },
+    { "id": "dao", "name": "道藏", "desc": "道家典籍", "books": ["抱朴子", "云笈七签"] },
+    { "id": "ji", "name": "集藏", "desc": "文集总集", "books": ["文选", "古文观止"] }
+  ],
+  "books": [
+    { "id": "lunyu", "title": "论语", "category": "儒藏", "dynasty": "春秋", "chapters": ["学而篇", "为政篇", "八佾篇", "里仁篇"] },
+    { "id": "shiji", "title": "史记", "category": "史藏", "dynasty": "西汉", "chapters": ["本纪", "世家", "列传"] }
+  ],
+  "characters": [
+    { "id": "kongzi", "name": "孔子", "zi": "孔丘", "dynasty": "春秋", "native": "鲁国陬邑", "birth": "公元前551年", "death": "公元前479年", "office": "鲁国大司寇", "books": ["论语", "春秋"] },
+    { "id": "yanyuan", "name": "颜回", "zi": "颜渊", "dynasty": "春秋", "native": "鲁国", "teacher": "孔子", "books": ["论语"] }
+  ],
+  "relations": [
+    { "personA": "孔子", "personB": "颜回", "type": "师生", "source": "《论语·先进》《史记·仲尼弟子列传》" },
+    { "personA": "孔子", "personB": "子路", "type": "师生", "source": "《论语》" }
+  ]
+}

@@ -1,0 +1,32 @@
+/* ===== 日间 light 默认主题 ===== */
+[data-theme="light"]{
+  --color-bg: #F9F7F2;
+  --color-text: #2B2B2B;
+  --color-text-secondary: #666666;
+  --color-border: #E8E4DD;
+  --color-primary: #8C3130;
+  --color-highlight: #F2D299;
+  --color-card-bg: #ffffff;
+}
+
+/* ===== 护眼 paper 模式 ===== */
+[data-theme="paper"]{
+  --color-bg: #F0F3E8;
+  --color-text: #2C3324;
+  --color-text-secondary: #5A6152;
+  --color-border: #D8DFCC;
+  --color-primary: #704030;
+  --color-highlight: #d8d2a8;
+  --color-card-bg: #f7faf0;
+}
+
+/* ===== 深色 dark 夜间模式 ===== */
+[data-theme="dark"]{
+  --color-bg: #1A1A1A;
+  --color-text: #E5E5E5;
+  --color-text-secondary: #AAAAAA;
+  --color-border: #333333;
+  --color-primary: #c9605e;
+  --color-highlight: #B89A68;
+  --color-card-bg: #262626;
+}

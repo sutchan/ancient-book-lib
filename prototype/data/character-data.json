@@ -1,0 +1,43 @@
+{
+  "collection": "古籍通人物考据模拟数据",
+  "version": "1.0",
+  "characters": [
+    {
+      "id": "kongzi",
+      "name": "孔子",
+      "zi": "孔丘",
+      "dynasty": "春秋",
+      "native": "鲁国陬邑",
+      "birth": "公元前551年",
+      "death": "公元前479年",
+      "office": "鲁国大司寇、摄相事",
+      "biography": "中国古代思想家、教育家，儒家学派创始人。",
+      "books": [
+        { "title": "论语", "category": "儒藏", "relation": "弟子及再传弟子所辑录" },
+        { "title": "春秋", "category": "史藏", "relation": "据鲁史修订" }
+      ],
+      "relations": [
+        { "person": "颜回", "type": "师生" },
+        { "person": "子路", "type": "师生" },
+        { "person": "孔鲤", "type": "父子" }
+      ]
+    },
+    {
+      "id": "yanyuan",
+      "name": "颜回",
+      "zi": "颜渊",
+      "dynasty": "春秋",
+      "native": "鲁国",
+      "birth": "公元前521年",
+      "death": "公元前481年",
+      "office": "无（布衣）",
+      "biography": "孔子最得意门生，以德行著称。",
+      "books": [
+        { "title": "论语", "category": "儒藏", "relation": "言行记载" }
+      ],
+      "relations": [
+        { "person": "孔子", "type": "师生" }
+      ]
+    }
+  ]
+}

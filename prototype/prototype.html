@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>古籍通｜高保真可交互原型</title>
+<link rel="stylesheet" href="./assets/prototype.css"/>
+<link rel="stylesheet" href="./assets/theme-color.css"/>
+</head>
+<body data-theme="light">
+<div class="app-container">
+  <!-- 全局导航栏 -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a class="brand" href="#page-home">古籍通</a>
+      <nav class="nav-menu">
+        <a href="#page-home">首页</a>
+        <a href="#page-category">馆藏分类</a>
+        <a href="#page-search">检索</a>
+        <a href="#page-character">人物考据</a>
+        <a href="#page-relation">社会关系</a>
+        <a href="#page-help">帮助</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="btn-toggle" id="btn-toggle-simplified">繁体</button>
+        <button class="btn-toggle" id="btn-theme">主题</button>
+      </div>
+      <button class="nav-hamburger" id="hamburger">☰</button>
+    </div>
+  </header>
+
+  <!-- 页面容器，路由切换渲染 -->
+  <main class="main-content" id="main-view"></main>
+
+  <!-- 全局页脚 -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <p>古籍通 · 开源公益古籍阅读平台 | 数据仅供学术参考 | 开源MIT协议</p>
+    </div>
+  </footer>
+</div>
+
+<script src="./assets/prototype.js"></script>
+</body>
+</html>
