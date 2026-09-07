@@ -8,7 +8,14 @@
 ## [1.0.2] - 2026-09-07
 
 ### 新增
-- 接入 Google Analytics（GA4），衡量 ID `G-H76XG9L6FZ`，通过 `app/GoogleAnalytics.tsx` 客户端组件注入
+- 接入 Google Analytics 4（GA4），衡量 ID `G-H76XG9L6FZ`
+- 新增 `components/Analytics.tsx` 服务端组件，SSG 时直接写入初始 HTML（`next/script` afterInteractive），全站 65 个静态页统一注入
+- 开启 IP 匿名化（`anonymize_ip: true`），仅采集匿名聚合访问统计，不采集个人身份信息，与「零隐私收集」定位一致
+
+### 变更
+- `app/layout.tsx` 统一引用 Analytics 组件，移除旧版 `app/GoogleAnalytics.tsx` 客户端实现（避免重复埋点）
+- 版本号升级至 1.0.2
+- 同步更新项目文档（合规声明、架构、目录规范、部署规范、帮助页）
 
 ## [1.0.1] - 2026-09-07
 

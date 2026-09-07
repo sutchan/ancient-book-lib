@@ -45,6 +45,7 @@ export default function HelpPage() {
       <h3 className="section-title">开源与协议</h3>
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
         <p>本项目以开源形式发布，代码遵循 MIT 协议。古籍原文为公有领域（Public Domain）资源，整理文本遵循原数据源授权协议。数据仅供学术研究与个人学习使用，商用需自行核实版权状态。</p>
+        <p><strong>访问统计说明：</strong>本站使用 Google Analytics 4 进行匿名访问统计（页面浏览量、来源、设备类型），已开启 IP 匿名化，不采集姓名、账号、联系方式等个人身份信息。您在浏览器隐私设置中屏蔽第三方 Cookie 即可停止统计。</p>
       </div>
 
       <h3 className="section-title">常见问题 FAQ</h3>
