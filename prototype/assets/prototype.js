@@ -155,10 +155,10 @@ function renderHome(main){
   }).join("");
   main.innerHTML =
     '<section>'+
-      '<div style="text-align:center;margin:48px 0 40px;">'+
-        '<h1 style="font-size:30px;margin-bottom:10px;">'+toSimplified('古籍通')+'</h1>'+
-        '<p style="color:var(--color-text-secondary);margin-bottom:30px;">'+toSimplified('开源公益古籍检索阅读与考据平台')+'</p>'+
-        '<div class="search-box" style="max-width:600px;margin:0 auto;">'+
+      '<div class="home-hero fade-in">'+
+        '<h1 class="hero-title">'+toSimplified('古籍通')+'</h1>'+
+        '<p class="hero-sub">'+toSimplified('开源公益古籍检索阅读与考据平台 · 十大馆藏 40+ 典籍全文在线')+'</p>'+
+        '<div class="search-box hero-search">'+
           '<input class="input-text" id="home-search-input" placeholder="'+toSimplified('检索古籍书名、内容、人物')+'">'+
           '<button class="btn btn-primary search-btn" id="home-search-btn">'+toSimplified('搜索')+'</button>'+
         '</div>'+
