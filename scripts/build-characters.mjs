@@ -24,9 +24,9 @@ const API = "https://cbdb.fas.harvard.edu/cbdbapi/person";
  * name 留空则使用 CBDB 原始 ChName。扩展数据只需在此追加条目。
  */
 const SEED = [
-  { id: 148844, name: "司馬遷" },
+  { id: 439127, name: "司馬遷" },
   { id: 135114, name: "班固" },
-  { id: 212634, name: "王維" },
+  { id: 32174, name: "王維" },
   { id: 3915, name: "杜甫" },
   { id: 32227, name: "白居易" },
   { id: 3332, name: "韓愈" },
@@ -45,7 +45,7 @@ const SEED = [
   { id: 511354, name: "施耐庵" },
   { id: 65615, name: "蒲松齡" },
   { id: 15887, name: "孔子" },
-  { id: 339621, name: "老子" },
+  { id: 339621, name: "老子", dynasty: "春秋" },
   { id: 134984, name: "孟子" },
   { id: 30374, name: "王陽明" },
   { id: 65905, name: "曹雪芹" },
@@ -110,7 +110,7 @@ function mapPerson(p, seed) {
     name: seed.name || bi.ChName || "",
     zi,
     alias,
-    dynasty: bi.Dynasty || "",
+    dynasty: seed.dynasty || bi.Dynasty || "",
     native,
     birth: bi.YearBirth || "",
     death: bi.YearDeath || "",
