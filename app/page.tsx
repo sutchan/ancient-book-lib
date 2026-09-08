@@ -1,6 +1,7 @@
 import Link from "next/link";
 import data from "@/lib/data-generated";
 import { toSimplified } from "@/lib/t2s";
+import RecentBooks from "@/components/RecentBooks";
 
 export default function HomePage() {
   return (
@@ -42,6 +43,8 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
+
+      <RecentBooks />
 
       <h2 className="section-title">十大馆藏</h2>
       <div className="category-grid">

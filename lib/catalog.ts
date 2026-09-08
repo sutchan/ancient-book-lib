@@ -10,13 +10,15 @@ export type { CatalogEntry, DaizhigeCatalog };
 const INDEX_URL = "/index/daizhige-catalog.json";
 
 let cache: DaizhigeCatalog | null = null;
+let idMap: Map<string, CatalogEntry> | null = null;
 
-/** 加载全量书目索引（浏览器端懒加载，带内存缓存） */
+/** 加载全量书目索引（浏览器端懒加载，带内存缓存 + O(1) ID 查找 Map） */
 export async function loadCatalog(): Promise<DaizhigeCatalog> {
   if (cache) return cache;
   const resp = await fetch(INDEX_URL);
   if (!resp.ok) throw new Error(`书目索引加载失败: ${resp.status}`);
   cache = (await resp.json()) as DaizhigeCatalog;
+  idMap = new Map(cache.books.map((b) => [b.id, b]));
   return cache;
 }
 
@@ -65,8 +67,10 @@ export function getSubcategories(
   return Array.from(set).sort();
 }
 
-/** 按 ID 查找书目 */
+/** 按 ID 查找书目（O(1) Map 查找） */
 export function findBookById(catalog: DaizhigeCatalog, id: string): CatalogEntry | undefined {
+  if (idMap) return idMap.get(id);
+  // fallback：未经过 loadCatalog 构建 Map 时线性查找
   return catalog.books.find((b) => b.id === id);
 }
 

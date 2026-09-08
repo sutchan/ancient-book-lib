@@ -5,6 +5,46 @@
 
 ## [未发布]
 
+## [1.2.0] - 2026-09-08
+
+### 新增
+- **IndexedDB 原文缓存**：远程书原文自动缓存至 IndexedDB（上限 100MB，LRU 淘汰），二次阅读零网络请求
+- **大文件加载保护**：>5MB 文件显示警告（含文件大小、Wi-Fi 建议、直接下载选项），加载时显示下载进度条，60s 超时自动中止
+- **CDN 镜像降级**：索引增加 jsDelivr + statically 两个 CDN 镜像，raw.githubusercontent.com 加载失败时自动尝试下一个镜像
+- **远程书详情页**：新增 `/catalog/book?id=xxx`，展示元数据、章节目录（按需加载）、开始阅读/上游原文/CDN 镜像入口
+- **阅读历史**：localStorage 记录最近阅读 10 本书，首页"最近阅读"区块展示
+- **阅读进度条**：阅读页顶部显示整体阅读进度百分比
+- **SEO**：新增 `robots.txt` + 构建后自动生成 `sitemap.xml`（111 个静态页面 URL）
+- **basePath 配置**：`next.config.mjs` 支持 `NEXT_PUBLIC_BASE_PATH` 环境变量，CI 自动根据是否配置自定义域名决定子路径
+
+### 优化
+- **搜索防抖**：全馆藏书目搜索输入加 250ms 防抖，避免每次按键全量过滤
+- **索引查找 O(1)**：`loadCatalog` 时构建 `Map<string, CatalogEntry>`，`findBookById` 从 O(n) 优化为 O(1)
+- **章节解析收紧**：增加长度下限（2-20字）、排除规则（含"见/如/参阅"等词排除）、上下文校验（标题前后至少一侧为空行），减少误识别
+- **大文件下载**：>5MB 文件直接提供上游 raw URL 下载链接，避免前端 Blob 内存溢出
+- **统一 fetch 工具**：新增 `lib/fetchWithTimeout.ts`，封装 AbortController 超时 + 下载进度回调
+- **CI 索引重建**：deploy workflow 增加 `npm run build:catalog` 步骤，确保上游数据更新时索引同步
+
+### 修复
+- GitHub Pages 子路径部署资源 404 风险（basePath + assetPrefix）
+- 远程书加载无超时、无进度、无大小保护的问题
+- 章节标题模式过宽导致正文被误识别为章节的问题
+
+### 变更
+- 版本号升级至 1.2.0
+
+## [1.1.1] - 2026-09-08
+
+### 新增
+- **Pages 自定义域名支持**：workflow 读取仓库变量 `PAGES_CUSTOM_DOMAIN`，构建后自动写入 `out/CNAME`；未配置该变量则跳过、使用默认域名（避免子路径下资源 404）
+- 部署规范新增「绑定自定义域名」章节：DNS 记录、仓库变量配置、Enforce HTTPS 步骤
+
+### 修复
+- 补齐 v1.1.0 缺失的 CHANGELOG 版本比较链接
+
+### 变更
+- 版本号升级至 1.1.1
+
 ## [1.1.0] - 2026-09-08
 
 ### 新增（B1 全量数据接入：直接引用上游，本仓库零 TXT 复制）
@@ -94,7 +134,9 @@
 - 高保真可交互原型 `prototype/`（三套主题 + 真实模拟数据）
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.4...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.1...v1.0.2

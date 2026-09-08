@@ -17,6 +17,8 @@ const OUT = resolve(ROOT, "public/index/daizhige-catalog.json");
 const REPO = "garychowcmu/daizhigev20";
 const BRANCH = "master";
 const RAW_BASE = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/`;
+const JSDELIVR_BASE = `https://cdn.jsdelivr.net/gh/${REPO}@${BRANCH}/`;
+const STATICALLY_BASE = `https://cdn.statically.io/gh/${REPO}/${BRANCH}/`;
 const TREE_API = `https://api.github.com/repos/${REPO}/git/trees/${BRANCH}?recursive=1`;
 
 console.log(`[1/3] 拉取 ${REPO} 全量文件树...`);
@@ -49,6 +51,10 @@ for (const node of data.tree) {
     path: node.path,
     size: node.size,
     rawUrl: RAW_BASE + encodeURI(node.path),
+    mirrors: [
+      JSDELIVR_BASE + encodeURI(node.path),
+      STATICALLY_BASE + encodeURI(node.path),
+    ],
   });
 }
 

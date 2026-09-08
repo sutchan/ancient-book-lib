@@ -22,7 +22,8 @@ export default function CatalogInner() {
   const params = useSearchParams();
   const [catalog, setCatalog] = useState<DaizhigeCatalog | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [kw, setKw] = useState(params.get("q") || "");
+  const [inputKw, setInputKw] = useState(params.get("q") || "");
+  const [kw, setKw] = useState(params.get("q") || ""); // 防抖后的搜索词
   const [category, setCategory] = useState(params.get("category") || "");
   const [subcat, setSubcat] = useState("");
   const [page, setPage] = useState(1);
@@ -30,6 +31,12 @@ export default function CatalogInner() {
   useEffect(() => {
     loadCatalog().then(setCatalog).catch((e) => setError(String(e)));
   }, []);
+
+  // 搜索防抖：250ms
+  useEffect(() => {
+    const t = setTimeout(() => setKw(inputKw), 250);
+    return () => clearTimeout(t);
+  }, [inputKw]);
 
   useEffect(() => { setPage(1); }, [kw, category, subcat]);
 
@@ -67,8 +74,8 @@ export default function CatalogInner() {
       <div className="filter-panel">
         <input
           className="input-text"
-          value={kw}
-          onChange={(e) => setKw(e.target.value)}
+          value={inputKw}
+          onChange={(e) => setInputKw(e.target.value)}
           placeholder="搜索书名（如：论语、金刚经、史记）"
           style={{ maxWidth: 360 }}
         />
@@ -127,18 +134,25 @@ export default function CatalogInner() {
           >
             <span style={{ fontSize: 18 }}>{CATEGORY_ICONS[b.category] || "📚"}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 600, fontSize: 15 }}>{b.title}</div>
+              <Link href={`/catalog/book?id=${b.id}`} style={{ fontWeight: 600, fontSize: 15, color: "inherit", textDecoration: "none" }}>
+                {b.title}
+              </Link>
               <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 2 }}>
                 {b.category} › {b.subcategories.join(" › ") || "—"} · {formatSize(b.size)}
               </div>
             </div>
-            <Link
-              href={`/read/remote?id=${b.id}`}
-              className="btn btn-primary"
-              style={{ fontSize: 13, padding: "6px 14px", whiteSpace: "nowrap" }}
-            >
-              开始阅读
-            </Link>
+            <div style={{ display: "flex", gap: 6 }}>
+              <Link
+                href={`/catalog/book?id=${b.id}`}
+                className="btn btn-secondary"
+                style={{ fontSize: 13, padding: "6px 12px", whiteSpace: "nowrap" }}
+              >详情</Link>
+              <Link
+                href={`/read/remote?id=${b.id}`}
+                className="btn btn-primary"
+                style={{ fontSize: 13, padding: "6px 14px", whiteSpace: "nowrap" }}
+              >阅读</Link>
+            </div>
           </div>
         ))}
       </div>

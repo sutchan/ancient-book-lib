@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sutchan.github.io/ancient-book-lib/sitemap.xml

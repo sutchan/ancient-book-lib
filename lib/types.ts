@@ -58,7 +58,8 @@ export interface CatalogEntry {
   subcategories: string[]; // 中间层级（如 ["乾隆藏","大乘五大部外重译经"]）
   path: string;           // 上游仓库相对路径
   size: number;           // 字节数
-  rawUrl: string;         // raw.githubusercontent.com 直链
+  rawUrl: string;         // raw.githubusercontent.com 主直链
+  mirrors: string[];      // CDN 镜像列表（jsDelivr 等），用于降级
 }
 
 export interface DaizhigeCatalog {
