@@ -24,7 +24,7 @@ const API = "https://cbdb.fas.harvard.edu/cbdbapi/person";
  * name 留空则使用 CBDB 原始 ChName。扩展数据只需在此追加条目。
  */
 const SEED = [
-  { id: 439127, name: "司馬遷" },
+  { id: 439127, name: "司馬遷", dynasty: "西漢" },
   { id: 135114, name: "班固" },
   { id: 32174, name: "王維" },
   { id: 3915, name: "杜甫" },
@@ -66,6 +66,7 @@ async function fetchPerson(id) {
 
 function mapPerson(p, seed) {
   const bi = p.BasicInfo || {};
+  const dynasty = seed.dynasty || bi.Dynasty || "";
   const aliases = toArr(p.PersonAliases?.Alias);
   const zi = aliases.filter((a) => a.AliasType === "字").map((a) => a.AliasName).join("、");
   const alias = aliases
@@ -94,12 +95,12 @@ function mapPerson(p, seed) {
   ];
 
   const tags = [];
-  if (bi.Dynasty) tags.push(bi.Dynasty);
+  if (dynasty) tags.push(dynasty);
   if (office.length) tags.push("官員");
   if (texts.length) tags.push("文人");
 
   const bio = [];
-  if (bi.Dynasty) bio.push(bi.Dynasty + "代");
+  if (dynasty) bio.push(dynasty + "代");
   if (native) bio.push(native + "人");
   if (zi) bio.push("字" + zi);
   if (alias) bio.push("號" + alias);

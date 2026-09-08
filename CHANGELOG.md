@@ -5,6 +5,13 @@
 
 ## [未发布]
 
+## [1.3.8] - 2026-09-08
+
+### 新增（从 CBDB 导入人物考据数据）
+- 新增 `scripts/build-characters.mjs`：以已校验的 CBDB 人物 ID 为种子，调用 CBDB REST API（`cbdb.fas.harvard.edu/cbdbapi/person`，授权 CC BY-NC-SA 4.0）拉取姓名/字/号/籍贯/生卒/官职，并按作者角色从 `PersonTexts` 提取著述作为「关联书籍」，生成 `public/index/characters.json`（28 位历史名人：孔子/老子/李白/杜甫/蘇軾/朱熹/司馬遷/王維等）
+- 导入以「校验后 ID」为准（CBDB 姓名检索非确定性且常命中同名 obscure 人物），并对返回 PersonId 二次核验；少数人物（司馬遷/老子）因 CBDB 朝代字段缺失或误标，在种子中覆盖为西漢/春秋
+- `CharacterList` 人物考据页现可渲染真实数据，支持检索/朝代·标签筛选/排序/详情展开
+
 ## [1.3.7] - 2026-09-08
 
 ### 新增（人物考据页功能完善）
