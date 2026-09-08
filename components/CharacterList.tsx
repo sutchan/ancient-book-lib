@@ -69,14 +69,18 @@ export default function CharacterList() {
             <div className="character-card" key={c.id}>
               <div className="char-name">
                 {c.name}
-                <span className="char-zi">字 {c.zi}</span>
+                {c.zi && <span className="char-zi">字 {c.zi}</span>}
               </div>
               <div className="info-row">
                 {c.alias && (
                   <div><label>号</label> {c.alias}</div>
                 )}
-                <div><label>朝代</label> {c.dynasty} · {c.native}</div>
-                <div><label>生卒</label> {c.birth} — {c.death}</div>
+                {(c.dynasty || c.native) && (
+                  <div><label>朝代/籍贯</label> {[c.dynasty, c.native].filter(Boolean).join(" · ")}</div>
+                )}
+                {(c.birth || c.death) && (
+                  <div><label>生卒</label> {[c.birth, c.death].filter(Boolean).join(" — ")}</div>
+                )}
                 {c.office && <div><label>官职</label> {c.office}</div>}
                 <div style={{ marginTop: 8 }}>
                   {(c.tags || []).map((t) => (

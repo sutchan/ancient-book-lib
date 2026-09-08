@@ -66,9 +66,7 @@ export default function CatalogInner() {
 
       <h2 style={{ marginBottom: 4 }}>全馆藏书目（殆知阁 v20）</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 14 }}>
-        共 <strong>{catalog.total.toLocaleString()}</strong> 部古籍 · 原始数据 {(catalog.totalSizeBytes / 1024 / 1024 / 1024).toFixed(1)} GB ·
-        托管于 <a href={catalog.source} target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>garychowcmu/daizhigev20</a> ·
-        本仓库不复制 TXT，阅读时按需加载
+        共 <strong>{catalog.total.toLocaleString()}</strong> 部古籍
       </p>
 
       <div className="filter-panel">

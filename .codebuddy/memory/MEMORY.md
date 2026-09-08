@@ -4,7 +4,9 @@
 - **技术栈**：Next.js 14 + React 18 + TypeScript，纯静态 SSG（`output: "export"`，产物 `out/`）。无数据库、无后端接口、无 ESLint 配置、无测试框架；类型检查门禁为 `npx tsc --noEmit`；`next start` 不适用于 export 模式，预览用 `npx serve out`。
 - **目录（实际）**：根级 `app/ components/ lib/ scripts/ prototype/ docs/ public/` 与 `.github/`。注意 `docs/02-架构与开发规范/项目目录结构规范.md` 仍写 `src/app` 旧结构，与实际不符。
 - **数据单一源**：`prototype/data/app-data.js` → `npm run build:index` 生成 `lib/data-generated.ts`（禁止手改生成文件）。
-- **架构红线**：禁数据库、禁后端检索、禁动态 SSR、禁直读超大原文（必须 Range 分片）、禁服务端存用户数据、禁广告/付费/注册/埋点、古籍原文保真。
+- **人物功能数据驱动（v1.2.8 起）**：`app-data.js` 用 IIFE，`characters` 由 `books.author` 经 `AUTHOR_PERSONS` 映射派生（剔除佚名/集体编撰、自动关联著作、空字段不虚构），`relations` 仅保留两端都在人物集中的有效引用（现 38 位人物 / 6 条关系）。`prototype/data/character-data.json` 已废弃清空（冗余模拟数据）。改人物数据只需改 `AUTHOR_PERSONS` 或 `books.author`，再 `npm run build:index` 重新生成。
+- **架构红线**：禁数据库、禁后端检索、禁动态 SSR、禁直读超大原文（必须 Range 分片）、禁服务端存用户数据、古籍原文保真。
+- **分析（埋点）已获所有者显式授权**：原红线含「禁广告/付费/注册/埋点」，但 owner 于 2026-09-08 前明确接入 **Google Analytics 4（衡量 ID `G-H76XG9L6FZ`，IP 匿名化、仅聚合访问统计）**，覆盖原「禁埋点」约束。实现见 `app/GoogleAnalytics.tsx`（next/script afterInteractive 注入 gtag）+ `app/layout.tsx` 挂载；版本号读 `process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID` 可覆盖。README 第 14–15 行已改为「不收集个人隐私（仅匿名访问统计，GA4）」。后续不再就该冲突二次提示用户。
 - **文档体系**：`docs/` 八大分类（01 基础说明 / 02 架构与开发规范 / 03 PRD / 04 任务清单 / 05 设计规范与原型 / 06 部署与迭代 / 07 环境搭建手册 / 08 技术方案研究）+ 根 `README.md` + `CHANGELOG.md`。
 - **社区健康文件**：位于 `.github/`（CONTRIBUTING / CODE_OF_CONDUCT / SECURITY / SUPPORT / PR 模板 / Issue 模板）。禁止创建 `.github/readme.md`。
 - **生产站点**：https://guji.ewuse.com/ ，托管于腾讯云 **EdgeOne Pages**（响应头 `server: edgeone makers`，DNS 多 A 记录智能解析；由 EdgeOne 从 Git 拉取并构建 `out/`）。GitHub Pages 仅为可选备用，非生产链路——不启用 Pages 时 `actions/deploy-pages@v4` 会持续报 `Failed to create deployment (status: 404)`，属预期。

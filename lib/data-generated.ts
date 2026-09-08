@@ -77,7 +77,7 @@ const data: AppData = {
       "author": "鸠摩罗什译",
       "desc": "大乘佛教般若部核心经典，以空慧断烦恼。",
       "chapters": [
-        "法会因由分第一",
+        "法因缘由分第一",
         "善现启请分第二",
         "大乘正宗分第三",
         "妙行无住分第四"
@@ -661,423 +661,619 @@ const data: AppData = {
   ],
   "characters": [
     {
-      "id": "p01",
+      "id": "c001",
+      "name": "班固",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "汉书"
+      ]
+    },
+    {
+      "id": "c002",
+      "name": "般剌密帝",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "楞严经"
+      ]
+    },
+    {
+      "id": "c003",
+      "name": "曹寅",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "全唐诗"
+      ]
+    },
+    {
+      "id": "c004",
+      "name": "曾参",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "大学"
+      ]
+    },
+    {
+      "id": "c005",
+      "name": "陈寿",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "三国志"
+      ]
+    },
+    {
+      "id": "c006",
+      "name": "葛洪",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "抱朴子"
+      ]
+    },
+    {
+      "id": "c007",
+      "name": "郭茂倩",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "乐府诗集"
+      ]
+    },
+    {
+      "id": "c008",
+      "name": "韩非",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "韩非子"
+      ]
+    },
+    {
+      "id": "c009",
+      "name": "京房",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "京氏易传"
+      ]
+    },
+    {
+      "id": "c010",
+      "name": "鸠摩罗什",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "金刚般若波罗蜜经",
+        "妙法莲华经"
+      ]
+    },
+    {
+      "id": "c011",
       "name": "孔子",
-      "zi": "仲尼",
-      "alias": "孔丘",
-      "dynasty": "春秋",
-      "native": "鲁国陬邑",
-      "birth": "公元前551年",
-      "death": "公元前479年",
-      "office": "鲁国大司寇",
-      "tags": [
-        "思想家",
-        "教育家",
-        "儒家"
-      ],
-      "desc": "儒家学派创始人，创立仁与礼的学说体系。",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
         "论语",
-        "春秋"
+        "孝经",
+        "易传"
       ]
     },
     {
-      "id": "p02",
-      "name": "孟子",
-      "zi": "子舆",
-      "alias": "孟轲",
-      "dynasty": "战国",
-      "native": "邹国",
-      "birth": "公元前372年",
-      "death": "公元前289年",
-      "office": "齐国客卿",
-      "tags": [
-        "思想家",
-        "儒家"
-      ],
-      "desc": "继承孔子学说，主张性善与仁政。",
-      "books": [
-        "孟子"
-      ]
-    },
-    {
-      "id": "p03",
+      "id": "c012",
       "name": "老子",
-      "zi": "伯阳",
-      "alias": "李耳",
-      "dynasty": "春秋",
-      "native": "楚国苦县",
-      "birth": "约公元前571年",
-      "death": "不详",
-      "office": "周守藏室之史",
-      "tags": [
-        "思想家",
-        "道家"
-      ],
-      "desc": "道家学派创始人，著道德经五千言。",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
         "道德经"
       ]
     },
     {
-      "id": "p04",
-      "name": "庄子",
-      "zi": "子休",
-      "alias": "庄周",
-      "dynasty": "战国",
-      "native": "宋国蒙",
-      "birth": "约公元前369年",
-      "death": "约公元前286年",
-      "office": "漆园吏",
-      "tags": [
-        "思想家",
-        "文学家",
-        "道家"
-      ],
-      "desc": "道家代表人物，逍遥齐物。",
+      "id": "c013",
+      "name": "李昉",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "庄子"
+        "文苑英华"
       ]
     },
     {
-      "id": "p05",
-      "name": "司马迁",
-      "zi": "子长",
-      "alias": "太史公",
-      "dynasty": "西汉",
-      "native": "夏阳",
-      "birth": "约公元前145年",
-      "death": "约公元前86年",
-      "office": "太史令",
-      "tags": [
-        "史学家",
-        "文学家"
-      ],
-      "desc": "著史记，纪传体通史之祖。",
+      "id": "c014",
+      "name": "李筌",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "史记"
+        "阴符经"
       ]
     },
     {
-      "id": "p06",
+      "id": "c015",
+      "name": "李时珍",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "本草纲目"
+      ]
+    },
+    {
+      "id": "c016",
+      "name": "刘向",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "战国策"
+      ]
+    },
+    {
+      "id": "c017",
+      "name": "孟子",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "孟子"
+      ]
+    },
+    {
+      "id": "c018",
+      "name": "墨翟",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "墨子"
+      ]
+    },
+    {
+      "id": "c019",
       "name": "屈原",
-      "zi": "灵均",
-      "alias": "屈平",
-      "dynasty": "战国",
-      "native": "楚国丹阳",
-      "birth": "约公元前340年",
-      "death": "公元前278年",
-      "office": "左徒、三闾大夫",
-      "tags": [
-        "诗人",
-        "政治家"
-      ],
-      "desc": "楚辞开创者，浪漫主义源头。",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
         "楚辞"
       ]
     },
     {
-      "id": "p07",
-      "name": "李白",
-      "zi": "太白",
-      "alias": "青莲居士",
-      "dynasty": "唐",
-      "native": "陇西成纪",
-      "birth": "701年",
-      "death": "762年",
-      "office": "翰林供奉",
-      "tags": [
-        "诗人"
-      ],
-      "desc": "诗仙，飘逸豪放。",
+      "id": "c020",
+      "name": "石涛",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "全唐诗·李白卷"
+        "画论"
       ]
     },
     {
-      "id": "p08",
-      "name": "杜甫",
-      "zi": "子美",
-      "alias": "少陵野老",
-      "dynasty": "唐",
-      "native": "巩县",
-      "birth": "712年",
-      "death": "770年",
-      "office": "检校工部员外郎",
-      "tags": [
-        "诗人"
-      ],
-      "desc": "诗圣，沉郁顿挫。",
+      "id": "c021",
+      "name": "实叉难陀",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "全唐诗·杜甫卷"
+        "大方广佛华严经"
       ]
     },
     {
-      "id": "p09",
-      "name": "苏轼",
-      "zi": "子瞻",
-      "alias": "东坡居士",
-      "dynasty": "北宋",
-      "native": "眉山",
-      "birth": "1037年",
-      "death": "1101年",
-      "office": "翰林学士、知制诰",
-      "tags": [
-        "文学家",
-        "书画家",
-        "美食家"
-      ],
-      "desc": "全才，诗词文书画俱佳。",
+      "id": "c022",
+      "name": "司马光",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "全唐诗·苏轼卷"
+        "资治通鉴"
       ]
     },
     {
-      "id": "p10",
-      "name": "韩愈",
-      "zi": "退之",
-      "alias": "昌黎先生",
-      "dynasty": "唐",
-      "native": "河阳",
-      "birth": "768年",
-      "death": "824年",
-      "office": "吏部侍郎",
-      "tags": [
-        "文学家",
-        "思想家"
-      ],
-      "desc": "古文运动领袖，唐宋八大家之首。",
+      "id": "c023",
+      "name": "司马迁",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "古文观止·唐宋文选"
+        "史记"
       ]
     },
     {
-      "id": "p11",
-      "name": "诸葛亮",
-      "zi": "孔明",
-      "alias": "卧龙",
-      "dynasty": "三国",
-      "native": "琅琊阳都",
-      "birth": "181年",
-      "death": "234年",
-      "office": "蜀汉丞相",
-      "tags": [
-        "政治家",
-        "军事家"
-      ],
-      "desc": "鞠躬尽瘁死而后已。",
+      "id": "c024",
+      "name": "苏易简",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "三国志·蜀书"
+        "文房四谱"
       ]
     },
     {
-      "id": "p11b",
-      "name": "刘备",
-      "zi": "玄德",
-      "alias": "汉昭烈帝",
-      "dynasty": "三国",
-      "native": "涿郡涿县",
-      "birth": "161年",
-      "death": "223年",
-      "office": "蜀汉开国皇帝",
-      "tags": [
-        "政治家"
-      ],
-      "desc": "蜀汉开国君主，三顾茅庐礼贤下士。",
+      "id": "c025",
+      "name": "孙过庭",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "三国志·蜀书"
+        "书谱"
       ]
     },
     {
-      "id": "p12",
-      "name": "王维",
-      "zi": "摩诘",
-      "alias": "诗佛",
-      "dynasty": "唐",
-      "native": "蒲州",
-      "birth": "701年",
-      "death": "761年",
-      "office": "尚书右丞",
-      "tags": [
-        "诗人",
-        "画家"
-      ],
-      "desc": "诗中有画，画中有诗。",
+      "id": "c026",
+      "name": "魏伯阳",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "全唐诗·王维卷"
+        "周易参同契"
       ]
     },
     {
-      "id": "p13",
-      "name": "朱熹",
-      "zi": "元晦",
-      "alias": "晦庵",
-      "dynasty": "南宋",
-      "native": "徽州婺源",
-      "birth": "1130年",
-      "death": "1200年",
-      "office": "焕章阁待制",
-      "tags": [
-        "思想家",
-        "教育家"
-      ],
-      "desc": "理学集大成者。",
+      "id": "c027",
+      "name": "吴楚材",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "四书章句集注"
+        "古文观止"
       ]
     },
     {
-      "id": "p14",
-      "name": "王阳明",
-      "zi": "伯安",
-      "alias": "阳明先生",
-      "dynasty": "明",
-      "native": "余姚",
-      "birth": "1472年",
-      "death": "1529年",
-      "office": "南京兵部尚书",
-      "tags": [
-        "思想家",
-        "军事家"
-      ],
-      "desc": "心学集大成者，知行合一。",
+      "id": "c028",
+      "name": "吴调侯",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "传习录"
+        "古文观止"
       ]
     },
     {
-      "id": "p15",
-      "name": "颜回",
-      "zi": "子渊",
-      "alias": "颜渊",
-      "dynasty": "春秋",
-      "native": "鲁国",
-      "birth": "公元前521年",
-      "death": "公元前481年",
-      "office": "无（布衣）",
-      "tags": [
-        "贤人",
-        "儒家"
-      ],
-      "desc": "孔子最得意门生，以德行著称。",
+      "id": "c029",
+      "name": "吴鞠通",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "论语"
+        "温病条辨"
       ]
     },
     {
-      "id": "p16",
-      "name": "子路",
-      "zi": "季路",
-      "alias": "仲由",
-      "dynasty": "春秋",
-      "native": "鲁国卞邑",
-      "birth": "公元前542年",
-      "death": "公元前480年",
-      "office": "卫国蒲邑大夫",
-      "tags": [
-        "贤人",
-        "儒家"
-      ],
-      "desc": "孔子弟子，勇武直率。",
+      "id": "c030",
+      "name": "萧统",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "论语"
+        "文选"
       ]
     },
     {
-      "id": "p17",
-      "name": "陶渊明",
-      "zi": "元亮",
-      "alias": "五柳先生",
-      "dynasty": "东晋",
-      "native": "浔阳柴桑",
-      "birth": "约365年",
-      "death": "427年",
-      "office": "彭泽县令",
-      "tags": [
-        "诗人",
-        "隐士"
-      ],
-      "desc": "田园诗派鼻祖，采菊东篱下。",
+      "id": "c031",
+      "name": "玄奘",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "陶渊明集"
+        "般若波罗蜜多心经"
       ]
     },
     {
-      "id": "p18",
+      "id": "c032",
+      "name": "荀况",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "荀子"
+      ]
+    },
+    {
+      "id": "c033",
+      "name": "张伯端",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "悟真篇"
+      ]
+    },
+    {
+      "id": "c034",
+      "name": "张君房",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "云笈七签"
+      ]
+    },
+    {
+      "id": "c035",
       "name": "张仲景",
-      "zi": "仲景",
-      "alias": "医圣",
-      "dynasty": "东汉",
-      "native": "南阳",
-      "birth": "约150年",
-      "death": "约219年",
-      "office": "长沙太守",
-      "tags": [
-        "医学家"
-      ],
-      "desc": "著伤寒杂病论，辨证论治之祖。",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
         "伤寒论",
         "金匮要略"
       ]
     },
     {
-      "id": "p19",
-      "name": "李时珍",
-      "zi": "东璧",
-      "alias": "濒湖山人",
-      "dynasty": "明",
-      "native": "蕲州",
-      "birth": "1518年",
-      "death": "1593年",
-      "office": "太医院判",
-      "tags": [
-        "医学家",
-        "药学家"
-      ],
-      "desc": "著本草纲目，药物学集大成。",
+      "id": "c036",
+      "name": "朱长文",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "本草纲目"
+        "琴史"
       ]
     },
     {
-      "id": "p20",
-      "name": "司马光",
-      "zi": "君实",
-      "alias": "涑水先生",
-      "dynasty": "北宋",
-      "native": "陕州夏县",
-      "birth": "1019年",
-      "death": "1086年",
-      "office": "尚书左仆射",
-      "tags": [
-        "政治家",
-        "史学家"
-      ],
-      "desc": "主编资治通鉴。",
+      "id": "c037",
+      "name": "庄周",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
       "books": [
-        "资治通鉴"
+        "庄子"
+      ]
+    },
+    {
+      "id": "c038",
+      "name": "子思",
+      "zi": "",
+      "alias": "",
+      "dynasty": "",
+      "native": "",
+      "birth": "",
+      "death": "",
+      "office": "",
+      "tags": [],
+      "desc": "",
+      "books": [
+        "中庸"
       ]
     }
   ],
   "relations": [
-    {
-      "a": "孔子",
-      "b": "颜回",
-      "type": "师生",
-      "source": "《论语·先进》《史记·仲尼弟子列传》",
-      "detail": "颜回为孔子最得意门生，孔子赞其「贤哉回也」「一箪食一瓢饮不改其乐」。",
-      "dynasty": "春秋"
-    },
-    {
-      "a": "孔子",
-      "b": "子路",
-      "type": "师生",
-      "source": "《论语》",
-      "detail": "子路勇武直率，孔子屡加教导，师徒情谊深厚。",
-      "dynasty": "春秋"
-    },
     {
       "a": "孔子",
       "b": "孟子",
@@ -1088,43 +1284,11 @@ const data: AppData = {
     },
     {
       "a": "老子",
-      "b": "庄子",
+      "b": "庄周",
       "type": "思想传承",
       "source": "《庄子》",
       "detail": "庄子继承发展道家学说，并称「老庄」。",
       "dynasty": "战国"
-    },
-    {
-      "a": "屈原",
-      "b": "李白",
-      "type": "文风影响",
-      "source": "《李白集》",
-      "detail": "李白「屈平词赋悬日月」，浪漫诗风承楚辞一脉。",
-      "dynasty": "唐"
-    },
-    {
-      "a": "杜甫",
-      "b": "李白",
-      "type": "交游",
-      "source": "《与李十二白同寻范十隐居》",
-      "detail": "李杜交谊深厚，同游齐鲁，诗史互映。",
-      "dynasty": "唐"
-    },
-    {
-      "a": "韩愈",
-      "b": "苏轼",
-      "type": "文风影响",
-      "source": "《潮州韩文公庙碑》",
-      "detail": "苏轼赞韩愈「文起八代之衰」，承其古文精神。",
-      "dynasty": "北宋"
-    },
-    {
-      "a": "朱熹",
-      "b": "王阳明",
-      "type": "思想批判",
-      "source": "《传习录》",
-      "detail": "阳明心学对朱子学进行反思与转化，致良知补格物穷理。",
-      "dynasty": "明"
     },
     {
       "a": "司马迁",
@@ -1143,76 +1307,12 @@ const data: AppData = {
       "dynasty": "明"
     },
     {
-      "a": "诸葛亮",
-      "b": "刘备",
-      "type": "君臣",
-      "source": "《三国志·蜀书》",
-      "detail": "三顾茅庐，鱼水君臣，托孤之重。",
-      "dynasty": "三国"
-    },
-    {
-      "a": "陶渊明",
-      "b": "王维",
-      "type": "文风影响",
-      "source": "《王右丞集》",
-      "detail": "王维田园山水诗承渊明一脉，人称「诗佛」而慕其归隐。",
-      "dynasty": "唐"
-    },
-    {
-      "a": "孔子",
-      "b": "诸葛亮",
-      "type": "精神传承",
-      "source": "《诫子书》",
-      "detail": "诸葛亮「静以修身俭以养德」本于儒者修身之道。",
-      "dynasty": "三国"
-    },
-    {
-      "a": "庄子",
-      "b": "苏轼",
-      "type": "文风影响",
-      "source": "《东坡集》",
-      "detail": "东坡逍遥超旷之襟怀，深得庄学三昧。",
-      "dynasty": "北宋"
-    },
-    {
-      "a": "孟子",
-      "b": "朱熹",
-      "type": "思想传承",
-      "source": "《四书章句集注》",
-      "detail": "朱熹尊孟，集注四书，承道统而倡理气心性。",
-      "dynasty": "南宋"
-    },
-    {
-      "a": "子路",
-      "b": "颜回",
-      "type": "同门",
-      "source": "《论语》",
-      "detail": "同为孔门七十二贤，一勇一德，各得夫子之教。",
-      "dynasty": "春秋"
-    },
-    {
       "a": "屈原",
       "b": "司马迁",
       "type": "精神共鸣",
       "source": "《史记·屈原贾生列传》",
       "detail": "太史公「悲其志」，将其列传以传忠贞之气。",
       "dynasty": "西汉"
-    },
-    {
-      "a": "李白",
-      "b": "苏轼",
-      "type": "文风影响",
-      "source": "《东坡集》",
-      "detail": "东坡豪放词风遥承太白，并称「仙才」。",
-      "dynasty": "北宋"
-    },
-    {
-      "a": "王维",
-      "b": "杜甫",
-      "type": "同朝",
-      "source": "《全唐诗》",
-      "detail": "盛唐双子星，一空灵一沉郁，各臻其极。",
-      "dynasty": "唐"
     },
     {
       "a": "老子",

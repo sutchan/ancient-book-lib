@@ -5,6 +5,18 @@
 
 ## [未发布]
 
+## [1.2.8] - 2026-09-08
+
+### 优化
+- 人物功能数据驱动：移除手写 20 位示范人物，`characters` 改为由 `books.author` 字段派生（去重、剔除佚名/集体编撰，自动关联其著作），缺失字段留空不虚构
+- `relations` 清理为仅保留两端均在人物集中的 6 条有效考据引用
+- `CharacterList` 改进为空字段条件渲染，避免「字 」「朝代  · 」等空标签
+
+## [1.2.7] - 2026-09-08
+
+### 修复
+- 移除书目页「原始数据 4.8 GB · 托管于 garychowcmu/daizhigev20 · 本仓库不复制 TXT，阅读时按需加载」说明文本
+
 ## [1.2.6] - 2026-09-08
 
 ### 修复（线上重大故障）
@@ -211,7 +223,9 @@
 - 高保真可交互原型 `prototype/`（三套主题 + 真实模拟数据）
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.6...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.8...HEAD
+[1.2.8]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.7...v1.2.8
+[1.2.7]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.6...v1.2.7
 [1.2.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.5...v1.2.6
 [1.2.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.3...v1.2.4

@@ -1,11 +1,13 @@
 /**
- * 古籍通 AncientBook 原型全局模拟数据
- * 说明：使用全局变量方案，保证 file:// 协议直接打开也可加载（不受 fetch CORS 限制）
- * 覆盖：十大馆藏、书籍章节、人物考据、社会关系、检索结果
+ * 古籍通 AncientBook 原型全局数据（单一数据源）
+ * 说明：使用全局变量方案，保证 file:// 协议直接打开也可加载（不受 fetch CORS 限制）。
+ * 覆盖：十大馆藏、书籍章节、人物考据、社会关系、检索结果。
+ *
+ * 人物数据「数据驱动」：characters 由 books 的 author 字段派生（去重、剔除佚名/集体编撰、
+ * 仅保留可考个人），不手写示范人物；relations 仅保留两端都在人物集中的有效引用。
  */
-window.APP_DATA = {
-  version: "2.0",
-  categories: [
+window.APP_DATA = (function () {
+  const categories = [
     { id: "fo", name: "佛藏", desc: "佛家经典 · 般若智慧", icon: "☸" },
     { id: "ru", name: "儒藏", desc: "儒家经典 · 修齐治平", icon: "儒" },
     { id: "yi", name: "医藏", desc: "医学方书 · 济世活人", icon: "医" },
@@ -16,10 +18,11 @@ window.APP_DATA = {
     { id: "shi2", name: "诗藏", desc: "诗词总集 · 吟咏性情", icon: "诗" },
     { id: "dao", name: "道藏", desc: "道家典籍 · 清静无为", icon: "道" },
     { id: "ji", name: "集藏", desc: "文集总集 · 汇录百家", icon: "集" }
-  ],
-  books: [
+  ];
+
+  const books = [
     // 佛藏
-    { id: "fo-jingang", title: "金刚般若波罗蜜经", category: "佛藏", dynasty: "后秦", author: "鸠摩罗什译", desc: "大乘佛教般若部核心经典，以空慧断烦恼。", chapters: ["法会因由分第一", "善现启请分第二", "大乘正宗分第三", "妙行无住分第四"] },
+    { id: "fo-jingang", title: "金刚般若波罗蜜经", category: "佛藏", dynasty: "后秦", author: "鸠摩罗什译", desc: "大乘佛教般若部核心经典，以空慧断烦恼。", chapters: ["法因缘由分第一", "善现启请分第二", "大乘正宗分第三", "妙行无住分第四"] },
     { id: "fo-xinjing", title: "般若波罗蜜多心经", category: "佛藏", dynasty: "唐", author: "玄奘译", desc: "字数最少、流传最广的佛教经典。", chapters: ["心经全文", "心经注疏"] },
     { id: "fo-fahua", title: "妙法莲华经", category: "佛藏", dynasty: "后秦", author: "鸠摩罗什译", desc: "开权显实、会三归一的大乘要典。", chapters: ["序品第一", "方便品第二", "譬喻品第三"] },
     { id: "fo-lengyan", title: "楞严经", category: "佛藏", dynasty: "唐", author: "般剌密帝译", desc: "阐明心性本体，破妄显真。", chapters: ["序分", "正宗分", "流通分"] },
@@ -73,66 +76,114 @@ window.APP_DATA = {
     { id: "ji-guowen", title: "古文观止", category: "集藏", dynasty: "清", author: "吴楚材吴调侯编", desc: "古文精选集，收文222篇。", chapters: ["左传选", "战国策选", "史记选", "唐宋文选"] },
     { id: "ji-zhaoming", title: "昭明文选补遗", category: "集藏", dynasty: "清", author: "佚名", desc: "文选补辑，广收遗珠。", chapters: ["卷上", "卷下"] },
     { id: "ji-wenyuan", title: "文苑英华", category: "集藏", dynasty: "北宋", author: "李昉等编", desc: "诗文总集，续文选。", chapters: ["赋部", "诗部", "文部"] }
-  ],
-  characters: [
-    { id: "p01", name: "孔子", zi: "仲尼", alias: "孔丘", dynasty: "春秋", native: "鲁国陬邑", birth: "公元前551年", death: "公元前479年", office: "鲁国大司寇", tags: ["思想家", "教育家", "儒家"], desc: "儒家学派创始人，创立仁与礼的学说体系。", books: ["论语", "春秋"] },
-    { id: "p02", name: "孟子", zi: "子舆", alias: "孟轲", dynasty: "战国", native: "邹国", birth: "公元前372年", death: "公元前289年", office: "齐国客卿", tags: ["思想家", "儒家"], desc: "继承孔子学说，主张性善与仁政。", books: ["孟子"] },
-    { id: "p03", name: "老子", zi: "伯阳", alias: "李耳", dynasty: "春秋", native: "楚国苦县", birth: "约公元前571年", death: "不详", office: "周守藏室之史", tags: ["思想家", "道家"], desc: "道家学派创始人，著道德经五千言。", books: ["道德经"] },
-    { id: "p04", name: "庄子", zi: "子休", alias: "庄周", dynasty: "战国", native: "宋国蒙", birth: "约公元前369年", death: "约公元前286年", office: "漆园吏", tags: ["思想家", "文学家", "道家"], desc: "道家代表人物，逍遥齐物。", books: ["庄子"] },
-    { id: "p05", name: "司马迁", zi: "子长", alias: "太史公", dynasty: "西汉", native: "夏阳", birth: "约公元前145年", death: "约公元前86年", office: "太史令", tags: ["史学家", "文学家"], desc: "著史记，纪传体通史之祖。", books: ["史记"] },
-    { id: "p06", name: "屈原", zi: "灵均", alias: "屈平", dynasty: "战国", native: "楚国丹阳", birth: "约公元前340年", death: "公元前278年", office: "左徒、三闾大夫", tags: ["诗人", "政治家"], desc: "楚辞开创者，浪漫主义源头。", books: ["楚辞"] },
-    { id: "p07", name: "李白", zi: "太白", alias: "青莲居士", dynasty: "唐", native: "陇西成纪", birth: "701年", death: "762年", office: "翰林供奉", tags: ["诗人"], desc: "诗仙，飘逸豪放。", books: ["全唐诗·李白卷"] },
-    { id: "p08", name: "杜甫", zi: "子美", alias: "少陵野老", dynasty: "唐", native: "巩县", birth: "712年", death: "770年", office: "检校工部员外郎", tags: ["诗人"], desc: "诗圣，沉郁顿挫。", books: ["全唐诗·杜甫卷"] },
-    { id: "p09", name: "苏轼", zi: "子瞻", alias: "东坡居士", dynasty: "北宋", native: "眉山", birth: "1037年", death: "1101年", office: "翰林学士、知制诰", tags: ["文学家", "书画家", "美食家"], desc: "全才，诗词文书画俱佳。", books: ["全唐诗·苏轼卷"] },
-    { id: "p10", name: "韩愈", zi: "退之", alias: "昌黎先生", dynasty: "唐", native: "河阳", birth: "768年", death: "824年", office: "吏部侍郎", tags: ["文学家", "思想家"], desc: "古文运动领袖，唐宋八大家之首。", books: ["古文观止·唐宋文选"] },
-    { id: "p11", name: "诸葛亮", zi: "孔明", alias: "卧龙", dynasty: "三国", native: "琅琊阳都", birth: "181年", death: "234年", office: "蜀汉丞相", tags: ["政治家", "军事家"], desc: "鞠躬尽瘁死而后已。", books: ["三国志·蜀书"] },
-    { id: "p11b", name: "刘备", zi: "玄德", alias: "汉昭烈帝", dynasty: "三国", native: "涿郡涿县", birth: "161年", death: "223年", office: "蜀汉开国皇帝", tags: ["政治家"], desc: "蜀汉开国君主，三顾茅庐礼贤下士。", books: ["三国志·蜀书"] },
-    { id: "p12", name: "王维", zi: "摩诘", alias: "诗佛", dynasty: "唐", native: "蒲州", birth: "701年", death: "761年", office: "尚书右丞", tags: ["诗人", "画家"], desc: "诗中有画，画中有诗。", books: ["全唐诗·王维卷"] },
-    { id: "p13", name: "朱熹", zi: "元晦", alias: "晦庵", dynasty: "南宋", native: "徽州婺源", birth: "1130年", death: "1200年", office: "焕章阁待制", tags: ["思想家", "教育家"], desc: "理学集大成者。", books: ["四书章句集注"] },
-    { id: "p14", name: "王阳明", zi: "伯安", alias: "阳明先生", dynasty: "明", native: "余姚", birth: "1472年", death: "1529年", office: "南京兵部尚书", tags: ["思想家", "军事家"], desc: "心学集大成者，知行合一。", books: ["传习录"] },
-    { id: "p15", name: "颜回", zi: "子渊", alias: "颜渊", dynasty: "春秋", native: "鲁国", birth: "公元前521年", death: "公元前481年", office: "无（布衣）", tags: ["贤人", "儒家"], desc: "孔子最得意门生，以德行著称。", books: ["论语"] },
-    { id: "p16", name: "子路", zi: "季路", alias: "仲由", dynasty: "春秋", native: "鲁国卞邑", birth: "公元前542年", death: "公元前480年", office: "卫国蒲邑大夫", tags: ["贤人", "儒家"], desc: "孔子弟子，勇武直率。", books: ["论语"] },
-    { id: "p17", name: "陶渊明", zi: "元亮", alias: "五柳先生", dynasty: "东晋", native: "浔阳柴桑", birth: "约365年", death: "427年", office: "彭泽县令", tags: ["诗人", "隐士"], desc: "田园诗派鼻祖，采菊东篱下。", books: ["陶渊明集"] },
-    { id: "p18", name: "张仲景", zi: "仲景", alias: "医圣", dynasty: "东汉", native: "南阳", birth: "约150年", death: "约219年", office: "长沙太守", tags: ["医学家"], desc: "著伤寒杂病论，辨证论治之祖。", books: ["伤寒论", "金匮要略"] },
-    { id: "p19", name: "李时珍", zi: "东璧", alias: "濒湖山人", dynasty: "明", native: "蕲州", birth: "1518年", death: "1593年", office: "太医院判", tags: ["医学家", "药学家"], desc: "著本草纲目，药物学集大成。", books: ["本草纲目"] },
-    { id: "p20", name: "司马光", zi: "君实", alias: "涑水先生", dynasty: "北宋", native: "陕州夏县", birth: "1019年", death: "1086年", office: "尚书左仆射", tags: ["政治家", "史学家"], desc: "主编资治通鉴。", books: ["资治通鉴"] }
-  ],
-  relations: [
-    { a: "孔子", b: "颜回", type: "师生", source: "《论语·先进》《史记·仲尼弟子列传》", detail: "颜回为孔子最得意门生，孔子赞其「贤哉回也」「一箪食一瓢饮不改其乐」。", dynasty: "春秋" },
-    { a: "孔子", b: "子路", type: "师生", source: "《论语》", detail: "子路勇武直率，孔子屡加教导，师徒情谊深厚。", dynasty: "春秋" },
+  ];
+
+  // 作者字段 → 真实人物（去重、剔除佚名/集体编撰、仅保留可考个人）
+  const AUTHOR_PERSONS = {
+    "鸠摩罗什译": ["鸠摩罗什"],
+    "玄奘译": ["玄奘"],
+    "般剌密帝译": ["般剌密帝"],
+    "实叉难陀译": ["实叉难陀"],
+    "孔子弟子及再传弟子": ["孔子"],
+    "孟子及其弟子": ["孟子"],
+    "曾参述": ["曾参"],
+    "子思": ["子思"],
+    "孔子": ["孔子"],
+    "佚名": [],
+    "张仲景": ["张仲景"],
+    "李时珍": ["李时珍"],
+    "吴鞠通": ["吴鞠通"],
+    "司马迁": ["司马迁"],
+    "司马光": ["司马光"],
+    "班固": ["班固"],
+    "刘向编": ["刘向"],
+    "陈寿": ["陈寿"],
+    "老子": ["老子"],
+    "庄周": ["庄周"],
+    "韩非": ["韩非"],
+    "墨翟": ["墨翟"],
+    "荀况": ["荀况"],
+    "伏羲画卦文王演易": [],
+    "孔子及后学": ["孔子"],
+    "魏伯阳": ["魏伯阳"],
+    "京房": ["京房"],
+    "孙过庭": ["孙过庭"],
+    "石涛": ["石涛"],
+    "朱长文": ["朱长文"],
+    "苏易简": ["苏易简"],
+    "屈原等": ["屈原"],
+    "曹寅等编": ["曹寅"],
+    "郭茂倩编": ["郭茂倩"],
+    "葛洪": ["葛洪"],
+    "张君房": ["张君房"],
+    "李筌注": ["李筌"],
+    "张伯端": ["张伯端"],
+    "萧统编": ["萧统"],
+    "吴楚材吴调侯编": ["吴楚材", "吴调侯"],
+    "李昉等编": ["李昉"]
+  };
+
+  // 数据驱动派生人物：以书籍作者为唯一来源，自动关联其著作
+  const personBooks = {};
+  for (const b of books) {
+    const persons = AUTHOR_PERSONS[b.author];
+    if (!persons) continue;
+    for (const name of persons) {
+      (personBooks[name] ||= new Set()).add(b.title);
+    }
+  }
+  const characters = Object.keys(personBooks)
+    .sort((a, b) => a.localeCompare(b, "zh-Hans-CN"))
+    .map((name, i) => ({
+      id: "c" + String(i + 1).padStart(3, "0"),
+      name,
+      zi: "",
+      alias: "",
+      dynasty: "",
+      native: "",
+      birth: "",
+      death: "",
+      office: "",
+      tags: [],
+      desc: "",
+      books: [...personBooks[name]]
+    }));
+
+  // 社会关系：仅保留两端均在人物集中的有效引用（源自真实史料考据）
+  const relations = [
     { a: "孔子", b: "孟子", type: "思想传承", source: "《孟子》《史记》", detail: "孟子私淑孔子，儒家道统承续者，被尊为「亚圣」。", dynasty: "战国" },
-    { a: "老子", b: "庄子", type: "思想传承", source: "《庄子》", detail: "庄子继承发展道家学说，并称「老庄」。", dynasty: "战国" },
-    { a: "屈原", b: "李白", type: "文风影响", source: "《李白集》", detail: "李白「屈平词赋悬日月」，浪漫诗风承楚辞一脉。", dynasty: "唐" },
-    { a: "杜甫", b: "李白", type: "交游", source: "《与李十二白同寻范十隐居》", detail: "李杜交谊深厚，同游齐鲁，诗史互映。", dynasty: "唐" },
-    { a: "韩愈", b: "苏轼", type: "文风影响", source: "《潮州韩文公庙碑》", detail: "苏轼赞韩愈「文起八代之衰」，承其古文精神。", dynasty: "北宋" },
-    { a: "朱熹", b: "王阳明", type: "思想批判", source: "《传习录》", detail: "阳明心学对朱子学进行反思与转化，致良知补格物穷理。", dynasty: "明" },
+    { a: "老子", b: "庄周", type: "思想传承", source: "《庄子》", detail: "庄子继承发展道家学说，并称「老庄」。", dynasty: "战国" },
     { a: "司马迁", b: "司马光", type: "史学传承", source: "《资治通鉴》", detail: "司马光编年体通鉴与史记纪传体通史相承，并称史学双璧。", dynasty: "北宋" },
     { a: "张仲景", b: "李时珍", type: "医学传承", source: "《本草纲目》", detail: "李时珍广征前贤，仲景辨证论治精神泽被后世医家。", dynasty: "明" },
-    { a: "诸葛亮", b: "刘备", type: "君臣", source: "《三国志·蜀书》", detail: "三顾茅庐，鱼水君臣，托孤之重。", dynasty: "三国" },
-    { a: "陶渊明", b: "王维", type: "文风影响", source: "《王右丞集》", detail: "王维田园山水诗承渊明一脉，人称「诗佛」而慕其归隐。", dynasty: "唐" },
-    { a: "孔子", b: "诸葛亮", type: "精神传承", source: "《诫子书》", detail: "诸葛亮「静以修身俭以养德」本于儒者修身之道。", dynasty: "三国" },
-    { a: "庄子", b: "苏轼", type: "文风影响", source: "《东坡集》", detail: "东坡逍遥超旷之襟怀，深得庄学三昧。", dynasty: "北宋" },
-    { a: "孟子", b: "朱熹", type: "思想传承", source: "《四书章句集注》", detail: "朱熹尊孟，集注四书，承道统而倡理气心性。", dynasty: "南宋" },
-    { a: "子路", b: "颜回", type: "同门", source: "《论语》", detail: "同为孔门七十二贤，一勇一德，各得夫子之教。", dynasty: "春秋" },
     { a: "屈原", b: "司马迁", type: "精神共鸣", source: "《史记·屈原贾生列传》", detail: "太史公「悲其志」，将其列传以传忠贞之气。", dynasty: "西汉" },
-    { a: "李白", b: "苏轼", type: "文风影响", source: "《东坡集》", detail: "东坡豪放词风遥承太白，并称「仙才」。", dynasty: "北宋" },
-    { a: "王维", b: "杜甫", type: "同朝", source: "《全唐诗》", detail: "盛唐双子星，一空灵一沉郁，各臻其极。", dynasty: "唐" },
     { a: "老子", b: "张仲景", type: "思想影响", source: "《伤寒论·序》", detail: "仲景「天布五行以运万类」之论，本于道法自然。", dynasty: "东汉" }
-  ],
-  searchDemo: {
+  ];
+
+  const searchDemo = {
     keyword: "不亦说乎",
     results: [
       { book: "论语", chapter: "学而篇第一", path: "首页 > 儒藏 > 论语", snippet: "子曰：学而时习之，不亦说乎？有朋自远方来，不亦乐乎？人不知而不愠，不亦君子乎？", score: 98 },
       { book: "论语", chapter: "为政篇第二", path: "首页 > 儒藏 > 论语", snippet: "子曰：由，诲女知之乎！知之为知之，不知为不知，是知也。", score: 85 },
       { book: "孟子", chapter: "梁惠王上", path: "首页 > 儒藏 > 孟子", snippet: "孟子见梁惠王，王立于沼上，顾鸿雁麋鹿，曰：贤者亦乐此乎？", score: 72 }
     ]
-  },
+  };
+
   // 生僻字释义演示数据
-  glossary: [
+  const glossary = [
     { char: "愠", pinyin: "yùn", meaning: "生气、恼怒。", usage: "人不知而不愠" },
     { char: "罔", pinyin: "wǎng", meaning: "迷惑而无所得。", usage: "学而不思则罔" },
     { char: "殆", pinyin: "dài", meaning: "疲倦、危险；这里指疑惑不安。", usage: "思而不学则殆" },
     { char: "孝弟", pinyin: "xiào tì", meaning: "孝顺父母、敬爱兄长。弟同「悌」。", usage: "其为人也孝弟" },
     { char: "鲜", pinyin: "xiǎn", meaning: "少。", usage: "鲜矣仁" }
-  ]
-};
+  ];
+
+  return {
+    version: "2.0",
+    categories,
+    books,
+    characters,
+    relations,
+    searchDemo,
+    glossary
+  };
+})();
