@@ -5,6 +5,24 @@
 
 ## [未发布]
 
+## [1.3.2] - 2026-09-08
+
+### 修复（原型二次审查）
+- **原型全站崩溃（致命回归）**：`getMain()` 原实现为 `return getMain();`，无限递归导致任何重渲染（繁简切换、翻章、检索、影像对照）直接 `RangeError`；改为 `$("#main-view") || $("#page-body")`
+- **书单点击报错**：书籍项内联 `onclick` 引用 IIFE 内私有变量 `state`，浏览器端 `ReferenceError`；改为 `AB.openBook(id)`，并自动重置章节进度
+- **人物卡片显示 `undefined`**：派生人物仅有姓名与关联著作，原模板无条件渲染朝代/籍贯/生卒/官职；改为按字段存在性渲染，缺失字段不显示
+- **检索页筛选无效**：馆藏/朝代下拉仅写入 state 未参与过滤，且每页条数默认 12 不在 10/20/50 选项中；现筛选真实生效，默认值改为 20，朝代选项由书目动态派生
+- **统计页硬编码**：繁简映射字原写死 429（实际 235），改为 `Object.keys(T2S_MAP).length` 实时统计；移除未使用的 `era` 死变量；空维度显示「待接入」提示
+
+### 优化
+- 双人关系查询由 `alert` 弹窗改为页面内 `aria-live` 结果区，无结果时给出引导；新增关系类型标签筛选
+- 命中高亮改为对转义后的关键词切片，避免含 `<`/`&` 关键词高亮失效；零命中回退示例结果时明确标注「未命中，以下为常见检索样例」
+- 无障碍：导航高亮同步 `aria-current="page"`，汉堡菜单补 `aria-label/aria-expanded/aria-controls`，设备预览与模式切换按钮补 `aria-pressed`，检索框补 `aria-label`，生僻字支持键盘 Enter 触发与 Esc 关闭释义弹层
+- 帮助页合规声明对齐线上口径：「无隐私收集」改为「仅匿名访问统计」
+
+### 重构
+- `prototype/assets/prototype.js`（821 行）按职责拆分为 `prototype/assets/js/` 下 10 个模块：`t2s-map` / `core` / `view-home` / `view-read` / `view-search` / `view-character` / `view-relation` / `view-help` / `view-stats` / `boot`，单文件均 ≤200 行；11 个 HTML 页脚本引用同步更新，对外交互契约（`AB.openBook` 等）保持不变
+
 ## [1.3.1] - 2026-09-08
 
 ### 新增（四项高优功能落地）
@@ -276,6 +294,8 @@
 [1.2.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.5...v1.2.6
 [1.2.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.3...v1.2.4
+[1.3.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.1...v1.3.2
+[1.3.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.0...v1.3.1
 [1.2.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.0...v1.2.1
