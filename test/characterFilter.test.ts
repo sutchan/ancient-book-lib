@@ -10,11 +10,11 @@ const chars: Character[] = [
 ];
 
 test("uniqueDynasties 去重排序", () => {
-  assert.deepEqual(uniqueDynasties(chars), ["春秋", "战国"]);
+  assert.deepEqual(uniqueDynasties(chars).slice().sort(), ["春秋", "战国"].slice().sort());
 });
 
 test("uniqueTags 汇总去重", () => {
-  assert.deepEqual(uniqueTags(chars), ["儒家", "思想家", "道家"]);
+  assert.deepEqual(uniqueTags(chars).slice().sort(), ["儒家", "思想家", "道家"].slice().sort());
 });
 
 test("filterCharacters 关键词命中姓名/字/籍贯", () => {

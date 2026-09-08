@@ -8,7 +8,7 @@ import type { Character } from "./types";
 
 /** 去重并排序的朝代列表 */
 export function uniqueDynasties(chars: Character[]): string[] {
-  return [...new Set(chars.map((c) => c.dynasty).filter(Boolean))].sort((a, b) =>
+  return Array.from(new Set(chars.map((c) => c.dynasty).filter(Boolean))).sort((a, b) =>
     a.localeCompare(b, "zh")
   );
 }
@@ -17,7 +17,7 @@ export function uniqueDynasties(chars: Character[]): string[] {
 export function uniqueTags(chars: Character[], limit = 40): string[] {
   const set = new Set<string>();
   chars.forEach((c) => (c.tags ?? []).forEach((t) => set.add(t)));
-  return [...set].sort((a, b) => a.localeCompare(b, "zh")).slice(0, limit);
+  return Array.from(set).sort((a, b) => a.localeCompare(b, "zh")).slice(0, limit);
 }
 
 export type CharacterSort = "name" | "dynasty";
