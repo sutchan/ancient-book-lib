@@ -13,9 +13,10 @@ permissions:
   pages: write
   id-token: write
 
+# 部署任务不允许被取消，否则会出现「部署进行中被取消 / 404」
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -42,7 +43,9 @@ jobs:
       - name: Run unit tests
         run: npm test
 
+      # PR 仅做校验（构建 + 类型检查 + 测试），不上传产物
       - name: Upload static artifact (out/)
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out

@@ -28,7 +28,7 @@ export default function Footer() {
         </p>
         <p>古籍通 AncientBook · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
         <p className="footer-stats" style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 8 }}>
-          馆藏 {stats.categories} 类 · 典籍 {stats.books} 部 · 人物 {stats.characters} 位 · 考据关系 {stats.relations} 条 · 演示预览版
+          馆藏 {stats.categories} 类 · 精选典籍 {stats.books} 部 · 全馆藏 15,694 部（殆知阁 v20）· 人物 {stats.characters} 位 · 考据关系 {stats.relations} 条
         </p>
         <p className="footer-version" style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 4 }}>
           当前版本 v{APP_VERSION}

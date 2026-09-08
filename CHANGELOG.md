@@ -5,6 +5,19 @@
 
 ## [未发布]
 
+## [1.0.4] - 2026-09-08
+
+### 修复
+- **GitHub Pages 部署流水线加固**：`pull_request` 仅做构建校验、不再上传产物（避免 PR 产物污染部署）；`concurrency.cancel-in-progress` 改为 `false`，避免并发任务取消进行中的部署
+- 补充部署排障说明：Pages 未启用导致的 `Failed to create deployment (status: 404)` 属仓库设置问题，需在 Settings → Pages → Source 选择 GitHub Actions
+
+### 新增
+- `public/.nojekyll`：禁用 Jekyll，防止 `_next/` 等下划线目录被忽略导致静态资源 404
+- 部署规范新增「GitHub Pages 部署（CI/CD）」章节：首次启用步骤、访问路径约束（推荐绑定自定义域名走根路径）、常见告警说明
+
+### 变更
+- 版本号升级至 1.0.4
+
 ## [1.0.3] - 2026-09-07
 
 ### 新增（评审改进全量落地，B1 数据接入除外）
@@ -63,7 +76,8 @@
 - 高保真可交互原型 `prototype/`（三套主题 + 真实模拟数据）
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.3...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.4...HEAD
+[1.0.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.0...v1.0.1

@@ -8,9 +8,9 @@ export default function HomePage() {
       <div className="home-hero">
         <h1 className="hero-title">古籍通</h1>
         <p className="hero-sub">
-          开源公益古籍检索阅读与考据平台 · 十大馆藏 {data.books.length} 部核心典籍在线
+          开源公益古籍检索阅读与考据平台 · 殆知阁 v20 全量 <strong>15,694</strong> 部古籍在线
         </p>
-        <p className="hero-badge">演示预览版 · 5GB 全量古籍接入推进中</p>
+        <p className="hero-badge">原始数据 4.9GB 托管于上游仓库 · 本仓库零复制 · 阅读时按需加载</p>
         <form className="search-box hero-search" action="/search" method="get">
           <input
             className="input-text"
@@ -33,12 +33,20 @@ export default function HomePage() {
             搜索
           </button>
         </form>
+        <div style={{ marginTop: 12, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link href="/catalog" className="btn btn-secondary" style={{ fontSize: 14 }}>
+            📚 浏览全馆藏（15,694 部）
+          </Link>
+          <Link href="/book-list" className="btn btn-secondary" style={{ fontSize: 14 }}>
+            ⭐ 精选典籍（45 部核心）
+          </Link>
+        </div>
       </div>
 
       <h2 className="section-title">十大馆藏</h2>
       <div className="category-grid">
         {data.categories.map((c) => (
-          <Link key={c.id} href={`/category/${c.id}`} className="card category-card">
+          <Link key={c.id} href={`/catalog?category=${encodeURIComponent(c.name)}`} className="card category-card">
             <div className="cat-icon">{c.icon}</div>
             <div className="cat-name">{c.name}</div>
             <div className="cat-desc">{c.desc}</div>

@@ -50,6 +50,27 @@ export interface Glossary {
   usage: string;
 }
 
+/** 殆知阁 v20 全量书目索引条目（远程 raw 引用，不复制 TXT） */
+export interface CatalogEntry {
+  id: string;
+  title: string;
+  category: string;       // 一级馆藏：佛藏/儒藏/...
+  subcategories: string[]; // 中间层级（如 ["乾隆藏","大乘五大部外重译经"]）
+  path: string;           // 上游仓库相对路径
+  size: number;           // 字节数
+  rawUrl: string;         // raw.githubusercontent.com 直链
+}
+
+export interface DaizhigeCatalog {
+  source: string;
+  branch: string;
+  generatedAt: string;
+  total: number;
+  totalSizeBytes: number;
+  stats: Record<string, number>;
+  books: CatalogEntry[];
+}
+
 export interface SearchDemoResult {
   book: string;
   chapter: string;
