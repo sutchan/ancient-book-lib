@@ -1,4 +1,8 @@
-name: Build & Deploy to GitHub Pages
+name: Build & Deploy
+
+# 生产站点：https://guji.ewuse.com/（腾讯云 EdgeOne Pages，由其自行拉取仓库构建）
+# Pages 部署为可选：仅当仓库变量 ENABLE_PAGES = true 时启用
+# （Settings → Secrets and variables → Actions → Variables）
 
 on:
   push:
@@ -49,7 +53,7 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      # 自定义域名：仓库变量 PAGES_CUSTOM_DOMAIN（Settings → Secrets and variables → Actions → Variables）
+      # 自定义域名：仓库变量 PAGES_CUSTOM_DOMAIN
       # 未配置则不写入 CNAME，站点使用默认域名
       - name: Write CNAME (custom domain, optional)
         if: vars.PAGES_CUSTOM_DOMAIN != ''
@@ -57,16 +61,24 @@ jobs:
           DOMAIN: ${{ vars.PAGES_CUSTOM_DOMAIN }}
         run: printf '%s\n' "$DOMAIN" > out/CNAME
 
-      # PR 仅做校验（构建 + 类型检查 + 测试），不上传产物
-      - name: Upload static artifact (out/)
+      - name: Upload build output (out/)
         if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: out-${{ github.sha }}
+          path: ./out
+          retention-days: 7
+
+      # 仅开启 Pages 时才上传 Pages 产物（PR 不上传）
+      - name: Upload static artifact (out/)
+        if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
-  # 仅 main 分支推送/手动触发时部署
+  # 仅 main 分支推送/手动触发且开启 Pages 时部署
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:

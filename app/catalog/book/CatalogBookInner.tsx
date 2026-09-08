@@ -43,12 +43,17 @@ export default function CatalogBookInner() {
       const titles: { title: string; count: number }[] = [];
       let currentTitle = "";
       let paraCount = 0;
-      for (const line of lines) {
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
         const t = line.trim();
+        const prevEmpty = i === 0 || !lines[i - 1].trim();
+        const nextEmpty = i === lines.length - 1 || !lines[i + 1].trim();
         if (t && t.length >= 2 && t.length <= 20 && !line.startsWith("　") && !line.startsWith(" ") &&
+            (prevEmpty || nextEmpty) && // 上下文校验：至少一侧为空行
             (/^卷[之其]?[一二三四五六七八九十百千零\d]+/.test(t) ||
              /^第[一二三四五六七八九十百千零\d]+[回卷章节篇折]/.test(t) ||
-             /^[甲乙丙丁戊己庚辛壬癸]/.test(t))) {
+             /^[甲乙丙丁戊己庚辛壬癸][之]?[一二三四五六七八九十百千零\d]+/.test(t) ||
+             /^[甲乙丙丁戊己庚辛壬癸][集部篇卷]/.test(t))) {
           if (currentTitle) titles.push({ title: currentTitle, count: paraCount });
           currentTitle = t;
           paraCount = 0;
@@ -101,9 +106,16 @@ export default function CatalogBookInner() {
           {book.mirrors?.[0] && (
             <a href={book.mirrors[0]} target="_blank" rel="noopener" className="btn btn-secondary">CDN 镜像</a>
           )}
-          <button className="btn btn-secondary" onClick={loadChapters} disabled={loadingChapters || !!chapters}>
-            {loadingChapters ? "加载目录中..." : chapters ? "目录已加载" : "查看目录"}
-          </button>
+          {book.size <= 10 * 1024 * 1024 && (
+            <button className="btn btn-secondary" onClick={loadChapters} disabled={loadingChapters || !!chapters}>
+              {loadingChapters ? "加载目录中..." : chapters ? "目录已加载" : "查看目录"}
+            </button>
+          )}
+          {book.size > 10 * 1024 * 1024 && (
+            <span style={{ fontSize: 13, color: "var(--color-text-secondary)", alignSelf: "center" }}>
+              大文件请在阅读页查看章节目录
+            </span>
+          )}
         </div>
       </div>
 

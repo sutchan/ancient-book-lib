@@ -16,11 +16,13 @@ const FETCH_TIMEOUT = 60000; // 60秒超时（大文件需要更长时间）
 const CHAPTER_PATTERNS = [
   /^卷[之其]?[一二三四五六七八九十百千零\d]+/,
   /^第[一二三四五六七八九十百千零\d]+[回卷章节篇折]/,
-  /^[甲乙丙丁戊己庚辛壬癸][之]?[一二三四五六七八九十]?/,
+  // 天干编号：要求天干后必须有数字或"集/部/篇/卷/之"，避免单独"甲"字误匹配
+  /^[甲乙丙丁戊己庚辛壬癸][之]?[一二三四五六七八九十百千零\d]+/,
+  /^[甲乙丙丁戊己庚辛壬癸][集部篇卷]/,
 ];
 
-// 正文中可能出现但不是章节标题的关键词
-const NON_CHAPTER_KEYWORDS = ["见", "如", "参阅", "参考", "参见", "详见", "另见", "又见", "语见", "出自"];
+// 正文中可能出现但不是章节标题的引用词（移除过于宽泛的"如""见"）
+const NON_CHAPTER_KEYWORDS = ["参阅", "参考", "参见", "详见", "另见", "又见", "语见", "出自"];
 
 function isChapterTitle(line: string, prevLine?: string, nextLine?: string): boolean {
   const t = line.trim();
@@ -97,20 +99,33 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
   const [fontSize, setFontSize] = useState(16);
   const [lineHeight, setLineHeight] = useState(1.8);
 
+  // 记录阅读历史（提取为独立函数，缓存命中和 fetch 成功后都调用）
+  const recordRecent = useCallback((b: CatalogEntry) => {
+    if (typeof window === "undefined") return;
+    try {
+      const recent = JSON.parse(localStorage.getItem("ab-recent") || "[]");
+      const filtered = recent.filter((r: any) => r.id !== b.id);
+      filtered.unshift({ id: b.id, title: b.title, category: b.category, time: Date.now() });
+      localStorage.setItem("ab-recent", JSON.stringify(filtered.slice(0, 10)));
+    } catch { /* ignore */ }
+  }, []);
+
   // 加载原文（带缓存 + 大文件保护 + 超时 + 进度 + CDN 镜像降级）
-  const loadContent = useCallback(async (b: CatalogEntry) => {
+  // force=true 时跳过大小警告检查（用户已确认加载大文件）
+  const loadContent = useCallback(async (b: CatalogEntry, force = false) => {
     // 1. 先查 IndexedDB 缓存
     const cached = await getCachedBook(b.id);
     if (cached) {
       setLoadingFromCache(true);
       setContent(cached);
       setLoading(false);
+      recordRecent(b);
       return;
     }
     setLoadingFromCache(false);
 
-    // 2. 大文件警告（>5MB）
-    if (b.size > LARGE_FILE_THRESHOLD) {
+    // 2. 大文件警告（>5MB），force 时跳过
+    if (!force && b.size > LARGE_FILE_THRESHOLD) {
       setShowLargeWarning(true);
       setLoading(false);
       return; // 等待用户确认
@@ -129,20 +144,12 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
             if (total > 0) setLoadingProgress(Math.round((loaded / total) * 100));
           },
         });
-    // 4. 写入缓存（异步，不阻塞渲染）
-    setCachedBook(b.id, b.title, text);
-    // 记录阅读历史
-    if (typeof window !== "undefined") {
-      try {
-        const recent = JSON.parse(localStorage.getItem("ab-recent") || "[]");
-        const filtered = recent.filter((r: any) => r.id !== b.id);
-        filtered.unshift({ id: b.id, title: b.title, category: b.category, time: Date.now() });
-        localStorage.setItem("ab-recent", JSON.stringify(filtered.slice(0, 10)));
-      } catch { /* ignore */ }
-    }
-    setContent(text);
-    setLoading(false);
-    return;
+        // 4. 写入缓存（异步，不阻塞渲染）
+        setCachedBook(b.id, b.title, text);
+        recordRecent(b);
+        setContent(text);
+        setLoading(false);
+        return;
       } catch (e: any) {
         lastError = e;
         // 继续尝试下一个镜像
@@ -151,7 +158,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
 
     // 所有源都失败
     throw lastError || new Error("所有数据源均加载失败");
-  }, []);
+  }, [recordRecent]);
 
   // 加载书目元数据 + 原文
   useEffect(() => {
@@ -160,6 +167,9 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
       try {
         setLoading(true);
         setError(null);
+        setShowLargeWarning(false);
+        setLoadingFromCache(false);
+        setLoadingProgress(0);
         const catalog = await loadCatalog();
         const b = findBookById(catalog, bookId);
         if (!b) { setError("未找到该书目"); setLoading(false); return; }
@@ -229,16 +239,9 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
 
   const handleDownload = useCallback(() => {
     if (!book || !content) return;
-    // 大文件（>5MB）直接提供上游链接，避免 Blob 内存溢出
+    // 大文件（>5MB）直接打开上游原文（跨域 download 属性无效，用户可右键另存为）
     if (book.size > LARGE_FILE_THRESHOLD) {
-      const a = document.createElement("a");
-      a.href = book.rawUrl;
-      a.download = `${book.title}.txt`;
-      a.target = "_blank";
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      window.open(book.rawUrl, "_blank", "noopener");
       return;
     }
     if (!confirmDownload()) return;
@@ -263,12 +266,12 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     return () => document.removeEventListener("mouseup", handler);
   }, []);
 
-  // 大文件警告确认后加载
+  // 大文件警告确认后加载（force=true 跳过大小检查）
   const confirmLargeLoad = useCallback(() => {
     if (!book) return;
     setShowLargeWarning(false);
     setLoading(true);
-    loadContent(book);
+    loadContent(book, true);
   }, [book, loadContent]);
 
   if (loading) return (
@@ -300,7 +303,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         </p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button className="btn btn-primary" onClick={confirmLargeLoad}>仍然在线阅读</button>
-          <a className="btn btn-secondary" href={book.rawUrl} target="_blank" rel="noopener" download>直接下载原文</a>
+          <a className="btn btn-secondary" href={book.rawUrl} target="_blank" rel="noopener">打开原文（可另存为）</a>
           <Link href="/catalog" className="btn btn-secondary">返回书目</Link>
         </div>
       </div>
@@ -317,7 +320,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         </p>
       )}
       <div style={{ marginTop: 16, display: "flex", gap: 10 }}>
-        <button className="btn btn-primary" onClick={() => { setError(null); setLoading(true); if (book) loadContent(book); }}>重试</button>
+        <button className="btn btn-primary" onClick={() => { setError(null); setLoading(true); if (book) loadContent(book, true); }}>重试</button>
         <Link href="/catalog" className="btn btn-secondary">返回书目</Link>
       </div>
     </div>

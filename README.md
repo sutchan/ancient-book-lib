@@ -13,7 +13,12 @@
 - 资源：殆知阁 v20 全量 15,694 部 / 4.9GB 古籍，托管于 garychowcmu/daizhigev20；本仓库仅存 5.7MB 书目索引，阅读时按需 fetch
 - 定位：公益开源 · 零广告 · 零注册 · 零付费 · 不收集个人隐私（仅匿名访问统计，GA4）
 - 统计：Google Analytics 4（`G-H76XG9L6FZ`），IP 匿名化，仅聚合访问数据
-- 当前版本：**v1.1.1**（全量数据接入：15,694 部古籍在线，本仓库零 TXT 复制；v1.1.1 新增 Pages 自定义域名 CNAME 自动注入） | 贡献指南：环境搭建、架构边界、分支与提交规范、PR 流程 |
+- 当前版本：**v1.2.1**（全量数据接入：15,694 部古籍在线，本仓库零 TXT 复制；v1.2.1 将 GitHub Pages 部署改为开关式，默认仅跑 CI）
+- 线上站点：https://guji.ewuse.com/（腾讯云 EdgeOne Pages 托管）
+
+| 文档 | 说明 |
+| --- | --- |
+| [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) | 贡献指南：环境搭建、架构边界、分支与提交规范、PR 流程 |
 | [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md) | 行为准则：社区互动规范与举报渠道 |
 | [`.github/SECURITY.md`](.github/SECURITY.md) | 安全策略：静态架构攻击面与漏洞私下报告方式 |
 | [`.github/SUPPORT.md`](.github/SUPPORT.md) | 支持与帮助：自助路径、提问渠道、常见问题 |

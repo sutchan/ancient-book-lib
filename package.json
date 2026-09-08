@@ -1,6 +1,6 @@
 {
   "name": "ancient-book-lib",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "古籍通 AncientBook 开源古籍文献检索阅读平台（纯静态无数据库架构）",
   "scripts": {

@@ -5,6 +5,17 @@
 
 ## [未发布]
 
+## [1.2.1] - 2026-09-08
+
+### 修复
+- **GitHub Pages 部署改为开关式**：`upload-pages-artifact` 与 `deploy` 任务增加 `vars.ENABLE_PAGES == 'true'` 条件，默认跳过；仓库未启用 Pages 时不再产生 `Failed to create deployment (status: 404)` 误报
+- 修复 README 顶部「当前版本」行与社区文档表格粘连、缺失表头与 CONTRIBUTING 行的问题
+
+### 变更
+- 构建产物统一用 `actions/upload-artifact@v4` 留存 7 天，便于排查（不再依赖 Pages 产物）
+- 部署规范补充「生产站点现状」（EdgeOne Pages + guji.ewuse.com）与 Pages 开关说明
+- 版本号升级至 1.2.1
+
 ## [1.2.0] - 2026-09-08
 
 ### 新增
@@ -134,7 +145,9 @@
 - 高保真可交互原型 `prototype/`（三套主题 + 真实模拟数据）
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.1...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.0...v1.2.1
+[1.2.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.3...v1.0.4

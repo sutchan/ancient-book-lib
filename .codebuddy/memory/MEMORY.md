@@ -9,4 +9,5 @@
 - **社区健康文件**：位于 `.github/`（CONTRIBUTING / CODE_OF_CONDUCT / SECURITY / SUPPORT / PR 模板 / Issue 模板）。禁止创建 `.github/readme.md`。
 - **生产站点**：https://guji.ewuse.com/ ，托管于腾讯云 **EdgeOne Pages**（响应头 `server: edgeone makers`，DNS 多 A 记录智能解析；由 EdgeOne 从 Git 拉取并构建 `out/`）。GitHub Pages 仅为可选备用，非生产链路——不启用 Pages 时 `actions/deploy-pages@v4` 会持续报 `Failed to create deployment (status: 404)`，属预期。
 - **仓库可见性**：2026-09-08 由私有转为**公开**（`GET /repos/sutchan/ancient-book-lib` → 200 / `private:false`）。此前 Pages 无法启用的根因即仓库私有（免费计划不支持私有库 Pages）。
+- **GitHub Actions 策略（v1.2.1 起）**：`.github/workflows/deploy.yml` 默认只做 CI（build:index → build:catalog → next build → 单测 → `upload-artifact@v4` 留存 out/ 7 天）；Pages 部署由仓库变量 `ENABLE_PAGES=true` 开关控制，默认关闭。仓库未启用 Pages 时 `deploy-pages@v4` 必报 `Failed to create deployment (status: 404)`，属预期误报。
 - **待办**：仓库缺 LICENSE 文件，许可证选择待用户确认（尚未创建）。
