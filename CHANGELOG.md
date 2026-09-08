@@ -5,6 +5,19 @@
 
 ## [未发布]
 
+## [1.3.1] - 2026-09-08
+
+### 新增（四项高优功能落地）
+- **超大书 HTTP Range 分片懒加载（P0，红线合规）**：`lib/fetchWithTimeout.ts` 新增 `range` 支持与 `fetchRangeText`；新增 `lib/remoteBook.ts` 按构建期生成的章节字节偏移清单（`public/index/chapters.json`）按需拉取章节，彻底解决整本 fetch 导致的超时/OOM；不支持分片的书目自动回退整本下载 + IndexedDB 缓存
+- **馆藏/批量下载入口（P1）**：`lib/download.ts` 新增 `exportBooklistCsv`，catalog 页新增「导出书单（含原文直链）」按钮，零复制导出当前筛选结果（书名/馆藏/子类/大小/原文直链），符合架构约束
+- **人物/关系数据驱动接线（P1，待 CBDB 数据）**：`components/CharacterList.tsx` / `RelationClient.tsx` 改为读取 `public/index/characters.json` / `relations.json`，数据为空时回退「待接入」空态，接入 CBDB 等元数据后自动渲染；新增数据契约种子文件
+- **全文检索构建整合（P0）**：`scripts/build-fulltext-index.mjs` 在同一次 4.9GB 下载 pass 中顺带生成章节字节偏移清单（单文件 `chapters.json`），并写入 `.github/workflows/deploy.yml` 构建流程；`fulltext-index.json` / `chapters.json` 加 `.gitignore`（体积大，部署期生成，不入库）
+- **章节识别增强**：`lib/chapterParse.ts` 补「品第X / 第X品」模式，并放宽上下文校验（标题后接缩进正文即可），修复佛经/子书章节漏检
+
+### 重构
+- `components/RemoteReader.tsx` 拆分为 `RemoteReader` + `ReaderToc`（章节导航）+ `ReaderToolbar`（工具栏），单文件体积受控
+- 章节解析逻辑统一抽离至 `lib/chapterParse.ts`，客户端与构建脚本共用
+
 ## [1.3.0] - 2026-09-08
 
 ### 变更（核心数据架构迁移：去除演示数据，直连上游全量 txt）
