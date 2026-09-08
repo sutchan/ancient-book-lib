@@ -1,0 +1,48 @@
+/* ============================================================
+   古籍通 AncientBook 原型 · 关系页 / 检索筛选 / 数据统计 v2.1
+   ============================================================ */
+
+/* ---------- 社会关系页 ---------- */
+.relation-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center;max-width:760px;margin-bottom:32px;}
+.relation-form .input-text{flex:1;min-width:180px;}
+.relation-type{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+.relation-item{border-left:3px solid var(--color-primary);padding:14px 18px;margin-bottom:14px;background:var(--color-card-bg);border-radius:0 6px 6px 0;border:1px solid var(--color-border);border-left-width:3px;}
+.relation-item .rel-a{font-weight:700;font-size:16px;}
+.relation-item .rel-type{color:var(--color-primary);font-size:13px;border:1px solid var(--color-primary);border-radius:4px;padding:1px 8px;margin-left:8px;}
+.relation-item .rel-source{font-size:13px;color:var(--color-text-secondary);margin-top:8px;}
+
+/* ---------- 检索筛选 ---------- */
+.filter-panel{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;align-items:center;}
+.filter-panel select{
+  padding:8px 12px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-card-bg);
+  color:var(--color-text);font-size:14px;font-family:inherit;cursor:pointer;
+}
+.search-mode-group{display:inline-flex;gap:8px;align-items:center;}
+.search-mode-group .btn-toggle.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+.search-stat{font-size:14px;color:var(--color-text-secondary);margin-bottom:16px;}
+.search-more{text-align:center;font-size:13px;color:var(--color-text-secondary);margin-top:20px;padding:10px;border-top:1px dashed var(--color-border);}
+
+/* ---------- 数据统计页 ---------- */
+.stat-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:32px;}
+.stat-kpi{
+  background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:6px;
+  padding:20px 12px;text-align:center;transition:transform 0.2s ease,box-shadow 0.2s ease;
+}
+.stat-kpi:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.kpi-num{font-size:28px;font-weight:700;color:var(--color-primary);margin-bottom:6px;font-variant-numeric:tabular-nums;}
+.kpi-label{font-size:13px;color:var(--color-text-secondary);}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:8px;}
+.stat-panel{padding:20px;}
+.stat-panel-title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.stat-panel-title::before{content:"";width:4px;height:15px;background:var(--color-primary);border-radius:2px;}
+.stat-bars{display:flex;flex-direction:column;gap:10px;}
+.stat-bar-row{display:grid;grid-template-columns:88px 1fr 36px;gap:10px;align-items:center;}
+.stat-bar-label{font-size:13px;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stat-bar-track{height:10px;background:rgba(140,49,48,0.08);border-radius:5px;overflow:hidden;}
+.stat-bar-fill{display:block;height:100%;border-radius:5px;min-width:2px;transition:width 0.6s ease;}
+.stat-bar-value{font-size:13px;font-weight:600;color:var(--color-primary);text-align:right;font-variant-numeric:tabular-nums;}
+
+@media(max-width:768px){
+  .stat-grid{grid-template-columns:1fr;}
+  .stat-bar-row{grid-template-columns:72px 1fr 30px;gap:8px;}
+}

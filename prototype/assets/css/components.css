@@ -1,0 +1,76 @@
+/* ============================================================
+   古籍通 AncientBook 原型 · 通用组件 v2.1
+   按钮 / 输入 / 标签 / 卡片 / 面包屑 / 空态 / 骨架屏 / 列表项
+   ============================================================ */
+.btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:15px;transition:all 0.2s ease;display:inline-flex;align-items:center;gap:6px;justify-content:center;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:var(--color-primary);color:#fff;}
+.btn-primary:hover{opacity:0.9;}
+.btn-secondary{background:transparent;border:1px solid var(--color-border);color:var(--color-text);}
+.btn-secondary:hover{border-color:var(--color-primary);color:var(--color-primary);}
+.btn-ghost{background:transparent;color:var(--color-primary);}
+.btn-ghost:hover{background:rgba(140,49,48,0.06);}
+.btn-disabled{opacity:0.4;cursor:not-allowed;}
+.btn-toggle{padding:6px 12px;border-radius:6px;border:1px solid var(--color-border);background:transparent;color:var(--color-text);cursor:pointer;font-size:14px;transition:all 0.2s ease;}
+.btn-toggle:hover{border-color:var(--color-primary);color:var(--color-primary);}
+.btn-toggle.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+.btn-sm{padding:4px 10px;font-size:13px;}
+
+.input-text{padding:10px 12px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-card-bg);color:var(--color-text);font-size:15px;width:100%;transition:border-color 0.2s ease,box-shadow 0.2s ease;}
+.input-text:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 2px rgba(140,49,48,0.12);}
+.input-text::placeholder{color:var(--color-text-secondary);opacity:0.6;}
+.input-text:disabled{opacity:0.5;cursor:not-allowed;}
+
+.search-box{display:flex;gap:8px;}
+.search-box .input-text{flex:1;}
+.search-box .search-btn{flex-shrink:0;}
+
+.tag{display:inline-block;padding:4px 10px;border-radius:4px;font-size:13px;border:1px solid var(--color-border);color:var(--color-text-secondary);}
+.tag-active,.tag.on{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+.tag-hover:hover{background:rgba(140,49,48,0.06);border-color:var(--color-primary);}
+
+.card{background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:6px;overflow:hidden;transition:transform 0.2s ease,box-shadow 0.2s ease;}
+.card:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.06);}
+.card:active{transform:translateY(-1px);}
+.card-body{padding:16px;}
+.card-title{font-size:16px;font-weight:600;margin-bottom:6px;}
+.card-desc{font-size:14px;color:var(--color-text-secondary);line-height:1.6;}
+
+.breadcrumb{display:flex;gap:8px;align-items:center;color:var(--color-text-secondary);font-size:14px;margin-bottom:24px;flex-wrap:wrap;}
+.breadcrumb a:hover{color:var(--color-primary);}
+.breadcrumb .sep{color:var(--color-border);}
+
+.empty-state,.loading-state{padding:60px 20px;text-align:center;color:var(--color-text-secondary);}
+.empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:0.5;}
+.empty-state .empty-title{font-size:16px;font-weight:600;margin-bottom:6px;color:var(--color-text);}
+
+/* 骨架屏 */
+.skeleton{background:linear-gradient(90deg,var(--color-border) 25%,var(--color-card-bg) 50%,var(--color-border) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.skeleton-line{height:14px;margin:8px 0;}
+.skeleton-card{height:120px;}
+
+/* ---------- 业务列表项（可点击） ---------- */
+.book-item{padding:14px 0;border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:padding 0.2s ease;}
+.book-item:hover{padding-left:8px;}
+.book-item:hover .book-title{color:var(--color-primary);}
+.book-title{font-size:16px;font-weight:600;transition:color 0.2s ease;}
+.book-meta{font-size:13px;color:var(--color-text-secondary);margin-top:3px;}
+.book-item .book-index{width:28px;height:28px;border-radius:6px;background:rgba(140,49,48,0.08);color:var(--color-primary);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+
+.search-result-item{padding:18px 0;border-bottom:1px solid var(--color-border);cursor:pointer;}
+.search-result-item:hover .result-title{color:var(--color-primary);}
+.result-title{font-size:17px;font-weight:600;transition:color 0.2s ease;}
+.search-result-item .path-info{font-size:13px;color:var(--color-text-secondary);margin:8px 0;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.search-result-item .snippet{line-height:1.8;font-size:15px;color:var(--color-text);}
+.search-result-item mark{background:var(--color-highlight);color:inherit;padding:0 2px;border-radius:2px;}
+.score-badge{font-size:12px;color:var(--color-primary);border:1px solid var(--color-primary);border-radius:4px;padding:1px 6px;}
+
+/* ---------- 人物卡片 ---------- */
+.character-card{background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:6px;padding:20px;transition:transform 0.2s ease,box-shadow 0.2s ease;}
+.character-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.05);}
+.char-name{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.char-zi{font-size:14px;color:var(--color-text-secondary);font-weight:400;}
+.info-row{margin-top:10px;font-size:15px;line-height:1.7;}
+.info-row label{color:var(--color-text-secondary);display:inline-block;min-width:64px;}
+.info-row .tag{margin-right:6px;margin-top:4px;}

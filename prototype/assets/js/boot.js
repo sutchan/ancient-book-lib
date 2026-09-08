@@ -119,7 +119,13 @@
     var hash = location.hash || "#page-home";
     var readMatch = hash.match(/^#read\/([\w-]+)/);
     if (readMatch) {
-      AB.state.currentBookId = readMatch[1];
+      // 换书时重置章节进度，避免沿用上一本书的章节下标
+      if (AB.state.currentBookId !== readMatch[1]) {
+        AB.state.currentBookId = readMatch[1];
+        AB.state.chapterIdx = 0;
+        AB.lsSet("ab-book", readMatch[1]);
+        AB.lsSet("ab-chapter", "0");
+      }
       AB.renderReader(main, readMatch[1]);
     } else {
       var key = hash.replace("#page-", "") || "home";
@@ -152,6 +158,7 @@
 
   function boot() {
     initGlobal();
+    AB.renderPrototypeNotice();
     AB.renderFooterStats();
     var main = AB.$("#main-view");
     if (main) {

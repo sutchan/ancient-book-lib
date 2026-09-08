@@ -1,6 +1,0 @@
-{
-  "version": "2.0",
-  "note": "已废弃：本文件为早期冗余模拟数据（见 docs/05 原型检查报告），原型与构建均以 prototype/data/app-data.js 为唯一数据源，人物由书籍 author 字段数据驱动派生。此处清空以避免遗留示范人物数据。",
-  "characters": [],
-  "relations": []
-}

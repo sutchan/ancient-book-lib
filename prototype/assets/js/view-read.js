@@ -5,6 +5,10 @@
 (function (AB) {
   "use strict";
 
+  /* 仅这两部有贴合原书的样张，其余书目复用通用样本 —— 需显式提示，避免被误认为真实原文 */
+  var REAL_SAMPLE_TITLES = ["论语", "心经"];
+  AB.isSampleText = function (book) { return REAL_SAMPLE_TITLES.indexOf(book.title) < 0; };
+
   /* 章节文本（模拟真实内容 + 生僻字标注），全文检索复用同一函数保证口径一致 */
   function getChapterText(book, idx) {
     var sample = {
@@ -104,6 +108,9 @@
           '<a href="#page-book-list">' + AB.toSimplified(book.category) + '</a><span class="sep">/</span>' +
           '<a href="#page-book-list">' + AB.toSimplified(book.title) + '</a><span class="sep">/</span>' +
           '<span>' + AB.toSimplified(chapterTitle) + '</span></div>' +
+        (AB.isSampleText(book)
+          ? '<div class="sample-tip" role="note">本章为原型演示样张，非正式原文；正式站点按需加载上游全本。</div>'
+          : '') +
         '<div class="reader-wrap">' +
           '<div class="reader-title">' + AB.toSimplified(book.title) + ' · ' + AB.toSimplified(chapterTitle) + '</div>' +
           '<div class="reader-sub">' + AB.toSimplified(book.dynasty + ' · ' + book.author) + '</div>' +
@@ -138,7 +145,7 @@
     function stepChapter(delta) {
       var len = chapters.length;
       AB.state.chapterIdx = Math.min(Math.max(len - 1, 0), Math.max(0, AB.state.chapterIdx + delta));
-      localStorage.setItem("ab-chapter", String(AB.state.chapterIdx));
+      AB.lsSet("ab-chapter", AB.state.chapterIdx);
       renderReader(AB.getMain(), AB.state.currentBookId);
     }
     var fsMinus = AB.$("#fs-minus", main), fsPlus = AB.$("#fs-plus", main);

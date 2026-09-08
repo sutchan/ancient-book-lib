@@ -1,0 +1,53 @@
+/* ============================================================
+   古籍通 AncientBook 原型 · 首页与组件库页 v2.1
+   注意：本文件位于 assets/css/，背景图相对路径需用 ../
+   ============================================================ */
+
+/* ---------- 首页 Hero 视觉区 ---------- */
+.home-hero{
+  position:relative;overflow:hidden;border-radius:12px;margin-bottom:8px;
+  background:url("../images/hero.png") center 30%/cover no-repeat;
+  padding:88px 32px 76px;text-align:center;
+  border:1px solid var(--color-border);
+  isolation:isolate;
+}
+.home-hero::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg,rgba(249,247,242,0.55) 0%,rgba(249,247,242,0.78) 55%,rgba(249,247,242,0.95) 100%);
+}
+.hero-title{
+  font-size:44px;font-weight:700;letter-spacing:8px;color:var(--color-text);
+  margin-bottom:14px;text-shadow:0 1px 2px rgba(255,255,255,0.8);
+}
+.hero-sub{font-size:16px;color:var(--color-text-secondary);margin-bottom:32px;letter-spacing:1px;}
+.hero-search{max-width:600px;margin:0 auto;background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:8px;padding:8px;box-shadow:0 6px 20px rgba(0,0,0,0.08);}
+.hero-search .input-text{border:none;background:transparent;font-size:16px;}
+.hero-search .input-text:focus{box-shadow:none;}
+
+.section-title{font-size:18px;font-weight:700;margin:36px 0 16px;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:"";width:4px;height:18px;background:var(--color-primary);border-radius:2px;}
+
+/* ---------- 分类卡片网格 ---------- */
+.category-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.category-card{cursor:pointer;text-align:center;padding:28px 16px;}
+.category-card .cat-icon{
+  width:52px;height:52px;margin:0 auto 12px;border-radius:50%;
+  background:rgba(140,49,48,0.08);color:var(--color-primary);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  transition:background 0.2s ease,transform 0.2s ease;
+}
+.category-card:hover .cat-icon{background:var(--color-primary);color:#fff;transform:scale(1.05);}
+.category-card .cat-name{font-size:16px;font-weight:600;}
+.category-card .cat-desc{font-size:13px;color:var(--color-text-secondary);margin-top:6px;}
+
+/* ---------- 组件库页（wireframes.html） ---------- */
+.wireframe-wrap{max-width:1200px;margin:0 auto;padding:40px 20px;}
+.section-block{margin-bottom:48px;border-bottom:1px solid var(--color-border);padding-bottom:32px;}
+.demo-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;align-items:center;}
+.desc-note{font-size:14px;color:var(--color-text-secondary);margin-top:8px;line-height:1.7;}
+.state-label{font-size:12px;color:var(--color-text-secondary);text-align:center;margin-top:4px;}
+.state-group{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.spec-tag{font-size:12px;background:rgba(140,49,48,0.08);color:var(--color-primary);border-radius:4px;padding:2px 8px;}
+.spec-table{width:100%;border-collapse:collapse;margin-top:16px;font-size:14px;}
+.spec-table th,.spec-table td{border:1px solid var(--color-border);padding:10px 12px;text-align:left;}
+.spec-table th{background:rgba(140,49,48,0.05);font-weight:600;}

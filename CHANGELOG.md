@@ -5,6 +5,22 @@
 
 ## [未发布]
 
+## [1.3.4] - 2026-09-08
+
+### 重构（原型样式模块化）
+- `prototype/assets/prototype.css`（316 行）按职责拆分为 `prototype/assets/css/` 下 6 个文件：`base`（重置/布局/导航/页脚/动效）、`components`（按钮/输入/卡片/列表/骨架屏）、`home`（首页 Hero 与组件库页）、`reader`（阅读页与影像对照）、`pages`（关系/检索筛选/数据统计）、`responsive`（响应式 + 无障碍，必须最后加载）；11 个 HTML（含 `wireframes.html`）样式引用同步更新，单文件均 ≤200 行
+- Hero 背景图相对路径随目录迁移调整为 `../images/hero.png`
+
+### 优化（原型无障碍与体验）
+- 新增统一 `:focus-visible` 焦点环（链接/按钮/下拉/可聚焦生僻字），新增 `.sr-only` 读屏专用隐藏类
+- 新增 `prefers-reduced-motion: reduce` 支持，尊重系统「减少动态效果」偏好
+- 书单项、检索结果项补齐 `cursor:pointer`；关系类型标签选中态 `.tag.on` 补齐样式（此前仅 `.tag-active` 生效，筛选高亮缺失）
+- 换书时重置章节进度：此前从 A 书第 30 章切到章节更少的 B 书会沿用旧下标，现切换书籍自动归零
+
+### 清理
+- 删除 3 份从未被引用的失效演示数据 `prototype/data/book-data.json` / `search-data.json` / `character-data.json`（原型唯一数据源为 `data/app-data.js`；git 历史可追溯）
+- `prototype/data/app-data.js` 数据版本 `2.0` → `2.2`，与脚本模块版本对齐
+
 ## [1.3.3] - 2026-09-08
 
 ### 清理（去除演示数据收尾）
@@ -301,6 +317,8 @@
 [1.2.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.5...v1.2.6
 [1.2.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.3...v1.2.4
+[1.3.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.3...v1.3.4
+[1.3.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.0...v1.3.1
 [1.2.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.2...v1.2.3

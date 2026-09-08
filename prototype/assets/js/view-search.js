@@ -133,13 +133,13 @@
     var limSel = AB.$("#filter-limit");
     if (limSel) limSel.addEventListener("change", function () {
       AB.state.searchLimit = parseInt(this.value, 10);
-      localStorage.setItem("ab-slimit", String(AB.state.searchLimit));
+      AB.lsSet("ab-slimit", AB.state.searchLimit);
       renderSearch(AB.getMain());
     });
     AB.$$("#search-mode .btn-toggle").forEach(function (bt) {
       bt.addEventListener("click", function () {
         AB.state.searchMode = bt.getAttribute("data-smode");
-        localStorage.setItem("ab-smode", AB.state.searchMode);
+        AB.lsSet("ab-smode", AB.state.searchMode);
         renderSearch(AB.getMain());
       });
     });
