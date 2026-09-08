@@ -89,6 +89,28 @@ export default function StatsClient() {
         </div>
       </div>
 
+      {/* 全量数据概览（殆知阁 v20） */}
+      <div className="card stat-panel" style={{ marginTop: 20, padding: "16px 20px" }}>
+        <div className="stat-panel-title">全量数据概览（殆知阁 v20 · 原始数据上游托管 · 本仓库零复制）</div>
+        <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 12 }}>
+          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>15,694</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>部古籍</span></div>
+          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>4.9</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>GB 原始 TXT</span></div>
+          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>10</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>大馆藏</span></div>
+          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>5.7</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>MB 书目索引（本仓库）</span></div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 4 }}>馆藏分布（全量）</div>
+            <div style={{ display: "flex", gap: 2, flexWrap: "wrap", fontSize: 11 }}>
+              {[["佛藏",5135],["史藏",2043],["集藏",1948],["道藏",1721],["子藏",1463],["医藏",911],["儒藏",908],["诗藏",776],["艺藏",446],["易藏",343]].map(([n,c]) => (
+                <span key={n as string} style={{ background: "var(--color-bg-secondary,#f4f3ee)", padding: "2px 8px", borderRadius: 4 }}>{n} {c}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-secondary)" }}>
+          数据源：<a href="https://github.com/garychowcmu/daizhigev20" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>garychowcmu/daizhigev20</a> · 阅读时按需 fetch raw URL，不预加载全量数据
+        </div>
+      </div>
+
       <div className="stat-grid">
         <BarChart title="馆藏分布（按十大藏库）" rows={byCat} />
         <BarChart title="典籍朝代分布" rows={byDynasty} />

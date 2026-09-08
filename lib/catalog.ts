@@ -5,6 +5,8 @@
  */
 import type { CatalogEntry, DaizhigeCatalog } from "./types";
 
+export type { CatalogEntry, DaizhigeCatalog };
+
 const INDEX_URL = "/index/daizhige-catalog.json";
 
 let cache: DaizhigeCatalog | null = null;

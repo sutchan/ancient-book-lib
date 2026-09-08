@@ -143,7 +143,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     if (!confirmDownload()) return;
     const modeText = simple ? "简体对照版" : "繁体原版";
     const body = simple ? toSimplified(content) : content;
-    downloadText(`${book.title}_${modeText}.txt`, body, book.title);
+    downloadText(`${book.title}_${modeText}.txt`, body);
   }, [book, content, simple]);
 
   // 划词检索

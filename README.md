@@ -1,4 +1,4 @@
-﻿# 古籍通 AncientBook
+# 古籍通 AncientBook
 
 **开源古籍文献检索阅读平台**
 
@@ -9,88 +9,11 @@
 [![贡献](https://img.shields.io/badge/贡献-欢迎%20PR-orange)](.github/CONTRIBUTING.md)
 
 - 工程仓库名：`ancient-book-lib`
-- 架构：纯静态 · 无数据库 · Next.js 14 SSG · 前端内存检索 · GitHub Range 分片懒加载
-- 资源：殆知阁开源十大藏库 5GB 纯 TXT 古籍（当前为 45 部核心典籍演示预览版，全量接入推进中）
+- 架构：纯静态 · 无数据库 · Next.js 14 SSG · 前端内存检索 · 上游 raw URL 按需加载（零 TXT 复制）
+- 资源：殆知阁 v20 全量 15,694 部 / 4.9GB 古籍，托管于 garychowcmu/daizhigev20；本仓库仅存 5.7MB 书目索引，阅读时按需 fetch
 - 定位：公益开源 · 零广告 · 零注册 · 零付费 · 不收集个人隐私（仅匿名访问统计，GA4）
 - 统计：Google Analytics 4（`G-H76XG9L6FZ`），IP 匿名化，仅聚合访问数据
-- 当前版本：**v1.0.4**（v1.0.3 落地评审改进：合规下载、进度/已读缓存、高级检索筛选、划词溯源、书籍详情页、考据聚合、繁简映射扩展至 820 字；v1.0.4 修复 GitHub Pages 部署流水线）
-
-## 快速开始
-
-```bash
-git clone https://github.com/sutchan/ancient-book-lib.git
-cd ancient-book-lib
-npm install
-npm run dev              # 本地开发 http://localhost:3000
-```
-
-其他常用命令：
-
-```bash
-npm run build            # 静态构建，产物输出到 out/
-npm run build:index      # 由 prototype/data/app-data.js 生成 lib/data-generated.ts
-npx serve out            # 预览静态产物（开启 output: export，next start 不适用）
-npx tsc --noEmit         # TypeScript 类型检查
-```
-
-> Node.js ≥ 18（推荐 LTS 20.x）、npm ≥ 9。端口占用时可用 `npm run dev -- -p 3001`。
-
-原型预览：直接用浏览器打开 `prototype/prototype.html` 即可，无需启动服务。
-
-## 自动部署（GitHub Pages）
-
-本仓库内置 GitHub Actions 工作流（`.github/workflows/deploy.yml`），推送 `main` 分支自动执行：安装依赖 → 同步数据（`build:index`）→ 全量静态构建 → 单元测试 → 部署 GitHub Pages。
-
-启用步骤（一次性）：
-
-1. 打开仓库 **Settings → Pages**；
-2. **Source** 选择 **GitHub Actions**；
-3. 推送任意提交到 `main`，Actions 中的 `Build & Deploy to GitHub Pages` 工作流自动运行；
-4. 部署完成后访问 `https://<用户名>.github.io/ancient-book-lib/`。
-
-> 工作流仅对 `main` 分支推送/手动触发（`workflow_dispatch`）时部署；PR 只跑构建与测试，不部署。
-
-## 目录结构
-
-```plain
-ancient-book-lib/
-├── app/            # Next.js 页面（book-list / category / character / help /
-│                   # read / relation / search / stats，全部 SSG）
-├── components/     # 全局公共组件（Navbar、Footer、ReaderClient、SearchClient...）
-├── lib/            # 类型定义、检索引擎、繁简映射、生成数据
-├── scripts/        # 离线预处理脚本（build-index.mjs）
-├── prototype/      # 高保真可交互原型（prototype.html + pages/ + data/）
-├── public/         # 静态资源
-├── docs/           # 全套项目规范、PRD、任务清单、设计文档
-└── .github/        # 社区健康文件（贡献指南 / 行为准则 / 安全策略 / 支持 / 模板）
-```
-
-## 项目文档导航
-
-```
-docs/
-├── 01-项目基础说明/        README、品牌定名、项目概述、开源合规
-├── 02-架构与开发规范/      架构、目录结构、代码规范、索引预处理、分片请求、性能、Git规范
-├── 03-产品需求PRD/         V1.0上线版PRD（终审）、古籍价值增量、历史版本
-├── 04-开发任务清单/        V1.0精简版开发任务清单
-├── 05-设计规范与原型/      UI/UX全局设计规范、Figma原型建模清单
-├── 06-部署与迭代/          部署上线规范、版本迭代管理规范
-├── 07-环境搭建手册/        本地开发环境搭建FAQ
-└── 08-技术方案研究/        5GB存储分析、无数据库检索方案、PRD缺陷复盘
-
-prototype/                高保真可交互原型
-├── prototype.html         全站高保真可交互原型（三套主题+真实数据+路由跳转）
-├── wireframes.html        组件库规范（基础/复合/业务组件+使用规则）
-├── assets/                原型全局样式、主题变量、交互脚本
-├── pages/                 独立页面原型（index.html 等8个页面）
-└── data/                  真实业务模拟数据（书籍/检索/人物）
-```
-
-## 参与共建
-
-| 文档 | 用途 |
-| - | - |
-| [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) | 贡献指南：环境搭建、架构边界、分支与提交规范、PR 流程 |
+- 当前版本：**v1.1.0**（全量数据接入：15,694 部古籍在线，本仓库零 TXT 复制） | 贡献指南：环境搭建、架构边界、分支与提交规范、PR 流程 |
 | [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md) | 行为准则：社区互动规范与举报渠道 |
 | [`.github/SECURITY.md`](.github/SECURITY.md) | 安全策略：静态架构攻击面与漏洞私下报告方式 |
 | [`.github/SUPPORT.md`](.github/SUPPORT.md) | 支持与帮助：自助路径、提问渠道、常见问题 |
