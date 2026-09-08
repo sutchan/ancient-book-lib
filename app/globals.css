@@ -162,6 +162,9 @@ label.btn-toggle:has(input:focus-visible){outline:2px solid var(--color-primary)
 .info-row label{color:var(--color-text-secondary);display:inline-block;min-width:64px;}
 .info-row .tag{margin-right:6px;margin-top:4px;}
 .char-id{font-size:12px;color:var(--color-text-secondary);margin-top:8px;border-top:1px dashed var(--color-border);padding-top:8px;}
+/* 人物卡片「关联典籍」可点击跳转馆藏检索 */
+.character-book-link{cursor:pointer;transition:all 0.2s ease;}
+.character-book-link:hover{border-color:var(--color-primary);color:var(--color-primary);background:rgba(140,49,48,0.06);}
 .section-title{font-size:18px;font-weight:700;margin:36px 0 16px;display:flex;align-items:center;gap:8px;}
 .section-title::before{content:"";width:4px;height:18px;background:var(--color-primary);border-radius:2px;}
 

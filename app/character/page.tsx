@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function CharacterPage() {
   return (
-    <section>
+    <section id="character-page">
       <div className="breadcrumb">
         <Link href="/">首页</Link>
         <span className="sep">/</span>
@@ -17,7 +17,7 @@ export default function CharacterPage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>人物考据档案</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-        人物考据与关系溯源数据待接入——将随 CBDB 等权威元数据导入后开放，届时可按朝代、籍贯、官职区分重名人物，并支持关键词检索、朝代/标签筛选与关联典籍聚合。
+        本页收录历史人物 CBDB 考据档案（姓名、字、号、籍贯、生卒、官职与著作），支持关键词检索、朝代/标签筛选与关联典籍聚合跳转。数据来源 CBDB（CC BY-NC-SA 4.0）。
       </p>
       <CharacterList />
     </section>

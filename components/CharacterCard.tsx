@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { Character } from "@/lib/types";
 
 /**
@@ -53,16 +54,34 @@ export default function CharacterCard({ c }: { c: Character }) {
       {open && (
         <div style={{ marginTop: 12, borderTop: "1px dashed var(--color-border)", paddingTop: 12 }}>
           {c.desc && <p style={{ fontSize: 14, lineHeight: 1.8 }}>{c.desc}</p>}
-          {c.books && c.books.length > 0 && (
+          {c.books && c.books.length > 0 ? (
             <div style={{ marginTop: 10 }}>
               <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 6 }}>
-                相关典籍（{c.books.length}）
+                相关典籍（{c.books.length}）· 点击书名可在馆藏中检索其版本
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              <div id={`character-${c.id}-books`} style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {c.books.map((b, i) => (
-                  <span key={i} className="tag">{b}</span>
+                  <Link
+                    key={i}
+                    className="tag character-book-link"
+                    href={`/search?q=${encodeURIComponent(b)}&mode=title`}
+                    title="在馆藏中检索该书"
+                  >
+                    {b}
+                  </Link>
                 ))}
               </div>
+            </div>
+          ) : (
+            <div style={{ marginTop: 10, fontSize: 13, color: "var(--color-text-secondary)" }}>
+              暂无关联典籍著录。
+              <Link
+                className="character-book-link"
+                style={{ marginLeft: 6 }}
+                href={`/search?q=${encodeURIComponent(c.name)}&mode=title`}
+              >
+                在馆藏中检索「{c.name}」的著作 →
+              </Link>
             </div>
           )}
         </div>
