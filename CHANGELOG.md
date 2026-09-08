@@ -5,6 +5,21 @@
 
 ## [未发布]
 
+## [1.2.3] - 2026-09-08
+
+### 新增
+- **原型接入品牌资料**：新增 `prototype/assets/brand/`（印章图标 64、主屏实心图标 180、OG 分享图、横版反白 logo、`site.webmanifest`），与线上 `public/brand/` 同源
+- **原型页面统一注入**：`prototype.html`、`wireframes.html`、`pages/*.html` 共 11 个页面 head 增加 favicon / apple-touch-icon / manifest / `theme-color` / `og:image` / `twitter:card`（相对路径按目录层级取 `./` 或 `../`）
+- **原型 logo 主题联动**：`prototype/assets/prototype.js` v2.0 → v2.1，新增 `syncBrandLogo()`，导航栏 logo 按 `data-logo-light` / `data-logo-dark` 切换，深色主题自动使用反白版（与线上 `components/Navbar.tsx` 行为一致）
+- `prototype/wireframes.html` 新增「六、品牌资料」章节：横版 logo 双底色演示、图标尺寸梯度（64/32/16/180）、品牌色板（`#A93320` / `#F7F3EA`）、OG 图预览与规格表
+
+### 修复
+- 原型 `prototype/assets/images/logo.png` 此前为 JPEG 内容，已替换为与线上同源的透明 PNG
+
+### 变更
+- 品牌资料使用规范文档补充「原型接入」章节
+- 版本号升级至 1.2.3
+
 ## [1.2.2] - 2026-09-08
 
 ### 新增

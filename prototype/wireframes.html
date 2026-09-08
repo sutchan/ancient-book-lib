@@ -29,6 +29,15 @@ pre code{font-family:Consolas,monospace;}
 .spec-table th{background:rgba(140,49,48,0.05);font-weight:600;}
 .usage-list li{margin:6px 0;line-height:1.8;}
 </style>
+
+<!-- 品牌资料：与线上 public/brand 同源（favicon / 主屏图标 / 分享图） -->
+<link rel="icon" type="image/png" sizes="64x64" href="./assets/brand/logo-mark-64.png"/>
+<link rel="apple-touch-icon" href="./assets/brand/logo-mark-solid-180.png"/>
+<link rel="manifest" href="./assets/brand/site.webmanifest"/>
+<meta name="theme-color" content="#A93320"/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="./assets/brand/og-image.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
 </head>
 <body data-theme="light">
 <div class="wireframe-wrap">
@@ -246,6 +255,78 @@ pre code{font-family:Consolas,monospace;}
       <li>⑦ 正文一律衬线字体（Noto Serif SC），UI 控件可无衬线；</li>
       <li>⑧ 间距遵循 8/16/24px 三级规范，禁止随意改值。</li>
     </ul>
+  </div>
+
+  <!-- ============ 六、品牌资料 ============ -->
+  <div class="section-block" id="brand-assets">
+    <h2>六、品牌资料（Logo / 图标 / 分享图）<span class="spec-tag">v1.2.3</span></h2>
+    <p class="desc-note">
+      品牌资产由 <code>scripts/brand/build-brand-assets.ps1</code> 一键生成，线上存于 <code>public/brand/</code>，原型副本存于
+      <code>assets/brand/</code>；均为脚本产物，禁止手工改图。规范详见
+      <code>docs/05-设计规范与原型/品牌资料使用规范.md</code>。
+    </p>
+
+    <h3>横版 Logo（比例 2.692 : 1）</h3>
+    <div class="demo-row">
+      <div class="state-group">
+        <div style="background:#F9F7F2;padding:12px 16px;border-radius:6px;">
+          <img src="./assets/images/logo.png" alt="古籍通横版 Logo" style="height:40px;display:block;">
+        </div>
+        <span class="state-label">浅色底 · logo-full-512</span>
+      </div>
+      <div class="state-group">
+        <div style="background:#1A1A1A;padding:12px 16px;border-radius:6px;">
+          <img src="./assets/brand/logo-full-light-512.png" alt="古籍通横版 Logo 反白版" style="height:40px;display:block;">
+        </div>
+        <span class="state-label">深色底 · logo-full-light-512</span>
+      </div>
+    </div>
+
+    <h3>方形印章图标</h3>
+    <div class="demo-row">
+      <div class="state-group">
+        <img src="./assets/brand/logo-mark-64.png" alt="印章图标 64" id="wf-mark-64" style="width:64px;height:64px;">
+        <span class="state-label">64px · 浏览器图标</span>
+      </div>
+      <div class="state-group">
+        <img src="./assets/brand/logo-mark-64.png" alt="印章图标 32" style="width:32px;height:32px;">
+        <span class="state-label">32px · favicon</span>
+      </div>
+      <div class="state-group">
+        <img src="./assets/brand/logo-mark-64.png" alt="印章图标 16" style="width:16px;height:16px;">
+        <span class="state-label">16px · 极小尺寸</span>
+      </div>
+      <div class="state-group">
+        <img src="./assets/brand/logo-mark-solid-180.png" alt="主屏图标 180" style="width:64px;height:64px;border-radius:14px;">
+        <span class="state-label">180px · 纸底实心（主屏）</span>
+      </div>
+    </div>
+
+    <h3>品牌色板</h3>
+    <div class="demo-row">
+      <div class="state-group">
+        <div style="width:88px;height:56px;border-radius:6px;background:#A93320;border:1px solid var(--color-border);"></div>
+        <span class="state-label">主色 #A93320</span>
+      </div>
+      <div class="state-group">
+        <div style="width:88px;height:56px;border-radius:6px;background:#F7F3EA;border:1px solid var(--color-border);"></div>
+        <span class="state-label">纸色 #F7F3EA</span>
+      </div>
+    </div>
+    <p class="desc-note">主色用于品牌资产与 OG 图；UI 控件沿用 CSS 变量 <code>--color-primary: #8C3130</code>，两者不互相覆盖。</p>
+
+    <h3>社交分享图（1200×630）</h3>
+    <img src="./assets/brand/og-image.png" alt="社交分享图" id="wf-og-preview" style="width:100%;max-width:600px;border-radius:6px;border:1px solid var(--color-border);">
+
+    <table class="spec-table">
+      <tr><th>文件</th><th>规格</th><th>使用场景</th></tr>
+      <tr><td>logo-full-{1024,512,256}.png</td><td>横版 2.692:1，透明底</td><td>导航栏、README、文档（浅色底）</td></tr>
+      <tr><td>logo-full-light-{512,256}.png</td><td>横版，深色转米白</td><td>深色主题导航栏、深色海报</td></tr>
+      <tr><td>logo-mark-{512…16}.png</td><td>方形印章，透明底</td><td>favicon、通用图标</td></tr>
+      <tr><td>logo-mark-solid-180.png</td><td>180×180，纸色实心底</td><td>iOS 添加到主屏</td></tr>
+      <tr><td>logo-mark-maskable-512.png</td><td>512×512，印章占 62%</td><td>Android 自适应图标（安全区）</td></tr>
+      <tr><td>og-image.png</td><td>1200×630</td><td>Open Graph / Twitter Card 分享卡片</td></tr>
+    </table>
   </div>
 </div>
 

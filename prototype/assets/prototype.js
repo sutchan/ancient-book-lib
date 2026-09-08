@@ -1,7 +1,8 @@
 ﻿/**
- * 古籍通 AncientBook 原型交互脚本 v2.0
- * 功能：数据驱动渲染 / 繁简真实转换 / 检索闭环 / 汉堡菜单 / 三端预览 / 阅读控制 / 划词释义 / 动效
+ * 古籍通 AncientBook 原型交互脚本 v2.1
+ * 功能：数据驱动渲染 / 繁简真实转换 / 检索闭环 / 汉堡菜单 / 三端预览 / 阅读控制 / 划词释义 / 品牌 logo 主题联动 / 动效
  * 数据源：data/app-data.js（全局变量，兼容 file:// 直开）
+ * 品牌资料：assets/brand/（与线上 public/brand 同源，由 scripts/brand 生成）
  */
 (function(){
 "use strict";
@@ -45,11 +46,23 @@ function save(){
 }
 function go(hash){ location.hash = hash; }
 
+/* ==================== 品牌 logo 主题联动 ==================== */
+/* 深色主题下切换为反白版 logo（data-logo-dark），其余主题用常规版（data-logo-light） */
+function syncBrandLogo(){
+  $$(".brand-logo").forEach(function(img){
+    var light = img.getAttribute("data-logo-light");
+    var dark = img.getAttribute("data-logo-dark");
+    if(state.theme === "dark" && dark){ img.setAttribute("src", dark); }
+    else if(light){ img.setAttribute("src", light); }
+  });
+}
+
 /* ==================== 全局初始化 ==================== */
 function initGlobal(){
   var body = document.body;
   body.setAttribute("data-theme", state.theme);
   body.setAttribute("data-device", state.device);
+  syncBrandLogo();
 
   // 主题切换
   var btnTheme = $("#btn-theme");
@@ -59,6 +72,7 @@ function initGlobal(){
     state.theme = list[(idx+1)%list.length];
     body.setAttribute("data-theme", state.theme);
     btnTheme.textContent = state.theme === "light" ? "日间" : state.theme === "paper" ? "护眼" : "深色";
+    syncBrandLogo();
     save();
   });
   if(btnTheme) btnTheme.textContent = state.theme === "light" ? "日间" : state.theme === "paper" ? "护眼" : "深色";

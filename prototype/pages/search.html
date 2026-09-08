@@ -9,6 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/theme-color.css"/>
 <link rel="stylesheet" href="../assets/prototype.css"/>
+
+<!-- 品牌资料：与线上 public/brand 同源（favicon / 主屏图标 / 分享图） -->
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/brand/logo-mark-64.png"/>
+<link rel="apple-touch-icon" href="../assets/brand/logo-mark-solid-180.png"/>
+<link rel="manifest" href="../assets/brand/site.webmanifest"/>
+<meta name="theme-color" content="#A93320"/>
+<meta property="og:type" content="website"/>
+<meta property="og:image" content="../assets/brand/og-image.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
 </head>
 <body data-theme="light" data-device="desktop" data-page="search">
 <div class="app-container">
@@ -20,7 +29,7 @@
   </div>
   <header class="navbar">
     <div class="nav-inner">
-      <a class="brand" href="./index.html"><img class="brand-logo" src="../assets/images/logo.png" alt="古籍通 AncientBook"></a>
+      <a class="brand" href="./index.html"><img class="brand-logo" id="brand-logo" src="../assets/images/logo.png" data-logo-light="../assets/images/logo.png" data-logo-dark="../assets/brand/logo-full-light-512.png" alt="古籍通 AncientBook"></a>
       <nav class="nav-menu">
         <a href="./index.html">首页</a>
         <a href="./category.html">十大藏库</a>
