@@ -1,3 +1,4 @@
+// components/Navbar.tsx v1.2.2
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -56,10 +57,11 @@ export default function Navbar({ current = "home" }: NavbarProps) {
     <>
       <header className="navbar">
         <div className="nav-inner">
-          <a className="brand" href="/">
+          <a className="brand" href="/" id="brand-home-link">
             <img
+              id="brand-logo"
               className="brand-logo"
-              src="/images/logo.png"
+              src={theme === "dark" ? "/brand/logo-full-light-512.png" : "/brand/logo-full-512.png"}
               alt="古籍通 AncientBook"
             />
           </a>

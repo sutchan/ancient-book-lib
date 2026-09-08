@@ -13,7 +13,7 @@
 - 资源：殆知阁 v20 全量 15,694 部 / 4.9GB 古籍，托管于 garychowcmu/daizhigev20；本仓库仅存 5.7MB 书目索引，阅读时按需 fetch
 - 定位：公益开源 · 零广告 · 零注册 · 零付费 · 不收集个人隐私（仅匿名访问统计，GA4）
 - 统计：Google Analytics 4（`G-H76XG9L6FZ`），IP 匿名化，仅聚合访问数据
-- 当前版本：**v1.2.1**（全量数据接入：15,694 部古籍在线，本仓库零 TXT 复制；v1.2.1 将 GitHub Pages 部署改为开关式，默认仅跑 CI）
+- 当前版本：**v1.2.2**（品牌资料套件：logo 多尺寸 PNG / favicon / PWA 图标 / OG 分享图统一生成；v1.2.1 将 GitHub Pages 部署改为开关式，默认仅跑 CI）
 - 线上站点：https://guji.ewuse.com/（腾讯云 EdgeOne Pages 托管）
 
 | 文档 | 说明 |
@@ -24,6 +24,7 @@
 | [`.github/SUPPORT.md`](.github/SUPPORT.md) | 支持与帮助：自助路径、提问渠道、常见问题 |
 | [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md) | PR 模板与自检清单 |
 | [`CHANGELOG.md`](CHANGELOG.md) | 版本更新日志 |
+| [`docs/05-设计规范与原型/品牌资料使用规范.md`](docs/05-设计规范与原型/品牌资料使用规范.md) | 品牌资料：logo 规格、图标尺寸、颜色令牌与生成脚本 |
 
 提交内容勘误（原文、繁简映射、人物考据）请使用专门的 [勘误模板](https://github.com/sutchan/ancient-book-lib/issues/new?template=content-errata.yml)，需附史料来源。
 

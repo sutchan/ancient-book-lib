@@ -5,6 +5,23 @@
 
 ## [未发布]
 
+## [1.2.2] - 2026-09-08
+
+### 新增
+- **品牌资料套件**：新增 `scripts/brand/build-brand-assets.ps1`（Windows GDI+，零第三方依赖），由源图一键生成 `public/brand/` 全套资源——横版 logo（1024/512/256，透明底与深底反白版）、方形印章徽章（1024~16 共 10 档）、iOS/Android 实心图标与 maskable 图标、1200×630 社交分享图 OG 图
+- **站点图标接入**：`app/icon.png`（64）、`app/apple-icon.png`（180）、`app/opengraph-image.png`（1200×630）由 Next 文件约定自动注入；根目录 `favicon.ico`（16/24/32/48/64 多尺寸）与 `apple-touch-icon.png` 兜底传统请求
+- **PWA 支持**：新增 `public/site.webmanifest`，metadata 补充 `manifest`、`applicationName`、`appleWebApp`、Open Graph / Twitter Card 字段，`viewport.themeColor` 取品牌主色 `#A93320`
+- **品牌令牌**：`public/brand/brand-tokens.json` 记录主色 `#A93320`、纸色 `#F7F3EA`、横版比例 2.692 与源图路径
+- `metadata.metadataBase` 设为生产域名 `https://guji.ewuse.com`，社交分享图输出绝对 URL（消除构建期 metadataBase 警告）
+- 品牌资料使用规范文档：`docs/05-设计规范与原型/品牌资料使用规范.md`
+
+### 修复
+- `public/images/logo.png` 此前实为 JPEG 内容（扩展名错误），已替换为真实透明 PNG；原型 `prototype/assets/images/logo.png` 同步更新
+- 导航栏深色主题下 logo 黑色文字不可见：深色主题自动切换到 `logo-full-light-512.png` 反白版
+
+### 变更
+- 版本号升级至 1.2.2
+
 ## [1.2.1] - 2026-09-08
 
 ### 修复
