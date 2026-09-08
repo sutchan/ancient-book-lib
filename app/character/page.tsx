@@ -17,7 +17,7 @@ export default function CharacterPage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>人物考据档案</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-        人物考据与关系溯源数据待接入——将随 CBDB 等权威元数据导入后开放，支持重名人物按朝代+籍贯+官职多维区分与关联典籍聚合。
+        人物考据与关系溯源数据待接入——将随 CBDB 等权威元数据导入后开放，届时可按朝代、籍贯、官职区分重名人物，并支持关键词检索、朝代/标签筛选与关联典籍聚合。
       </p>
       <CharacterList />
     </section>

@@ -5,6 +5,17 @@
 
 ## [未发布]
 
+## [1.3.6] - 2026-09-08
+
+### 重构（原型设计对齐正式站点现状）
+- **导航精简对齐**：原型导航由 8 项（含过时的「十大馆藏」「馆藏书籍」）改为与正式站点 `components/Navbar.tsx` 完全一致的 **7 项**：首页 / 全馆藏 / 检索 / 人物考据 / 社会关系 / 数据统计 / 帮助；11 个 HTML（综合页 + 9 个独立页）导航同步更新
+- **馆藏页合并**：正式站点已将 `/category`、`/book-list` 合并为单一「全馆藏」书目页（`/catalog`），原型同步：① `category` 页改为「已合并至全馆藏」引导页（按钮跳全馆藏）；② `book-list` 页升级为「全馆藏」书目浏览页（保留 10 大类筛选 chips + 45 部演示书目）；③ 首页「十大馆藏」分类卡片点击直接进入全馆藏并预筛选对应馆藏（对齐正式 `/catalog?category=`）
+
+### 优化（原型首页与文案对齐）
+- 首页 Hero 文案对齐正式 `app/page.tsx`：改为「殆知阁 v20 全量 15,694 部古籍在线」+ 徽标「原始数据 4.9GB 托管于上游仓库 · 本仓库零复制 · 阅读时按需加载」
+- 首页检索框新增「全文 / 标题」模式单选（与正式站点首页一致），提交时携模式跳检索页
+- 「学术工具」区块补齐「数据统计」卡片，人物考据 / 社会关系卡片描述加注「（数据待接入）」，与正式站点空态口径一致
+
 ## [1.3.5] - 2026-09-08
 
 > 说明：以下改动已随 v1.3.4 发布提交一并入库，此处补记；本版本仅同步文档与版本号。
@@ -332,6 +343,8 @@
 [1.2.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.5...v1.2.6
 [1.2.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.4...v1.2.5
 [1.2.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.3...v1.2.4
+[1.3.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.5...v1.3.6
+[1.3.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.1...v1.3.2
