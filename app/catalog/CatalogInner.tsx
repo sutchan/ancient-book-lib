@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -10,6 +10,7 @@ import {
   formatSize,
   type DaizhigeCatalog,
 } from "@/lib/catalog";
+import { exportBooklistCsv } from "@/lib/download";
 
 const PAGE_SIZE = 50;
 
@@ -55,6 +56,21 @@ export default function CatalogInner() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  // 导出当前筛选结果的书单（仅元数据 + 原文直链，零复制，符合架构）
+  const handleExportBooklist = useCallback(() => {
+    if (!catalog) return;
+    const rows = filtered.map((b) => ({
+      title: b.title,
+      category: b.category,
+      subcategories: b.subcategories,
+      size: b.size,
+      rawUrl: b.rawUrl,
+      mirrors: b.mirrors,
+    }));
+    const name = category ? `古籍通_${category}_书单` : "古籍通_全馆藏_书单";
+    exportBooklistCsv(rows, `${name}.csv`);
+  }, [catalog, filtered, category]);
+
   if (error) return <div style={{ padding: 40, color: "#c00" }}>索引加载失败：{error}</div>;
   if (!catalog) return <div style={{ padding: 40 }}>正在加载 15,694 部古籍书目索引...</div>;
 
@@ -80,6 +96,14 @@ export default function CatalogInner() {
         <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
           匹配 {filtered.length.toLocaleString()} 部
         </span>
+        <button
+          className="btn btn-secondary"
+          style={{ fontSize: 13, padding: "6px 12px", marginLeft: "auto" }}
+          onClick={handleExportBooklist}
+          title="导出当前筛选书单（含书名/馆藏/子类/大小/原文直链），零复制"
+        >
+          导出书单（含原文直链）
+        </button>
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>

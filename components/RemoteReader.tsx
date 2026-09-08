@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { loadCatalog, findBookById, formatSize, type CatalogEntry } from "@/lib/catalog";
 import { toSimplified } from "@/lib/t2s";
-import { downloadText, DOWNLOAD_NOTICE, confirmDownload } from "@/lib/download";
+import { downloadText, confirmDownload } from "@/lib/download";
 import { fetchTextWithTimeout, FetchTimeoutError } from "@/lib/fetchWithTimeout";
 import { getCachedBook, setCachedBook } from "@/lib/idb";
+import { parseChapters, splitParagraphs } from "@/lib/chapterParse";
+import {
+  loadChapterManifest,
+  buildToc,
+  fetchChapterText,
+  type ChapterRange,
+} from "@/lib/remoteBook";
+import ReaderToc from "./ReaderToc";
+import ReaderToolbar from "./ReaderToolbar";
 
 const PAGE_SIZE = 8;
 const LARGE_FILE_THRESHOLD = 5 * 1024 * 1024; // 5MB 以上视为大文件
@@ -16,79 +25,6 @@ const FETCH_TIMEOUT = 60000; // 60秒超时（大文件需要更长时间）
 function safeHttpUrl(url: string | undefined): string | null {
   if (!url || !/^https?:\/\//i.test(url)) return null;
   return url;
-}
-
-/** 章节标题识别：卷X / 第X回 / 第X章 / 篇X / 学而第一 等短行 */
-const CHAPTER_PATTERNS = [
-  /^卷[之其]?[一二三四五六七八九十百千零\d]+/,
-  /^第[一二三四五六七八九十百千零\d]+[回卷章节篇折]/,
-  // 天干编号：要求天干后必须有数字或"集/部/篇/卷/之"，避免单独"甲"字误匹配
-  /^[甲乙丙丁戊己庚辛壬癸][之]?[一二三四五六七八九十百千零\d]+/,
-  /^[甲乙丙丁戊己庚辛壬癸][集部篇卷]/,
-];
-
-// 正文中可能出现但不是章节标题的引用词（移除过于宽泛的"如""见"）
-const NON_CHAPTER_KEYWORDS = ["参阅", "参考", "参见", "详见", "另见", "又见", "语见", "出自"];
-
-function isChapterTitle(line: string, prevLine?: string, nextLine?: string): boolean {
-  const t = line.trim();
-  // 长度限制：2-20 字
-  if (!t || t.length < 2 || t.length > 20) return false;
-  // 不以缩进开头（正文通常缩进）
-  if (line.startsWith("　") || line.startsWith(" ")) return false;
-  // 排除含正文引用关键词的行
-  if (NON_CHAPTER_KEYWORDS.some((k) => t.includes(k))) return false;
-  // 排除含标点的行（章节标题通常无标点）
-  if (/[，。！？；：、""''（）【】]/.test(t)) return false;
-
-  const matched = CHAPTER_PATTERNS.some((p) => p.test(t));
-  if (!matched) return false;
-
-  // 上下文校验：章节标题前后应为空行或文件边界
-  const prevEmpty = !prevLine || !prevLine.trim();
-  const nextEmpty = !nextLine || !nextLine.trim();
-  // 至少一侧为空行（容忍某些格式不规范的古籍）
-  if (!prevEmpty && !nextEmpty) return false;
-
-  return true;
-}
-
-/** 解析 TXT 为章节数组 */
-function parseChapters(text: string, bookTitle: string): { title: string; paragraphs: string[] }[] {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
-  const chapters: { title: string; paragraphs: string[] }[] = [];
-  let current: { title: string; paragraphs: string[] } | null = null;
-  let buf: string[] = [];
-
-  const flush = () => {
-    if (current && buf.length > 0) {
-      current.paragraphs.push(...buf.filter((p) => p.trim()));
-      buf = [];
-    }
-  };
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const prevLine = i > 0 ? lines[i - 1] : undefined;
-    const nextLine = i < lines.length - 1 ? lines[i + 1] : undefined;
-    if (isChapterTitle(line, prevLine, nextLine)) {
-      flush();
-      if (current) chapters.push(current);
-      current = { title: line.trim(), paragraphs: [] };
-    } else {
-      const trimmed = line.trim();
-      if (trimmed) buf.push(trimmed);
-    }
-  }
-  flush();
-  if (current) chapters.push(current);
-
-  // 无法识别章节时，整书作为一章
-  if (chapters.length === 0) {
-    return [{ title: bookTitle, paragraphs: lines.map((l) => l.trim()).filter(Boolean) }];
-  }
-  // 过滤掉只有标题无正文的空章节
-  return chapters.filter((c) => c.paragraphs.length > 0);
 }
 
 export default function RemoteReader({ bookId }: { bookId: string }) {
@@ -104,6 +40,9 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
   const [simple, setSimple] = useState(false);
   const [fontSize, setFontSize] = useState(16);
   const [lineHeight, setLineHeight] = useState(1.8);
+  const [usingManifest, setUsingManifest] = useState(false); // 是否走 Range 分片模式
+  const [toc, setToc] = useState<ChapterRange[]>([]); // 分片模式目录（字节偏移）
+  const chapterCacheRef = useRef<Map<number, string>>(new Map());
 
   // 记录阅读历史（提取为独立函数，缓存命中和 fetch 成功后都调用）
   const recordRecent = useCallback((b: CatalogEntry) => {
@@ -116,10 +55,57 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     } catch { /* ignore */ }
   }, []);
 
-  // 加载原文（带缓存 + 大文件保护 + 超时 + 进度 + CDN 镜像降级）
-  // force=true 时跳过大小警告检查（用户已确认加载大文件）
-  const loadContent = useCallback(async (b: CatalogEntry, force = false) => {
-    // 1. 先查 IndexedDB 缓存
+  // 分片模式：按章节字节区间拉取（带内存缓存，避免重复下载）
+  const loadChapter = useCallback(async (b: CatalogEntry, ch: ChapterRange) => {
+    setLoading(true);
+    setError(null);
+    setLoadingProgress(0);
+    try {
+      const cached = chapterCacheRef.current.get(ch.start);
+      if (cached !== undefined) {
+        setContent(cached);
+        setLoading(false);
+        return;
+      }
+      const text = await fetchChapterText(b, ch, {
+        timeout: FETCH_TIMEOUT,
+        onProgress: (loaded, total) => setLoadingProgress(total > 0 ? Math.round((loaded / total) * 100) : 0),
+      });
+      chapterCacheRef.current.set(ch.start, text);
+      recordRecent(b);
+      setContent(text);
+      setLoading(false);
+    } catch (e: any) {
+      setError(String(e?.message || e));
+      setLoading(false);
+    }
+  }, [recordRecent]);
+
+  // 加载原文：优先 Range 分片（超大书），否则回退整本下载 + IDB 缓存 + 大文件警告
+  const loadContent = useCallback(async (b: CatalogEntry, force = false, restoredChapter = 0) => {
+    setLoading(true);
+    setError(null);
+    setLoadingProgress(0);
+    setShowLargeWarning(false);
+    setLoadingFromCache(false);
+
+    // 1. 尝试分片清单（构建期生成；支持则仅按需拉取章节）
+    const manifest = await loadChapterManifest(b.id);
+    if (manifest && manifest.length) {
+      const t = buildToc(manifest);
+      setUsingManifest(true);
+      setToc(t);
+      const idx = Math.max(0, Math.min(t.length - 1, restoredChapter));
+      setChapterIdx(idx);
+      setPageIdx(0);
+      await loadChapter(b, t[idx]);
+      recordRecent(b);
+      return;
+    }
+
+    // 2. 回退：整本下载（小书 / 尚未生成清单的书）
+    setUsingManifest(false);
+    setToc([]);
     const cached = await getCachedBook(b.id);
     if (cached) {
       setLoadingFromCache(true);
@@ -130,7 +116,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     }
     setLoadingFromCache(false);
 
-    // 2. 大文件警告（>5MB），force 时跳过
+    // 大文件警告（>5MB），force 时跳过
     if (!force && b.size > LARGE_FILE_THRESHOLD) {
       setShowLargeWarning(true);
       setLoading(false);
@@ -140,7 +126,6 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     // 3. 尝试主源 + CDN 镜像降级
     const urls = [b.rawUrl, ...(b.mirrors || [])];
     let lastError: Error | null = null;
-
     for (let i = 0; i < urls.length; i++) {
       try {
         setLoadingProgress(0);
@@ -150,7 +135,6 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
             if (total > 0) setLoadingProgress(Math.round((loaded / total) * 100));
           },
         });
-        // 4. 写入缓存（异步，不阻塞渲染）
         setCachedBook(b.id, b.title, text);
         recordRecent(b);
         setContent(text);
@@ -158,13 +142,10 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         return;
       } catch (e: any) {
         lastError = e;
-        // 继续尝试下一个镜像
       }
     }
-
-    // 所有源都失败
     throw lastError || new Error("所有数据源均加载失败");
-  }, [recordRecent]);
+  }, [recordRecent, loadChapter]);
 
   // 加载书目元数据 + 原文
   useEffect(() => {
@@ -184,15 +165,17 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
 
         // 恢复阅读进度
         const progressStr = typeof window !== "undefined" ? localStorage.getItem(`ab-remote-${bookId}`) : null;
+        let restoredChapter = 0;
         if (progressStr) {
           try {
             const p = JSON.parse(progressStr);
-            setChapterIdx(p.chapterIdx || 0);
+            restoredChapter = p.chapterIdx || 0;
             setPageIdx(p.pageIdx || 0);
           } catch { /* ignore */ }
         }
+        setChapterIdx(restoredChapter);
 
-        await loadContent(b);
+        await loadContent(b, false, restoredChapter);
       } catch (e: any) {
         if (!cancelled) {
           if (e instanceof FetchTimeoutError) {
@@ -208,16 +191,19 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     return () => { cancelled = true; };
   }, [bookId, loadContent]);
 
+  // 回退模式：从整本文本解析章节
   const chapters = useMemo(
-    () => (content && book ? parseChapters(content, book.title) : []),
-    [content, book]
+    () => (content && !usingManifest && book ? parseChapters(content, book.title) : []),
+    [content, usingManifest, book]
   );
 
-  const current = chapters[chapterIdx];
-  const totalPages = current ? Math.ceil(current.paragraphs.length / PAGE_SIZE) : 1;
-  const pageParagraphs = current
-    ? current.paragraphs.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE)
-    : [];
+  const navItems = usingManifest ? toc : chapters;
+  const currentTitle = usingManifest ? toc[chapterIdx]?.title ?? "" : chapters[chapterIdx]?.title ?? "";
+  const paragraphs = usingManifest
+    ? content ? splitParagraphs(content) : []
+    : chapters[chapterIdx]?.paragraphs ?? [];
+  const totalPages = Math.ceil(paragraphs.length / PAGE_SIZE) || 1;
+  const pageParagraphs = paragraphs.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE);
 
   // 进度缓存
   useEffect(() => {
@@ -238,14 +224,26 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
   }, [simple]);
 
   const goChapter = useCallback((idx: number) => {
-    setChapterIdx(Math.max(0, Math.min(chapters.length - 1, idx)));
+    const max = (usingManifest ? toc.length : chapters.length) - 1;
+    const clamped = Math.max(0, Math.min(max, idx));
+    setChapterIdx(clamped);
     setPageIdx(0);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [chapters.length]);
+    if (usingManifest && book) {
+      const ch = toc[clamped];
+      if (ch) loadChapter(book, ch);
+    }
+  }, [usingManifest, toc, chapters.length, book, loadChapter]);
 
   const handleDownload = useCallback(() => {
-    if (!book || !content) return;
-    // 大文件（>5MB）直接打开上游原文（跨域 download 属性无效，用户可右键另存为）
+    if (!book) return;
+    // 分片模式：整本需逐章拉取，引导至上游原文另存为（避免浏览器内拼接超大文本）
+    if (usingManifest) {
+      const u = safeHttpUrl(book.rawUrl);
+      if (u) window.open(u, "_blank", "noopener");
+      return;
+    }
+    if (!content) return;
     if (book.size > LARGE_FILE_THRESHOLD) {
       const u = safeHttpUrl(book.rawUrl);
       if (u) window.open(u, "_blank", "noopener");
@@ -255,7 +253,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     const modeText = simple ? "简体对照版" : "繁体原版";
     const body = simple ? toSimplified(content) : content;
     downloadText(`${book.title}_${modeText}.txt`, body);
-  }, [book, content, simple]);
+  }, [book, content, simple, usingManifest]);
 
   // 划词检索
   const [selBtn, setSelBtn] = useState<{ text: string; x: number; y: number } | null>(null);
@@ -340,13 +338,14 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
       </div>
     </div>
   );
-  if (!book || !current) return null;
+  if (!book || (!content && !usingManifest)) return null;
 
   return (
     <div className="reader-wrap">
       <div className="reader-title">{book.title}</div>
       <div className="reader-sub">
-        {book.category} › {book.subcategories.join(" › ")} · {formatSize(book.size)} · {chapters.length} 章
+        {book.category} › {book.subcategories.join(" › ")} · {formatSize(book.size)} · {navItems.length} 章
+        {usingManifest && <span style={{ color: "var(--color-primary)" }}> · 分片懒加载</span>}
         · {safeHttpUrl(book.rawUrl) ? (
           <a href={safeHttpUrl(book.rawUrl)!} target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>上游原文</a>
         ) : (
@@ -354,56 +353,30 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         )}
       </div>
 
-      {/* 工具栏 */}
-      <div className="reader-toolbar">
-        <div className="ctrl">
-          <span>字号</span>
-          <button onClick={() => setFontSize(Math.max(14, fontSize - 1))}>A-</button>
-          <button onClick={() => setFontSize(Math.min(22, fontSize + 1))}>A+</button>
-        </div>
-        <div className="ctrl">
-          <span>行距</span>
-          <button onClick={() => setLineHeight(Math.max(1.5, +(lineHeight - 0.1).toFixed(1)))}>－</button>
-          <button onClick={() => setLineHeight(Math.min(2.4, +(lineHeight + 0.1).toFixed(1)))}>＋</button>
-        </div>
-        <label className="ctrl" style={{ cursor: "pointer" }}>
-          <input type="checkbox" checked={simple} onChange={(e) => setSimple(e.target.checked)} style={{ marginRight: 4 }} />
-          简体对照
-        </label>
-        <button className="btn btn-secondary" style={{ fontSize: 13, padding: "5px 12px" }} onClick={handleDownload}>
-          下载本书
-        </button>
-      </div>
+      <ReaderToolbar
+        fontSize={fontSize}
+        lineHeight={lineHeight}
+        simple={simple}
+        onFontDec={() => setFontSize(Math.max(14, fontSize - 1))}
+        onFontInc={() => setFontSize(Math.min(22, fontSize + 1))}
+        onLineDec={() => setLineHeight(Math.max(1.5, +(lineHeight - 0.1).toFixed(1)))}
+        onLineInc={() => setLineHeight(Math.min(2.4, +(lineHeight + 0.1).toFixed(1)))}
+        onToggleSimple={(v) => setSimple(v)}
+        onDownload={handleDownload}
+      />
 
       {/* 阅读进度条 */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--color-text-secondary)", marginBottom: 4 }}>
           <span>阅读进度</span>
-          <span>{chapters.length > 0 ? Math.round(((chapterIdx + 1) / chapters.length) * 100) : 0}%</span>
+          <span>{navItems.length > 0 ? Math.round(((chapterIdx + 1) / navItems.length) * 100) : 0}%</span>
         </div>
         <div style={{ background: "var(--color-border,#eee)", borderRadius: 4, height: 6, overflow: "hidden" }}>
-          <div style={{ background: "var(--color-primary,#8C3130)", height: "100%", width: `${chapters.length > 0 ? ((chapterIdx + 1) / chapters.length) * 100 : 0}%`, transition: "width 0.3s" }} />
+          <div style={{ background: "var(--color-primary,#8C3130)", height: "100%", width: `${navItems.length > 0 ? ((chapterIdx + 1) / navItems.length) * 100 : 0}%`, transition: "width 0.3s" }} />
         </div>
       </div>
 
-      {/* 章节导航 */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
-        <button className="btn btn-secondary" disabled={chapterIdx === 0} onClick={() => goChapter(chapterIdx - 1)} style={{ fontSize: 13 }}>
-          ← 上一章
-        </button>
-        <select
-          value={chapterIdx}
-          onChange={(e) => goChapter(+e.target.value)}
-          style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid var(--color-border)", fontSize: 13 }}
-        >
-          {chapters.map((c, i) => (
-            <option key={i} value={i}>第 {i + 1} 章 · {c.title}</option>
-          ))}
-        </select>
-        <button className="btn btn-secondary" disabled={chapterIdx >= chapters.length - 1} onClick={() => goChapter(chapterIdx + 1)} style={{ fontSize: 13 }}>
-          下一章 →
-        </button>
-      </div>
+      <ReaderToc items={navItems} current={chapterIdx} onSelect={goChapter} disabled={loading} />
 
       {/* 正文 */}
       <div
@@ -411,7 +384,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         style={{ fontSize, lineHeight, userSelect: "text" }}
         onMouseUp={() => { /* selection handler above */ }}
       >
-        <h3 style={{ textAlign: "center", marginBottom: 20, fontSize: 18 }}>{current.title}</h3>
+        <h3 style={{ textAlign: "center", marginBottom: 20, fontSize: 18 }}>{currentTitle}</h3>
         {pageParagraphs.map((p, i) => (
           <p key={i}>{simple ? toSimplified(p) : p}</p>
         ))}
@@ -421,25 +394,21 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
       {totalPages > 1 && (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 32 }}>
           <button className="btn btn-secondary" disabled={pageIdx === 0} onClick={() => { setPageIdx(pageIdx - 1); window.scrollTo({ top: 0 }); }} style={{ fontSize: 13 }}>上一页</button>
-          <span style={{ fontSize: 13 }}>第 {pageIdx + 1} / {totalPages} 页</span>
+          <span style={{ fontSize: 14 }}>第 {pageIdx + 1} / {totalPages} 页</span>
           <button className="btn btn-secondary" disabled={pageIdx >= totalPages - 1} onClick={() => { setPageIdx(pageIdx + 1); window.scrollTo({ top: 0 }); }} style={{ fontSize: 13 }}>下一页</button>
         </div>
       )}
 
-      <div className="reader-progress">
-        已自动保存阅读进度 · 章节 {chapterIdx + 1}/{chapters.length} · 页 {pageIdx + 1}/{totalPages}
-      </div>
-
-      {/* 划词检索浮动按钮 */}
       {selBtn && (
-        <a
-          href={`/search?q=${encodeURIComponent(selBtn.text)}&mode=full`}
-          className="search-sel-btn"
-          style={{ left: selBtn.x, top: selBtn.y, position: "fixed", transform: "translateX(-50%)" }}
-          onClick={() => setSelBtn(null)}
+        <div
+          style={{ position: "absolute", left: selBtn.x, top: selBtn.y, transform: "translateX(-50%)", zIndex: 50 }}
         >
-          检索「{selBtn.text}」
-        </a>
+          <button
+            className="btn btn-primary"
+            style={{ fontSize: 12, padding: "4px 10px" }}
+            onClick={() => { window.open(`/search?q=${encodeURIComponent(selBtn.text)}&mode=full`, "_blank"); setSelBtn(null); }}
+          >检索「{selBtn.text}」</button>
+        </div>
       )}
     </div>
   );

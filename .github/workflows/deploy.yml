@@ -38,11 +38,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Sync data from prototype (single source of truth)
-        run: npm run build:index
-
-      - name: Rebuild daizhige catalog index (15,694 books from upstream)
+      - name: Build daizhige catalog index (15,694 books from upstream repo)
         run: npm run build:catalog
+
+      - name: Build fulltext index + chapter manifests (4.9GB upstream TXT, 生成全文检索与 Range 分片所需产物)
+        run: npm run build:fulltext
 
       - name: Lint & Type check (via build)
         env:

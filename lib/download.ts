@@ -66,3 +66,35 @@ export function buildCategoryTxt(
     `\n${DOWNLOAD_NOTICE}\n`
   );
 }
+
+/** 书单导出行（仅元数据与原文直链，不含正文，符合零复制架构） */
+export interface BooklistRow {
+  title: string;
+  category: string;
+  subcategories: string[];
+  size: number;
+  rawUrl: string;
+  mirrors: string[];
+}
+
+/** 将书单导出为 CSV（UTF-8 BOM，Excel 友好），含书名/馆藏/子类/大小/原文直链/镜像直链 */
+export function exportBooklistCsv(rows: BooklistRow[], filename: string): void {
+  const csvCell = (s: string): string => {
+    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+  };
+  const header = ["书名", "馆藏", "子类", "大小(B)", "原文直链", "镜像直链"];
+  const lines = [header.join(",")];
+  for (const r of rows) {
+    const cells = [
+      r.title,
+      r.category,
+      r.subcategories.join("/"),
+      String(r.size),
+      r.rawUrl,
+      (r.mirrors || []).join(" "),
+    ].map(csvCell);
+    lines.push(cells.join(","));
+  }
+  downloadText(filename, lines.join("\n"));
+}

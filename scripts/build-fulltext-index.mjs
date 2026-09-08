@@ -18,6 +18,7 @@ import { writeFileSync, mkdirSync, existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { T2S_MAP } from "../lib/t2s.ts";
+import { chapterBoundaries } from "../lib/chapterParse.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
@@ -61,6 +62,7 @@ function tokenize(text) {
 
 const books = catalog.books.slice(0, Math.min(catalog.books.length, isFinite(LIMIT) ? LIMIT : catalog.books.length));
 const index = {};
+const chaptersMap = {}; // { [bookId]: [{title, start, end}] } 章节字节偏移清单（单文件，便于入库与部署）
 let done = 0;
 const CONCURRENCY = 8;
 
@@ -77,6 +79,21 @@ async function worker(queue) {
       for (const term of tokenize(text)) {
         if (term.length === 1 && STOP.has(term)) continue;
         (index[term] ||= []).push(b.id);
+      }
+      // 章节字节偏移清单（供阅读页 Range 分片懒加载，复用本次下载）
+      try {
+        const bounds = chapterBoundaries(text);
+        if (bounds.length > 0) {
+          const totalBytes = Buffer.byteLength(text, "utf8");
+          const manifest = bounds.map((bd) => ({
+            title: bd.title,
+            start: Buffer.byteLength(text.slice(0, bd.charStart), "utf8"),
+            end: Buffer.byteLength(text.slice(0, bd.charEnd), "utf8") || totalBytes,
+          }));
+          chaptersMap[b.id] = manifest;
+        }
+      } catch (e) {
+        console.warn(`⚠️ 章节清单生成失败 ${b.id}: ${e.message}`);
       }
     } catch (e) {
       console.warn(`⚠️ 失败 ${b.id}: ${e.message}`);
@@ -104,3 +121,12 @@ console.log(`[2/2] ✅ 全量倒排索引: ${OUT}`);
 console.log(`  词条数: ${Object.keys(trimmed).length}`);
 console.log(`  覆盖文献: ${books.length} 部`);
 console.log(`  索引体积: ${(Buffer.byteLength(JSON.stringify(trimmed)) / 1024 / 1024).toFixed(1)} MB`);
+
+// 章节字节偏移清单（单文件：{ [bookId]: [{title,start,end}] }，便于入库与部署）
+if (Object.keys(chaptersMap).length) {
+  const out = resolve(ROOT, "public/index/chapters.json");
+  writeFileSync(out, JSON.stringify(chaptersMap), "utf8");
+  const count = Object.keys(chaptersMap).length;
+  console.log(`  章节清单: ${count} 部 → public/index/chapters.json`);
+  console.log(`  章节清单体积: ${(Buffer.byteLength(JSON.stringify(chaptersMap)) / 1024 / 1024).toFixed(1)} MB`);
+}
