@@ -17,14 +17,14 @@ export default function Footer() {
           <Link href="/help">免责声明</Link>
           <Link href="/help">反馈渠道</Link>
         </div>
-        <p style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 8 }}>
+        <p>
           资源下载公示：全站古籍均可在书籍页/馆藏页按章、按本、按馆藏下载；统一解压密码与备用网盘链接将于全量数据发布时公示。
         </p>
         <p>古籍通 AncientBook · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
-        <p className="footer-stats" style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 8 }}>
+        <p className="footer-stats">
           馆藏 10 类 · 全馆藏 {TOTAL_BOOKS.toLocaleString()} 部（殆知阁 v20）· 人物/关系 待接入
         </p>
-        <p className="footer-version" style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 4 }}>
+        <p className="footer-version">
           当前版本 v{APP_VERSION}
         </p>
       </div>

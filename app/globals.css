@@ -78,10 +78,21 @@ img{max-width:100%;display:block;}
 .fade-in.visible{opacity:1;transform:translateY(0);}
 
 /* ---------- 页脚 ---------- */
-.footer{border-top:1px solid var(--color-border);padding:24px 20px;text-align:center;color:var(--color-text-secondary);font-size:14px;}
-.footer-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
+.footer{
+  border-top:1px solid var(--color-border);
+  padding:24px 20px;
+  text-align:center;
+  color:var(--color-text-secondary);
+  font-family:inherit;            /* 统一继承全局衬线字体栈 */
+  font-size:14px;                 /* 页脚基准字号 */
+  line-height:1.6;
+}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:8px;}
 .footer .foot-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.footer .foot-links a{font-size:14px;color:var(--color-text);}
 .footer .foot-links a:hover{color:var(--color-primary);}
+/* 页脚段落统一次级字号：链接为基准 14px，说明文字为 13px，避免内联魔法数字 */
+.footer-inner > p{font-size:13px;color:var(--color-text-secondary);}
 
 /* ---------- 基础组件 ---------- */
 .btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:15px;transition:all 0.2s ease;display:inline-flex;align-items:center;gap:6px;justify-content:center;}
