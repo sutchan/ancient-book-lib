@@ -72,7 +72,7 @@ export interface DaizhigeCatalog {
   books: CatalogEntry[];
 }
 
-export interface SearchDemoResult {
+export interface SearchTitleResult {
   book: string;
   chapter: string;
   path: string;
@@ -88,7 +88,7 @@ export interface AppData {
   relations: Relation[];
   searchDemo: {
     keyword: string;
-    results: SearchDemoResult[];
+    results: SearchTitleResult[];
   };
   glossary: Glossary[];
 }

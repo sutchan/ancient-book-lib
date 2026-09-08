@@ -5,6 +5,13 @@
 
 ## [未发布]
 
+## [1.3.3] - 2026-09-08
+
+### 清理（去除演示数据收尾）
+- 运行代码残留"演示"措辞清理：馆藏批量 TXT 导出头部"演示预览版导出"改为"馆藏藏书清单导出"；`lib/types.ts` 类型 `SearchDemoResult` 重命名为 `SearchTitleResult`
+- 删除 v1.3.0 移除 demo 阅读器后残留的空目录 `app/read/[title]/`、`app/book/[id]/`
+- 真实书目链路确认就绪：15,694 部古籍来自 `garychowcmu/daizhigev20`（`public/index/daizhige-catalog.json` 由 `npm run build:catalog` 生成），阅读页按需 fetch 上游 raw URL，全仓库零 TXT 复制
+
 ## [1.3.2] - 2026-09-08
 
 ### 修复（原型二次审查）

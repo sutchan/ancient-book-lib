@@ -59,7 +59,7 @@ export function buildCategoryTxt(
   categoryName: string,
   books: { title: string; meta: string; body: string }[]
 ): string {
-  const head = `${categoryName}·馆藏合集\n（古籍通 AncientBook 演示预览版导出）\n${"=".repeat(30)}\n\n`;
+  const head = `${categoryName}·馆藏合集\n（古籍通 AncientBook 馆藏藏书清单导出）\n${"=".repeat(30)}\n\n`;
   return (
     head +
     books.map((b) => `# ${b.title}\n${b.meta}\n\n${b.body}\n`).join("") +
