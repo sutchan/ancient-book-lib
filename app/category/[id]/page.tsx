@@ -1,51 +1,31 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import data from "@/lib/data-generated";
+import { CATEGORIES } from "@/lib/categories";
 
 interface Props {
   params: { id: string };
 }
 
 export function generateStaticParams() {
-  return data.categories.map((c) => ({ id: c.id }));
-}
-
-export function generateMetadata({ params }: Props): Metadata {
-  const cat = data.categories.find((c) => c.id === params.id);
-  return {
-    title: `${cat?.name ?? "馆藏"}｜古籍通 AncientBook`,
-    description: cat?.desc,
-  };
+  return CATEGORIES.map((c) => ({ id: c.id }));
 }
 
 export default function CategoryPage({ params }: Props) {
-  const cat = data.categories.find((c) => c.id === params.id);
-  if (!cat) notFound();
-  const books = data.books.filter((b) => b.category === cat.name);
-
+  const cat = CATEGORIES.find((c) => c.id === params.id);
+  const href = cat ? `/catalog?category=${encodeURIComponent(cat.name)}` : "/catalog";
   return (
     <section>
       <div className="breadcrumb">
         <Link href="/">首页</Link>
         <span className="sep">/</span>
-        <span>{cat.name}</span>
+        <span>全馆藏</span>
       </div>
-      <h2 style={{ marginBottom: 8 }}>{cat.name}</h2>
+      <h2 style={{ marginBottom: 8 }}>馆藏分类{cat ? `：${cat.name}` : ""}</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-        {cat.desc} · 共收录 {books.length} 部典籍
+        该分类已合并至「全馆藏」书目页，可按馆藏筛选浏览：
       </p>
-      {books.map((b, i) => (
-        <Link key={b.id} href={`/book/${b.id}`} className="book-item">
-          <div className="book-index">{i + 1}</div>
-          <div>
-            <div className="book-title">{b.title}</div>
-            <div className="book-meta">
-              {b.dynasty} · {b.author} · {b.chapters.length} 卷
-            </div>
-          </div>
-        </Link>
-      ))}
+      <Link href={href} className="btn btn-primary">
+        前往全馆藏书目
+      </Link>
     </section>
   );
 }

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import data from "@/lib/data-generated";
 import CharacterList from "@/components/CharacterList";
 
 export const metadata: Metadata = {
@@ -18,7 +17,7 @@ export default function CharacterPage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>人物考据档案</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-        共收录 {data.characters.length} 位历史人物 · 支持姓名/字号/别称搜索 · 重名人物按朝代+籍贯+官职多维区分 · 关联典籍一键聚合
+        人物考据与关系溯源数据待接入——将随 CBDB 等权威元数据导入后开放，支持重名人物按朝代+籍贯+官职多维区分与关联典籍聚合。
       </p>
       <CharacterList />
     </section>

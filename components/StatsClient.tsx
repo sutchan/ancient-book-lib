@@ -1,14 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import data from "@/lib/data-generated";
-import {
-  statsByCategory,
-  statsByDynasty,
-  statsByTag,
-  statsByRelationType,
-} from "@/lib/search";
+import { loadCatalog, formatSize, type DaizhigeCatalog } from "@/lib/catalog";
 
 const PALETTE = ["#8C3130", "#B8754E", "#C9A227", "#4E7A5A", "#5B7A9D", "#7A5B9D", "#9D5B6E", "#3E7A78", "#8A6D3B", "#5A6B8C"];
 
@@ -30,7 +24,7 @@ function BarChart({ title, rows }: { title: string; rows: { name: string; count:
                 }}
               />
             </div>
-            <div className="stat-bar-value">{r.count}</div>
+            <div className="stat-bar-value">{r.count.toLocaleString()}</div>
           </div>
         ))}
       </div>
@@ -39,16 +33,49 @@ function BarChart({ title, rows }: { title: string; rows: { name: string; count:
 }
 
 export default function StatsClient() {
-  const byCat = useMemo(() => statsByCategory(), []);
-  const byDynasty = useMemo(() => statsByDynasty(), []);
-  const byTag = useMemo(() => statsByTag(), []);
-  const byRel = useMemo(() => statsByRelationType(), []);
+  const [catalog, setCatalog] = useState<DaizhigeCatalog | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalChapters = data.books.reduce((s, b) => s + b.chapters.length, 0);
-  const totalChars = data.characters.length;
-  const totalRels = data.relations.length;
-  const avgChapters = (totalChapters / data.books.length).toFixed(1);
-  const tagMax = byTag[0];
+  useEffect(() => {
+    loadCatalog()
+      .then(setCatalog)
+      .catch((e) => setError(String(e)));
+  }, []);
+
+  const byCat = useMemo(() => {
+    if (!catalog) return [];
+    return Object.entries(catalog.stats)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [catalog]);
+
+  if (error) {
+    return (
+      <section>
+        <div className="breadcrumb">
+          <Link href="/">首页</Link>
+          <span className="sep">/</span>
+          <span>数据统计</span>
+        </div>
+        <p style={{ color: "#c00" }}>索引加载失败：{error}</p>
+      </section>
+    );
+  }
+
+  if (!catalog) {
+    return (
+      <section>
+        <div className="breadcrumb">
+          <Link href="/">首页</Link>
+          <span className="sep">/</span>
+          <span>数据统计</span>
+        </div>
+        <div style={{ padding: 40, textAlign: "center" }}>加载中…</div>
+      </section>
+    );
+  }
+
+  const total = catalog.total;
 
   return (
     <section>
@@ -59,94 +86,70 @@ export default function StatsClient() {
       </div>
       <h2 style={{ marginBottom: 8 }}>馆藏数据统计与分析</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-        基于当前考据库 {data.version} 的馆藏规模、学术分布与关系网络量化分析
+        基于殆知阁 v20 全量 {total.toLocaleString()} 部古籍（上游托管，本仓库零复制）的馆藏规模与分布分析
       </p>
 
       <div className="stat-kpis">
         <div className="stat-kpi">
-          <div className="kpi-num">{data.categories.length}</div>
+          <div className="kpi-num">{byCat.length}</div>
           <div className="kpi-label">馆藏分类</div>
         </div>
         <div className="stat-kpi">
-          <div className="kpi-num">{data.books.length}</div>
+          <div className="kpi-num">{total.toLocaleString()}</div>
           <div className="kpi-label">收录典籍</div>
         </div>
         <div className="stat-kpi">
-          <div className="kpi-num">{totalChapters}</div>
-          <div className="kpi-label">章节卷次</div>
+          <div className="kpi-num">{formatSize(catalog.totalSizeBytes)}</div>
+          <div className="kpi-label">原始数据量</div>
         </div>
         <div className="stat-kpi">
-          <div className="kpi-num">{totalChars}</div>
+          <div className="kpi-num">待接入</div>
           <div className="kpi-label">考据人物</div>
         </div>
         <div className="stat-kpi">
-          <div className="kpi-num">{totalRels}</div>
+          <div className="kpi-num">待接入</div>
           <div className="kpi-label">关系条目</div>
-        </div>
-        <div className="stat-kpi">
-          <div className="kpi-num">{avgChapters}</div>
-          <div className="kpi-label">均卷数/部</div>
         </div>
       </div>
 
-      {/* 全量数据概览（殆知阁 v20） */}
       <div className="card stat-panel" style={{ marginTop: 20, padding: "16px 20px" }}>
         <div className="stat-panel-title">全量数据概览（殆知阁 v20 · 原始数据上游托管 · 本仓库零复制）</div>
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 12 }}>
-          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>15,694</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>部古籍</span></div>
-          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>4.9</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>GB 原始 TXT</span></div>
-          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>10</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>大馆藏</span></div>
-          <div><span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>5.7</span> <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>MB 书目索引（本仓库）</span></div>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 4 }}>馆藏分布（全量）</div>
-            <div style={{ display: "flex", gap: 2, flexWrap: "wrap", fontSize: 11 }}>
-              {[["佛藏",5135],["史藏",2043],["集藏",1948],["道藏",1721],["子藏",1463],["医藏",911],["儒藏",908],["诗藏",776],["艺藏",446],["易藏",343]].map(([n,c]) => (
-                <span key={n as string} style={{ background: "var(--color-bg-secondary,#f4f3ee)", padding: "2px 8px", borderRadius: 4 }}>{n} {c}</span>
-              ))}
-            </div>
+          <div>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>{total.toLocaleString()}</span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>部古籍</span>
+          </div>
+          <div>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>4.9</span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>GB 原始 TXT</span>
+          </div>
+          <div>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>10</span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>大馆藏</span>
+          </div>
+          <div>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>5.7</span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>MB 书目索引（本仓库）</span>
           </div>
         </div>
         <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-secondary)" }}>
-          数据源：<a href="https://github.com/garychowcmu/daizhigev20" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>garychowcmu/daizhigev20</a> · 阅读时按需 fetch raw URL，不预加载全量数据
+          数据源：
+          <a href="https://github.com/garychowcmu/daizhigev20" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>
+            garychowcmu/daizhigev20
+          </a>{" "}
+          · 阅读时按需 fetch raw URL，不预加载全量数据
         </div>
       </div>
 
-      <div className="stat-grid">
-        <BarChart title="馆藏分布（按十大藏库）" rows={byCat} />
-        <BarChart title="典籍朝代分布" rows={byDynasty} />
-      </div>
       <div className="stat-grid" style={{ marginTop: 16 }}>
-        <BarChart title="人物身份标签分布" rows={byTag.slice(0, 8)} />
-        <BarChart title="关系类型分布" rows={byRel} />
-      </div>
-
-      <div className="card stat-panel" style={{ marginTop: 24 }}>
-        <div className="stat-panel-title">考据洞察</div>
-        <ul style={{ lineHeight: 2, fontSize: 15, paddingLeft: 20, color: "var(--color-text)" }}>
-          <li>
-            馆藏均衡度：十大藏库平均每库 {((data.books.length / data.categories.length).toFixed(1))} 部典籍，
-            最高为{" "}{byCat[0]?.name}（{byCat[0]?.count} 部）{byCat[byCat.length - 1]?.count === byCat[0]?.count ? "" : `，最低为 ${byCat[byCat.length - 1]?.name}（${byCat[byCat.length - 1]?.count} 部）`}，
-            馆藏结构较为均衡。
-          </li>
-          <li>
-            朝代纵贯：典籍覆盖从「{byDynasty[byDynasty.length - 1]?.name}」到「{byDynasty[0]?.name}」的{" "}
-            {byDynasty.length} 个历史阶段，其中 {byDynasty[0]?.name} 部目最多（{byDynasty[0]?.count} 部），
-            体现以先秦经典与唐宋典籍为双核心的收藏脉络。
-          </li>
-          <li>
-            人物谱系：{tagMax ? <>最高频身份标签为「{tagMax.name}」（{tagMax.count} 位），</> : ""}
-            思想家与文学家构成考据人物主体；人物著作与馆藏典籍互链率{" "}
-            {((data.characters.filter((c) => c.books.some((bk) => data.books.some((b) => b.title === bk || bk.includes(b.title)))).length / totalChars) * 100).toFixed(0)}%。
-          </li>
-          <li>
-            关系网络：{totalRels} 条关系覆盖 {new Set(data.relations.flatMap((r) => [r.a, r.b])).size} 位人物，
-            网络密度 {((totalRels * 2) / (totalChars * (totalChars - 1)) * 100).toFixed(1)}%；
-            最高频关系类型为「{byRel[0]?.name}」（{byRel[0]?.count} 条）。
-          </li>
-          <li>
-            数据说明：以上指标基于演示考据库实时计算，上线后随 5GB 古籍全文库索引同步刷新，支持按时间维度归档对比。
-          </li>
-        </ul>
+        <BarChart title="馆藏分布（按十大藏库）" rows={byCat} />
+        <div className="card stat-panel">
+          <div className="stat-panel-title">人物 / 关系考据</div>
+          <div style={{ padding: 16, color: "var(--color-text-secondary)", lineHeight: 1.8 }}>
+            人物考据与关系溯源数据待接入，将随 CBDB 等权威元数据导入后开放，
+            届时可展示身份标签分布、关系类型分布与考据洞察。
+          </div>
+        </div>
       </div>
     </section>
   );

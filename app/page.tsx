@@ -1,5 +1,5 @@
 import Link from "next/link";
-import data from "@/lib/data-generated";
+import { CATEGORIES } from "@/lib/categories";
 import { toSimplified } from "@/lib/t2s";
 import RecentBooks from "@/components/RecentBooks";
 
@@ -12,7 +12,9 @@ export default function HomePage() {
           开源公益古籍检索阅读与考据平台 · 殆知阁 v20 全量 <strong>15,694</strong> 部古籍在线
         </p>
         <p className="hero-badge">原始数据 4.9GB 托管于上游仓库 · 本仓库零复制 · 阅读时按需加载</p>
-        <p style={{ marginTop: 6, fontSize: 13, color: "var(--color-text-secondary)" }}>精选典籍支持前端全文检索；全馆藏 15,694 部支持书目检索与原文按需阅读</p>
+        <p style={{ marginTop: 6, fontSize: 13, color: "var(--color-text-secondary)" }}>
+          全馆藏 15,694 部支持书目检索与原文按需阅读
+        </p>
         <form className="search-box hero-search" action="/search" method="get">
           <input
             className="input-text"
@@ -39,8 +41,8 @@ export default function HomePage() {
           <Link href="/catalog" className="btn btn-secondary" style={{ fontSize: 14 }}>
             📚 浏览全馆藏（15,694 部）
           </Link>
-          <Link href="/book-list" className="btn btn-secondary" style={{ fontSize: 14 }}>
-            ⭐ 精选典籍（45 部核心）
+          <Link href="/catalog" className="btn btn-secondary" style={{ fontSize: 14 }}>
+            ⭐ 全部书目
           </Link>
         </div>
       </div>
@@ -49,7 +51,7 @@ export default function HomePage() {
 
       <h2 className="section-title">十大馆藏</h2>
       <div className="category-grid">
-        {data.categories.map((c) => (
+        {CATEGORIES.map((c) => (
           <Link key={c.id} href={`/catalog?category=${encodeURIComponent(c.name)}`} className="card category-card">
             <div className="cat-icon">{c.icon}</div>
             <div className="cat-name">{c.name}</div>
@@ -63,12 +65,12 @@ export default function HomePage() {
         <Link href="/character" className="card category-card">
           <div className="cat-icon">考</div>
           <div className="cat-name">人物考据</div>
-          <div className="cat-desc">历史人物档案与史料聚合</div>
+          <div className="cat-desc">历史人物档案与史料聚合（数据待接入）</div>
         </Link>
         <Link href="/relation" className="card category-card">
           <div className="cat-icon">系</div>
           <div className="cat-name">社会关系溯源</div>
-          <div className="cat-desc">人物多维关系与双人溯源</div>
+          <div className="cat-desc">人物多维关系与双人溯源（数据待接入）</div>
         </Link>
         <Link href="/stats" className="card category-card">
           <div className="cat-icon">统</div>

@@ -1,46 +1,74 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { searchAll, distinctDynasties, categoryNames } from "@/lib/search";
+import { loadCatalog, type DaizhigeCatalog } from "@/lib/catalog";
+import {
+  loadFulltextIndex,
+  searchFulltext,
+  searchByTitle,
+  type SearchResult,
+} from "@/lib/search";
 import { toSimplified } from "@/lib/t2s";
-import data from "@/lib/data-generated";
 
 export default function SearchClient() {
   const sp = useSearchParams();
-  const [kw, setKw] = useState(sp.get("q") || "不亦说乎");
-  const [mode, setMode] = useState<"title" | "full">(
-    sp.get("mode") === "title" ? "title" : "full"
-  );
+  const [kw, setKw] = useState(sp.get("q") || "论语");
+  const [mode, setMode] = useState<"title" | "full">(sp.get("mode") === "title" ? "title" : "full");
   const [category, setCategory] = useState(sp.get("category") || "");
-  const [dynasty, setDynasty] = useState(sp.get("dynasty") || "");
   const [limit, setLimit] = useState(12);
-  const [results, setResults] = useState(() =>
-    searchAll(kw, "full", 12, { category: "", dynasty: "" })
-  );
-
-  const run = useCallback(
-    (q: string, m: "title" | "full", cat: string, dyn: string, lim: number) => {
-      setResults(
-        searchAll(q, m, lim, {
-          category: cat || undefined,
-          dynasty: dyn || undefined,
-        })
-      );
-    },
-    []
-  );
+  const [catalog, setCatalog] = useState<DaizhigeCatalog | null>(null);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [total, setTotal] = useState(0);
+  const [indexReady, setIndexReady] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    run(kw, mode, category, dynasty, limit);
-  }, [kw, mode, category, dynasty, limit, run]);
+    loadCatalog()
+      .then(setCatalog)
+      .catch((e) => setError(String(e)));
+  }, []);
 
-  const shown = results;
-  // searchAll 已按 limit 截断；仅有结果恰好达到上限时才提示「可能还有更多」
-  const hasMore = results.length === limit;
-  const dynasties = useMemo(() => distinctDynasties(), []);
-  const cats = useMemo(() => categoryNames(), []);
+  useEffect(() => {
+    if (!catalog) return;
+    const q = kw.trim();
+    if (!q) {
+      setResults([]);
+      setTotal(0);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      if (mode === "title") {
+        const r = searchByTitle(q, catalog, { category: category || undefined }, limit);
+        if (!cancelled) {
+          setResults(r);
+          setTotal(r.length);
+          setIndexReady(null);
+        }
+      } else {
+        const idx = await loadFulltextIndex();
+        if (cancelled) return;
+        setIndexReady(!!idx);
+        const r = idx
+          ? searchFulltext(q, idx, catalog, limit)
+          : searchByTitle(q, catalog, { category: category || undefined }, limit);
+        if (!cancelled) {
+          setResults(r);
+          setTotal(r.length);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [kw, mode, category, limit, catalog]);
+
+  const cats = useMemo(
+    () => (catalog ? Object.entries(catalog.stats).map(([name, count]) => ({ name, count })) : []),
+    [catalog]
+  );
 
   return (
     <section>
@@ -57,9 +85,7 @@ export default function SearchClient() {
           placeholder="输入关键词，如：论语、仁义、孔子"
           aria-label="检索关键词"
         />
-        <button className="btn btn-primary search-btn" onClick={() => run(kw, mode, category, dynasty, limit)}>
-          搜索
-        </button>
+        <button className="btn btn-primary search-btn">搜索</button>
       </div>
       <div className="filter-panel">
         <div className="search-mode-group" role="radiogroup" aria-label="检索模式">
@@ -78,78 +104,59 @@ export default function SearchClient() {
             {toSimplified("全文检索")}
           </button>
         </div>
-        <select
-          aria-label="馆藏筛选"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
+        <select aria-label="馆藏筛选" value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">全部馆藏</option>
           {cats.map((c) => (
-            <option key={c} value={c}>{c}</option>
+            <option key={c.name} value={c.name}>
+              {c.name}（{c.count}）
+            </option>
           ))}
         </select>
         <select
-          aria-label="朝代筛选"
-          value={dynasty}
-          onChange={(e) => setDynasty(e.target.value)}
+          aria-label="每页条数"
+          value={limit}
+          onChange={(e) => setLimit(parseInt(e.target.value, 10))}
         >
-          <option value="">全部朝代</option>
-          {dynasties.map((d) => (
-            <option key={d} value={d}>{d}</option>
-          ))}
-        </select>
-        <select aria-label="每页条数" value={limit} onChange={(e) => setLimit(parseInt(e.target.value, 10))}>
           <option value={10}>每页10条</option>
           <option value={20}>每页20条</option>
           <option value={50}>每页50条</option>
         </select>
       </div>
+
+      {mode === "full" && indexReady === false && (
+        <div className="search-stat" style={{ color: "var(--color-text-secondary)" }}>
+          全文索引尚未生成，已回退为标题检索（运行 <code>npm run build:fulltext</code> 开启真正全文检索）
+        </div>
+      )}
+      {error && (
+        <div className="search-stat" style={{ color: "#c00" }}>
+          索引加载失败：{error}
+        </div>
+      )}
+
       <div className="search-stat">
-        关键词「{kw}」· {mode === "title" ? "标题模式" : "全文模式"}
-        {category && ` · ${category}`}
-        {dynasty && ` · ${dynasty}`} 共命中 {data.books.length + data.characters.length} 部可检对象
-        （演示返回 {shown.length} 条）
+        关键词「{kw}」· {mode === "title" ? "标题模式" : "全文模式"} · 命中 {total} 部
       </div>
-      {shown.length === 0 ? (
+
+      {results.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
           <div className="empty-title">未找到相关内容</div>
           <div>请尝试更换关键词或减少筛选条件</div>
         </div>
       ) : (
-        shown.map((r, i) => (
-          <div className="search-result-item" key={i}>
+        results.map((r) => (
+          <div className="search-result-item" key={r.id}>
             <div className="result-title">
-              <Link
-                href={
-                  r.kind === "book"
-                    ? `/book/${data.books.find((b) => b.title === r.book)?.id ?? ""}`
-                    : "/character"
-                }
-              >
-                {toSimplified(r.book)} · {toSimplified(r.chapter)}
-              </Link>
+              <Link href={`/read/remote?id=${r.id}`}>{toSimplified(r.book)}</Link>
             </div>
             <div className="path-info">
               <span>{toSimplified(r.path)}</span>
               <span className="score-badge">{r.score}</span>
             </div>
-            <div className="snippet">
-              {r.snippet.split(kw).map((part, idx) =>
-                idx === 0 ? (
-                  <span key={idx}>{toSimplified(part)}</span>
-                ) : (
-                  <span key={idx}>
-                    <mark>{toSimplified(kw)}</mark>
-                    {toSimplified(part)}
-                  </span>
-                )
-              )}
-            </div>
           </div>
         ))
       )}
-      {hasMore && <div className="search-more">已显示前 {shown.length} 条，演示数据仅覆盖核心典籍</div>}
     </section>
   );
 }

@@ -5,6 +5,15 @@
 
 ## [未发布]
 
+## [1.3.0] - 2026-09-08
+
+### 变更（核心数据架构迁移：去除演示数据，直连上游全量 txt）
+- **唯一数据源切换**：移除 `lib/data-generated.ts`（45 部手写 demo）与 `scripts/build-index.mjs`，全站改以 `public/index/daizhige-catalog.json`（15,694 部，由 `npm run build:catalog` 调 GitHub Trees API 生成）为唯一书目数据源；阅读时按需 fetch `raw.githubusercontent.com` 直链（含 jsDelivr / statically 镜像降级），本仓库零 TXT 复制
+- **浏览/阅读统一真实链路**：书目、书籍详情、阅读统一走 `/catalog` → `/catalog/book` → `/read/remote`；删除 `/book/[id]`、`/read/[title]` 等 demo 路由，以及 `ReaderClient` / `BookActions` / `CategoryDownload` 等 demo 专用组件
+- **检索重构**：`lib/search.ts` 重写为「标题检索（始终可用）+ 全量倒排索引全文检索」；新增 `npm run build:fulltext` 下载上游 TXT 生成 `public/index/fulltext-index.json`，索引缺失时自动回退标题检索
+- **人物 / 关系 / 统计**：人物考据、社会关系溯源保留入口，无元数据（CBDB 待接入）时显示「数据待接入」空态；数据统计页改为基于真实目录动态计算馆藏分布与体量
+- **脚本调整**：移除 `prebuild:index`（依赖 demo 构建，会阻断 `next build`），新增 `build:fulltext`；版本 1.2.10 → 1.3.0
+
 ## [1.2.10] - 2026-09-08
 
 ### 修复（原型审查）

@@ -1,4 +1,4 @@
-// components/Navbar.tsx v1.2.9
+// components/Navbar.tsx
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -14,8 +14,6 @@ interface NavbarProps {
 const MENU: { key: string; href: string; label: string }[] = [
   { key: "home", href: "/", label: "首页" },
   { key: "catalog", href: "/catalog", label: "全馆藏" },
-  { key: "category", href: "/category", label: "十大藏库" },
-  { key: "book-list", href: "/book-list", label: "精选典籍" },
   { key: "search", href: "/search", label: "检索" },
   { key: "character", href: "/character", label: "人物考据" },
   { key: "relation", href: "/relation", label: "社会关系" },
@@ -25,7 +23,6 @@ const MENU: { key: string; href: string; label: string }[] = [
 
 export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
   const pathname = usePathname();
-  // 当前页高亮：优先按路由推导，回退到传入的 current
   const current =
     currentProp !== "home"
       ? currentProp

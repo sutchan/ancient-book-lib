@@ -1,17 +1,11 @@
-// components/Footer.tsx v1.0.3
+// components/Footer.tsx
 import Link from "next/link";
-import data from "@/lib/data-generated";
 
 // 应用版本单一来源为 package.json，构建时由 Next.js 内联该环境变量。
-const APP_VERSION = process.env.npm_package_version || "1.0.3";
+const APP_VERSION = process.env.npm_package_version || "1.3.0";
 
-// 构建时由数据源实时统计，避免硬编码。
-const stats = {
-  categories: data.categories.length,
-  books: data.books.length,
-  characters: data.characters.length,
-  relations: data.relations.length,
-};
+// 真实馆藏总数（与 daizhige-catalog.json 同步；上游 garychowcmu/daizhigev20 15,694 部）
+const TOTAL_BOOKS = 15694;
 
 export default function Footer() {
   return (
@@ -28,7 +22,7 @@ export default function Footer() {
         </p>
         <p>古籍通 AncientBook · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
         <p className="footer-stats" style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 8 }}>
-          馆藏 {stats.categories} 类 · 精选典籍 {stats.books} 部 · 全馆藏 15,694 部（殆知阁 v20）· 人物 {stats.characters} 位 · 考据关系 {stats.relations} 条
+          馆藏 10 类 · 全馆藏 {TOTAL_BOOKS.toLocaleString()} 部（殆知阁 v20）· 人物/关系 待接入
         </p>
         <p className="footer-version" style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 4 }}>
           当前版本 v{APP_VERSION}

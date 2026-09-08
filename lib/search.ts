@@ -1,267 +1,96 @@
 /**
- * 前端内存全文检索（纯静态无数据库核心）
- * 权重规则（固化）：标题完全匹配 > 章节名完全匹配 > 段落开头精准匹配 > 正文高词频匹配 > 普通正文匹配
+ * 检索工具（纯静态无数据库）
+ * - 标题/元数据检索：始终可用，基于 daizhige-catalog.json（loadCatalog + searchCatalog）
+ * - 全文检索：当 public/index/fulltext-index.json 存在时基于倒排索引做真正全文匹配
+ *   （由 `npm run build:fulltext` 下载上游 TXT 生成；索引缺失时自动回退标题检索）
  */
-import type { Book, Character } from "./types";
-import data from "./data-generated";
-import { T2S_MAP as T2S_SINGLE } from "./t2s";
+import type { DaizhigeCatalog } from "./types";
+import { loadCatalog, searchCatalog } from "./catalog";
 
 export interface SearchResult {
-  kind: "book" | "character";
-  book: string;
-  chapter: string;
+  kind: "book";
+  id: string;
+  book: string; // 书名
+  category: string;
+  subcategories: string[];
   path: string;
-  snippet: string;
   score: number;
 }
 
-/** 高级检索筛选维度（PRD §4.3.2 多维组合筛选） */
 export interface SearchFilters {
-  category?: string; // 馆藏名称，如「儒藏」
-  dynasty?: string;  // 朝代，如「春秋」
+  category?: string;
 }
 
-/** 全馆藏去重朝代列表 */
-export function distinctDynasties(): string[] {
-  return Array.from(new Set(data.books.map((b) => b.dynasty).filter(Boolean))).sort();
-}
-
-/** 馆藏名称列表（与 categories 同名） */
-export function categoryNames(): string[] {
-  return data.categories.map((c) => c.name);
-}
-
-/** 章节正文（生产版由分片懒加载按字节范围拉取；演示版内置节选） */
-export function getChapterText(book: Book, idx: number): string {
-  const title = book.title;
-  const sample: Record<string, string[]> = {
-    论语: [
-      "子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？人不知而不慍，不亦君子乎？」",
-      "有子曰：「其為人也孝弟，而好犯上者，鮮矣；不好犯上，而好作亂者，未之有也。君子務本，本立而道生。」",
-      "子曰：「巧言令色，鮮矣仁！」",
-      "曾子曰：「吾日三省吾身：為人謀而不忠乎？與朋友交而不信乎？傳不習乎？」",
-    ],
-    心经: [
-      "觀自在菩薩，行深般若波羅蜜多時，照見五蘊皆空，度一切苦厄。",
-      "舍利子，色不異空，空不異色，色即是空，空即是色，受想行識，亦復如是。",
-      "舍利子，是諸法空相，不生不滅，不垢不淨，不增不減。",
-      "是故空中無色，無受想行識，無眼耳鼻舌身意，無色聲香味觸法。",
-      "無眼界，乃至無意識界，無無明，亦無無明盡，乃至無老死，亦無老死盡。",
-    ],
-  };
-  const paras = sample[title] || [
-    "古之學者必有師。師者，所以傳道、受業、解惑也。",
-    "生乎吾前，其聞道也固先乎吾，吾從而師之；生乎吾後，其聞道也亦先乎吾，吾從而師之。",
-    "吾師道也，夫庸知其年之先後生於吾乎？是故無貴無賤，無長無少，道之所存，師之所存也。",
-  ];
-  return paras[idx % paras.length];
-}
-
-/** 全文检索（标题/章节/正文/人物），支持馆藏与朝代多维筛选 */
-export function searchAll(
-  kw: string,
-  mode: "title" | "full" = "full",
-  limit = 20,
-  filters: SearchFilters = {}
-): SearchResult[] {
-  const q = kw.trim();
-  if (!q) return [];
-  const results: SearchResult[] = [];
-
-  for (const b of data.books) {
-    if (filters.category && b.category !== filters.category) continue;
-    if (filters.dynasty && b.dynasty !== filters.dynasty) continue;
-    const titleHit = b.title.includes(q);
-    const chapterHit = b.chapters.some((c) => c.includes(q));
-    const bodyHit =
-      b.chapters.some((_, i) => getChapterText(b, i).includes(q)) ||
-      (b.desc ?? "").includes(q);
-    const hit = mode === "title" ? titleHit || chapterHit : titleHit || chapterHit || bodyHit;
-    if (!hit) continue;
-    const score = titleHit ? 98 : chapterHit ? 92 : 80;
-    results.push({
-      kind: "book",
-      book: b.title,
-      chapter: b.chapters[0],
-      path: `首页 > ${b.category} > ${b.title}`,
-      snippet: getChapterText(b, 0).slice(0, 60) + "…",
-      score,
-    });
-  }
-
-  for (const p of data.characters) {
-    if (filters.dynasty && p.dynasty !== filters.dynasty) continue;
-    if (p.name.includes(q) || (p.zi && p.zi.includes(q)) || (p.alias && p.alias.includes(q))) {
-      results.push({
-        kind: "character",
-        book: p.name,
-        chapter: "人物档案",
-        path: `考据 > ${p.dynasty}`,
-        snippet: p.desc,
-        score: 90,
-      });
-    }
-  }
-
-  return results.sort((a, b) => b.score - a.score).slice(0, limit);
-}
-
-/** 人物检索 */
-export function searchCharacters(kw: string): Character[] {
-  const q = kw.trim();
-  return data.characters.filter(
-    (p) =>
-      !q ||
-      p.name.includes(q) ||
-      (p.zi ?? "").includes(q) ||
-      (p.alias ?? "").includes(q)
-  );
-}
-
-/** 统计：馆藏分布 */
-export function statsByCategory() {
-  return data.categories.map((c) => ({
-    name: c.name,
-    count: data.books.filter((b) => b.category === c.name).length,
-  }));
-}
-
-/** 统计：朝代分布 */
-export function statsByDynasty() {
-  const map: Record<string, number> = {};
-  data.books.forEach((b) => {
-    map[b.dynasty] = (map[b.dynasty] || 0) + 1;
-  });
-  return Object.entries(map)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
-}
-
-/** 统计：人物身份标签 */
-export function statsByTag() {
-  const map: Record<string, number> = {};
-  data.characters.forEach((c) =>
-    (c.tags || []).forEach((t) => {
-      map[t] = (map[t] || 0) + 1;
-    })
-  );
-  return Object.entries(map)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
-}
-
-/** 统计：关系类型 */
-export function statsByRelationType() {
-  const map: Record<string, number> = {};
-  data.relations.forEach((r) => {
-    map[r.type] = (map[r.type] || 0) + 1;
-  });
-  return Object.entries(map)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
-}
-
-/** 分片懒加载模型：每片字节数（生产版由 HTTP Range 实现） */
-export const CHUNK_SIZE = 4 * 1024; // 2–4KB/片
-export function chunkPlan(totalBytes: number) {
-  const chunks = Math.ceil(totalBytes / CHUNK_SIZE);
-  return { chunks, ranges: Array.from({ length: chunks }, (_, i) => [i * CHUNK_SIZE, Math.min((i + 1) * CHUNK_SIZE - 1, totalBytes - 1)] as [number, number]) };
-}
-
-/* ============================================================
- * 生产数据接入：HTTP Range 分片懒加载 + 倒排索引加载
- * 对应 PRD「纯静态无数据库」架构的检索链路：
- *   构建期 build-index.mjs --fulltext 生成 index/*.json
- *   运行时前端按字节范围（Range）分片拉取正文，不整本下载
- * ============================================================ */
-
-/** 按 HTTP Range 拉取指定字节区间（GitHub RAW / 任意静态托管均支持 Range） */
-export async function fetchChunk(
-  url: string,
-  start: number,
-  end: number,
-  signal?: AbortSignal
-): Promise<string> {
-  const res = await fetch(url, {
-    headers: { Range: `bytes=${start}-${end}` },
-    signal,
-  });
-  if (!res.ok && res.status !== 206) {
-    throw new Error(`Range 请求失败: HTTP ${res.status}`);
-  }
-  return await res.text();
-}
-
-/** 懒加载正文：按分片清单逐片拉取，命中后即返回（演示数据直接回退本地样本） */
-export async function loadChapterText(
-  bookTitle: string,
-  chapterIdx: number,
-  baseUrl = ""
-): Promise<string> {
-  // 演示数据：未发布真实 TXT 时回退内置样本
-  const demo = getChapterText(
-    data.books.find((b) => b.title === bookTitle) || data.books[0],
-    chapterIdx
-  );
+/** 加载全量倒排索引（缺失返回 null，调用方回退标题检索） */
+export async function loadFulltextIndex(baseUrl = ""): Promise<Record<string, string[]> | null> {
   try {
-    const manifestRes = await fetch(`${baseUrl}/index/chunk-manifest.json`);
-    if (!manifestRes.ok) return demo;
-    const manifest = await manifestRes.json();
-    const book = manifest[bookTitle];
-    const chapter = book?.chapters?.[chapterIdx];
-    if (!chapter) return demo;
-    const parts: string[] = [];
-    const plan = chunkPlan(chapter.size);
-    for (const [s, e] of plan.ranges) {
-      parts.push(await fetchChunk(`${baseUrl}/text/${book.id}.txt`, chapter.start + s, chapter.start + e));
-    }
-    return parts.join("");
-  } catch {
-    return demo; // 网络/部署限制时优雅降级
-  }
-}
-
-/** 加载倒排索引（构建期产物），未命中时返回 null */
-export async function loadInvertedIndex(baseUrl = ""): Promise<Record<string, Record<string, number[]>> | null> {
-  try {
-    const res = await fetch(`${baseUrl}/index/inverted-index.json`);
+    const res = await fetch(`${baseUrl}/index/fulltext-index.json`);
     if (!res.ok) return null;
-    return await res.json();
+    return (await res.json()) as Record<string, string[]>;
   } catch {
     return null;
   }
 }
 
-/** 基于倒排索引的全文检索（前端内存，毫秒级） */
-export function searchByIndex(
-  kw: string,
-  index: Record<string, Record<string, number[]>> | null,
-  limit = 20
-): SearchResult[] {
-  if (!index) return searchAll(kw, "full", limit);
-  const q = kw.trim();
-  if (!q) return [];
-  const hits = index[q] || index[toSimplifiedChar(q)] || {};
-  const results: SearchResult[] = [];
-  for (const [bookTitle, chapters] of Object.entries(hits)) {
-    const book = data.books.find((b) => b.title === bookTitle);
-    if (!book) continue;
-    results.push({
-      kind: "book",
-      book: bookTitle,
-      chapter: book.chapters[chapters[0]],
-      path: `首页 > ${book.category} > ${bookTitle}`,
-      snippet: getChapterText(book, chapters[0]).slice(0, 60) + "…",
-      score: 95 - results.length,
-    });
+/** 查询分词：单字 + 二元组（与 build-fulltext-index.mjs 一致） */
+function tokenize(q: string): string[] {
+  const norm = q.replace(/\s+/g, "");
+  const toks = new Set<string>();
+  for (let i = 0; i < norm.length; i++) {
+    toks.add(norm[i]);
+    if (i < norm.length - 1) toks.add(norm.slice(i, i + 2));
   }
-  return results.sort((a, b) => b.score - a.score).slice(0, limit);
+  return Array.from(toks);
 }
 
-/** 简体化单个查询字符（用于索引键命中） */
-function toSimplifiedChar(text: string): string {
-  return text
-    .split("")
-    .map((c) => T2S_SINGLE[c] || c)
-    .join("");
+/** 基于倒排索引的全文检索：命中词数越多排序越前 */
+export function searchFulltext(
+  kw: string,
+  index: Record<string, string[]> | null,
+  catalog: DaizhigeCatalog,
+  limit = 20
+): SearchResult[] {
+  if (!index || !kw.trim()) return [];
+  const toks = tokenize(kw);
+  const scores = new Map<string, number>();
+  for (const t of toks) {
+    const hits = index[t];
+    if (!hits) continue;
+    for (const id of hits) scores.set(id, (scores.get(id) || 0) + 1);
+  }
+  const idMap = new Map(catalog.books.map((b) => [b.id, b]));
+  return Array.from(scores.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([id, score]) => {
+      const b = idMap.get(id)!;
+      return {
+        kind: "book" as const,
+        id,
+        book: b.title,
+        category: b.category,
+        subcategories: b.subcategories,
+        path: `${b.category} › ${b.subcategories.join(" › ")}`,
+        score: 90 + Math.min(score, 10),
+      };
+    });
+}
+
+/** 标题/元数据检索（始终可用，无需索引） */
+export function searchByTitle(
+  kw: string,
+  catalog: DaizhigeCatalog,
+  filters: SearchFilters = {},
+  limit = 20
+): SearchResult[] {
+  const results = searchCatalog(catalog, kw, { category: filters.category, limit: 99999 });
+  return results.slice(0, limit).map((b) => ({
+    kind: "book" as const,
+    id: b.id,
+    book: b.title,
+    category: b.category,
+    subcategories: b.subcategories,
+    path: `${b.category} › ${b.subcategories.join(" › ")}`,
+    score: 85,
+  }));
 }
