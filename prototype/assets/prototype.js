@@ -45,6 +45,8 @@ function save(){
   localStorage.setItem("ab-lh", String(state.lineHeight));
 }
 function go(hash){ location.hash = hash; }
+/* 兼容综合页（#main-view）与独立页（#page-body）两种容器，避免二次渲染在独立页拿到 null */
+function getMain(){ return getMain(); }
 
 /* ==================== 品牌 logo 主题联动 ==================== */
 /* 深色主题下切换为反白版 logo（data-logo-dark），其余主题用常规版（data-logo-light） */
@@ -137,8 +139,10 @@ function initGlobal(){
 
 /* ==================== 渲染器 ==================== */
 function reRender(){
-  var main = $("#main-view");
-  if(main) renderRoute(main);
+  var main = getMain();
+  if(!main) return;
+  if(main.id === "main-view"){ renderRoute(main); }
+  else if(window.__currentPage){ PAGE_RENDERERS[window.__currentPage](main); }
 }
 
 function renderRoute(main){
@@ -322,7 +326,7 @@ function renderReader(main, bookId){
 }
 window.toggleImageCompare = function(){
   state.showImage = !(state.showImage === true);
-  var container = $("#main-view") || $("#page-body");
+  var container = getMain();
   if(container) renderReader(container, state.currentBookId);
 };
 
@@ -403,7 +407,7 @@ window.goChapter = function(delta){
   var len = book.chapters.length;
   state.chapterIdx = Math.min(len-1, Math.max(0, state.chapterIdx + delta));
   localStorage.setItem("ab-chapter", String(state.chapterIdx));
-  var container = $("#main-view") || $("#page-body");
+  var container = getMain();
   if(container) renderReader(container, state.currentBookId);
 };
 
@@ -486,24 +490,24 @@ function renderSearch(main){
   function doSearch(){
     if(inp && inp.value.trim()){
       state.searchKeyword = inp.value.trim();
-      renderSearch($("#main-view"));
+      renderSearch(getMain());
     }
   }
   if(btn) btn.addEventListener("click", doSearch);
   if(inp) inp.addEventListener("keydown", function(e){ if(e.key==="Enter") doSearch(); });
   var catSel = $("#filter-cat");
-  if(catSel) catSel.addEventListener("change", function(){ state.filterCategory=this.value; renderSearch($("#main-view")); });
+  if(catSel) catSel.addEventListener("change", function(){ state.filterCategory=this.value; renderSearch(getMain()); });
   var limSel = $("#filter-limit");
   if(limSel) limSel.addEventListener("change", function(){
     state.searchLimit = parseInt(this.value, 10);
     localStorage.setItem("ab-slimit", String(state.searchLimit));
-    renderSearch($("#main-view"));
+    renderSearch(getMain());
   });
   $$(".search-mode-group .btn-toggle").forEach(function(bt){
     bt.addEventListener("click", function(){
       state.searchMode = bt.getAttribute("data-smode");
       localStorage.setItem("ab-smode", state.searchMode);
-      renderSearch($("#main-view"));
+      renderSearch(getMain());
     });
   });
   bindFadeIn(main);
@@ -545,7 +549,7 @@ function renderCharacter(main){
     var list = DATA.characters.filter(function(p){
       return !kw || p.name.indexOf(kw)>-1 || (p.zi&&p.zi.indexOf(kw)>-1) || (p.alias&&p.alias.indexOf(kw)>-1);
     });
-    var cards = list.slice(0,8).map(function(p){
+    var cards = list.map(function(p){
       return '<div class="character-card fade-in" style="margin-bottom:16px;">'+
         '<div class="char-name">'+toSimplified(p.name)+'<span class="char-zi">'+toSimplified((p.zi?"字"+p.zi:"")+(p.alias?" · "+p.alias:""))+'</span></div>'+
         '<div class="info-row"><label>朝代</label>'+toSimplified(p.dynasty)+'</div>'+
@@ -576,7 +580,7 @@ function renderCharacter(main){
   var inp = $("#char-input"), btn = $("#char-btn");
   function doSearch(){
     state.searchKeyword = inp.value.trim();
-    renderCharacter($("#main-view"));
+    renderCharacter(getMain());
   }
   if(btn) btn.addEventListener("click", doSearch);
   if(inp) inp.addEventListener("keydown", function(e){ if(e.key==="Enter") doSearch(); });
@@ -584,7 +588,7 @@ function renderCharacter(main){
 }
 window.switchCharMode = function(m){
   state.searchMode = m;
-  renderCharacter($("#main-view"));
+  renderCharacter(getMain());
 };
 
 /* ==================== 社会关系页 ==================== */
@@ -743,17 +747,17 @@ function renderStats(main){
 
       '<h2 class="section-title">'+toSimplified('数据洞察')+'</h2>'+
       '<div class="character-card fade-in" style="margin-bottom:16px;">'+
-        '<div class="info-row">· '+toSimplified('资源密度：十大馆藏均衡覆盖，佛、儒、医、史、子五藏各收录 5 部核心典籍，合计 45 部、139 个章节卷次，构成完整古籍研读骨架')+'</div>'+
+        '<div class="info-row">· '+toSimplified('资源密度：十大馆藏均衡覆盖，佛、儒、医、史、子五藏各收录 5 部核心典籍，合计 '+books.length+' 部、'+totalChapters+' 个章节卷次，构成完整古籍研读骨架')+'</div>'+
         '<div class="info-row">· '+toSimplified('时间纵深：典籍跨越西周至清代 3000 余年，战国、先秦、唐代形成三大著述高峰，折射思想奠基期与文化鼎盛期的双重繁荣')+'</div>'+
-        '<div class="info-row">· '+toSimplified('学术价值：21 位考据人物覆盖思想家、文学家、诗人、政治家、医学家等 10+ 身份维度，以人物为轴串联起经典、制度与思想的跨典籍网络')+'</div>'+
-        '<div class="info-row">· '+toSimplified('关系密度：20 条社会关系以「文风影响」「思想传承」「师生」为核心脉络，构成可溯源的学术传承链，支撑双人溯源与谱系考据')+'</div>'+
+        '<div class="info-row">· '+toSimplified('学术价值：'+chars.length+' 位考据人物覆盖思想家、文学家、诗人、政治家、医学家等 10+ 身份维度，以人物为轴串联起经典、制度与思想的跨典籍网络')+'</div>'+
+        '<div class="info-row">· '+toSimplified('关系密度：'+rels.length+' 条社会关系以「文风影响」「思想传承」「师生」为核心脉络，构成可溯源的学术传承链，支撑双人溯源与谱系考据')+'</div>'+
         '<div class="info-row">· '+toSimplified('检索基建：内置 429 条古籍常用字繁简映射，覆盖经文、史传、诗词高频古字，保障学术级保真转换')+'</div>'+
       '</div>'+
 
       '<h2 class="section-title">'+toSimplified('扩展规划（V1.1+）')+'</h2>'+
       '<div class="character-card fade-in">'+
         '<div class="info-row">· '+toSimplified('全库规模：索引池落地后，典籍规模将由演示 45 部扩展至全量 19,000+ 部（殆知阁源库），检索覆盖 5GB 全文')+'</div>'+
-        '<div class="info-row">· '+toSimplified('人物扩容：考据人物将由 21 位扩展至 CBDB 公开数据集（60 万+ 人物档案），支持姓名/朝代/籍贯多维检索')+'</div>'+
+        '<div class="info-row">· '+toSimplified('人物扩容：考据人物将由 '+chars.length+' 位扩展至 CBDB 公开数据集（60 万+ 人物档案），支持姓名/朝代/籍贯多维检索')+'</div>'+
         '<div class="info-row">· '+toSimplified('统计增强：新增检索热度、阅读时长、分片加载统计等实时指标（纯前端采集，零隐私）')+'</div>'+
       '</div>'+
     '</section>';
@@ -775,6 +779,7 @@ function initStandalone(){
   // pages/*.html 独立页面：body 带 data-page 属性，读取对应区块渲染到 #page-body
   var page = document.body.getAttribute("data-page");
   if(!page) return;
+  window.__currentPage = page;
   var container = $("#page-body");
   if(!container) return;
   var fn = PAGE_RENDERERS[page];
