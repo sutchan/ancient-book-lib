@@ -13,7 +13,7 @@
 - 资源：殆知阁 v20 全量 15,694 部 / 4.9GB 古籍，托管于 garychowcmu/daizhigev20；本仓库仅存 5.7MB 书目索引，阅读时按需 fetch
 - 定位：公益开源 · 零广告 · 零注册 · 零付费 · 不收集个人隐私（仅匿名访问统计，GA4）
 - 统计：Google Analytics 4（`G-H76XG9L6FZ`），IP 匿名化，仅聚合访问数据
-- 当前版本：**v1.2.3**（原型同步品牌资料：11 个原型页统一接入 favicon / 主屏图标 / 分享图，深色主题自动切换反白 logo；v1.2.2 提供品牌资料套件与生成脚本）
+- 当前版本：**v1.2.6**（v1.2.4 Actions 升级 Node 24；v1.2.5 原型页脚改为数据统计；v1.2.6 修复生产站点 basePath 导致的全站资源 404，sitemap/robots 改为生产域名）
 - 线上站点：https://guji.ewuse.com/（腾讯云 EdgeOne Pages 托管）
 
 | 文档 | 说明 |

@@ -11,8 +11,9 @@ import { dirname } from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
 const OUT_DIR = join(ROOT, "out");
-const SITE_URL = process.env.SITE_URL || "https://sutchan.github.io";
-const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "/ancient-book-lib";
+// 生产站点：https://guji.ewuse.com/（根路径）；GitHub Pages 子路径部署时由环境传入
+const SITE_URL = process.env.SITE_URL || "https://guji.ewuse.com";
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 function walk(dir) {
   const files = [];

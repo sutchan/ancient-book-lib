@@ -57,6 +57,19 @@ function syncBrandLogo(){
   });
 }
 
+/* ==================== 页脚统计 ==================== */
+/* 与线上 components/Footer.tsx 的 footer-stats 口径一致：馆藏/典籍/人物/关系由数据源实时统计 */
+function renderFooterStats(){
+  var el = $("#footer-stats");
+  if(!el) return;
+  el.textContent =
+    "馆藏 " + DATA.categories.length + " 类" +
+    " · 精选典籍 " + DATA.books.length + " 部" +
+    " · 全馆藏 15,694 部（殆知阁 v20）" +
+    " · 人物 " + DATA.characters.length + " 位" +
+    " · 考据关系 " + DATA.relations.length + " 条";
+}
+
 /* ==================== 全局初始化 ==================== */
 function initGlobal(){
   var body = document.body;
@@ -778,6 +791,7 @@ function initStandalone(){
 /* ==================== 启动 ==================== */
 function boot(){
   initGlobal();
+  renderFooterStats();
   var main = $("#main-view");
   if(main){
     window.addEventListener("hashchange", function(){

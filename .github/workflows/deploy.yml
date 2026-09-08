@@ -27,10 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -63,7 +63,7 @@ jobs:
 
       - name: Upload build output (out/)
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: out-${{ github.sha }}
           path: ./out
@@ -72,9 +72,11 @@ jobs:
       # 仅开启 Pages 时才上传 Pages 产物（PR 不上传）
       - name: Upload static artifact (out/)
         if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./out
+          # 保留 .nojekyll 等隐藏文件
+          include-hidden-files: true
 
   # 仅 main 分支推送/手动触发且开启 Pages 时部署
   deploy:
@@ -87,4 +89,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

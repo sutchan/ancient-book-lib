@@ -1,4 +1,4 @@
-// app/layout.tsx v1.2.2
+// app/layout.tsx v1.2.6
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   keywords: ["古籍", "古文", "国学", "四库全书", "繁体字", "古籍检索", "AncientBook", "殆知阁"],
   applicationName: "古籍通 AncientBook",
   manifest: "/site.webmanifest",
+  alternates: { canonical: "/" },
   appleWebApp: {
     capable: true,
     title: "古籍通",
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
+    url: "/",
     locale: "zh-CN",
     siteName: "古籍通 AncientBook",
     title: SITE_TITLE,

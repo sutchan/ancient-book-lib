@@ -5,6 +5,40 @@
 
 ## [未发布]
 
+## [1.2.6] - 2026-09-08
+
+### 修复（线上重大故障）
+- **生产站点全站资源 404**：`next.config.mjs` 在 `NODE_ENV=production` 下默认 `basePath = "/ancient-book-lib"`，
+  而生产部署在根路径 `https://guji.ewuse.com/`，导致线上 HTML 引用的 CSS / JS chunks / icon / 站内链接
+  全部带 `/ancient-book-lib/` 前缀而 404（页面无样式、导航点击 404）。改为默认根路径，
+  仅在显式设置 `NEXT_PUBLIC_BASE_PATH` 时才启用子路径（GitHub Pages 场景由 CI 传入）
+- **sitemap / robots 域名错误**：`scripts/generate-sitemap.mjs` 默认站点改为 `https://guji.ewuse.com`、
+  默认 basePath 为空；`public/robots.txt` 的 Sitemap 行同步改为生产域名（原指向 `sutchan.github.io/ancient-book-lib`）
+
+### 优化
+- `app/layout.tsx` 补充 `alternates.canonical` 与 `openGraph.url`，补全规范化链接与分享 URL（修复后页面无 canonical / og:url 元信息）
+
+### 变更
+- 版本号升级至 1.2.6
+
+## [1.2.5] - 2026-09-08
+
+### 变更
+- **原型页脚改为数据统计**：移除 `prototype.html` 页脚占位文案「解压密码：gujitong · 备用网盘：pan.example.com/gujitong」，改为与线上 `components/Footer.tsx` 同口径的项目统计（馆藏 / 精选典籍 / 全馆藏 15,694 部 / 人物 / 考据关系）
+- `prototype/assets/prototype.js` 新增 `renderFooterStats()`，页脚统计由 `data/app-data.js` 实时计算（HTML 内保留静态兜底，未加载 JS 时同样可读）；9 个独立页面 `pages/*.html` 页脚同步补统计行
+- UI 与 UX 全局设计规范、Figma 原型建模页面清单中「底部公示区」描述同步为「数据统计概览」，不再列解压密码 / 网盘链接
+- 版本号升级至 1.2.5
+
+## [1.2.4] - 2026-09-08
+
+### 变更
+- **GitHub Actions 升级至 Node 24 运行时**：`actions/checkout` v4 → v7、`actions/setup-node` v4 → v7、`actions/upload-artifact` v4 → v7、`actions/upload-pages-artifact` v3 → v5、`actions/deploy-pages` v4 → v5，消除
+  `Node.js 20 is deprecated ... being forced to run on Node.js 24` 构建告警
+- 版本号升级至 1.2.4
+
+### 修复
+- 补齐 v1.2.2 / v1.2.3 缺失的 CHANGELOG 版本比较链接
+
 ## [1.2.3] - 2026-09-08
 
 ### 新增
@@ -177,7 +211,12 @@
 - 高保真可交互原型 `prototype/`（三套主题 + 真实模拟数据）
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.1...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.6...HEAD
+[1.2.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.5...v1.2.6
+[1.2.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.4...v1.2.5
+[1.2.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.3...v1.2.4
+[1.2.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.2...v1.2.3
+[1.2.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.0...v1.1.1
