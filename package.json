@@ -1,6 +1,6 @@
 {
   "name": "ancient-book-lib",
-  "version": "1.3.8",
+  "version": "1.4.0",
   "private": true,
   "description": "古籍通 AncientBook 开源古籍文献检索阅读平台（纯静态无数据库架构）",
   "scripts": {
@@ -12,6 +12,7 @@
     "build:catalog": "node scripts/build-daizhige-catalog.mjs",
     "build:fulltext": "tsx scripts/build-fulltext-index.mjs",
     "build:characters": "node scripts/build-characters.mjs",
+    "build:book-samples": "node scripts/build-book-samples.mjs",
     "test": "tsx --test test/*.test.ts",
     "export": "next build && next export"
   },

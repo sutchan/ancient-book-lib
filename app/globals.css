@@ -177,6 +177,19 @@ label.btn-toggle:has(input:focus-visible){outline:2px solid var(--color-primary)
 .hero-search .input-text{border:none;background:transparent;font-size:16px;}
 .hero-search .input-text:focus{box-shadow:none;}
 
+/* ---------- 趣味探索（随机书/人） ---------- */
+.fun-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.random-card{padding:20px;display:flex;flex-direction:column;gap:10px;animation:cardPop 0.3s ease both;}
+@keyframes cardPop{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.rc-head{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:var(--color-text-secondary);}
+.rc-emoji{font-size:18px;}
+.rc-title{font-size:22px;font-weight:700;color:var(--color-text);line-height:1.4;transition:color 0.2s ease;}
+.rc-title:hover{color:var(--color-primary);}
+.rc-zi{font-size:14px;font-weight:400;color:var(--color-text-secondary);}
+.rc-meta{display:flex;gap:6px;flex-wrap:wrap;}
+.rc-actions{display:flex;gap:8px;margin-top:4px;}
+.rc-loading{padding:18px 0;color:var(--color-text-secondary);font-size:14px;}
+
 /* ---------- 阅读页 ---------- */
 .reader-wrap{max-width:720px;margin:0 auto;position:relative;}
 .reader-title{text-align:center;font-size:22px;font-weight:700;margin-bottom:8px;}

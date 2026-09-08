@@ -2,6 +2,8 @@ import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
 import { toSimplified } from "@/lib/t2s";
 import RecentBooks from "@/components/RecentBooks";
+import RandomBook from "@/components/RandomBook";
+import RandomCharacter from "@/components/RandomCharacter";
 
 export default function HomePage() {
   return (
@@ -48,6 +50,17 @@ export default function HomePage() {
       </div>
 
       <RecentBooks />
+
+      <section id="fun-explore">
+        <h2 className="section-title">趣味探索</h2>
+        <p style={{ fontSize: 14, color: "var(--color-text-secondary)", marginTop: -8, marginBottom: 16 }}>
+          不知道读什么？随手翻开一卷，遇见一位古人。
+        </p>
+        <div className="fun-grid">
+          <RandomBook />
+          <RandomCharacter />
+        </div>
+      </section>
 
       <h2 className="section-title">十大馆藏</h2>
       <div className="category-grid">

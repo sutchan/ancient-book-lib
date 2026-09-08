@@ -5,6 +5,13 @@
 
 ## [未发布]
 
+## [1.4.0] - 2026-09-08
+
+### 新增（首页趣味探索模块）
+- 首页新增「趣味探索」区块，含「随机一书」与「随机一人」两个模块：分别从轻量书目样本与 CBDB 人物数据中随机抽选，提供「🎲 换一本 / 换一位」按钮即时重抽（不重复上一条），提升浏览趣味性
+- 新增 `scripts/build-book-samples.mjs`（npm `build:book-samples`）：从殆知阁全量书目索引随机抽取 400 部生成轻量样本 `public/index/book-samples.json`，避免首页加载 11MB 全量目录
+- 新增 `components/RandomBook.tsx` / `components/RandomCharacter.tsx`（客户端组件，挂载后按需 fetch 样本/人物 JSON 并渲染）
+
 ## [1.3.8] - 2026-09-08
 
 ### 新增（从 CBDB 导入人物考据数据）
