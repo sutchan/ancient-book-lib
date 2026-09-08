@@ -18,13 +18,23 @@ export function confirmDownload(): boolean {
   }
 }
 
+/** 净化文件名：去除路径分隔符、控制字符与首尾空白点，避免路径穿越与非法文件名 */
+function sanitizeFilename(name: string): string {
+  return name
+    .replace(/[\\/:*?"<>|\x00-\x1f]/g, "_")
+    .replace(/^\.+/, "")
+    .trim()
+    .slice(0, 200) || "download";
+}
+
 /** 生成 TXT 文件并触发浏览器下载（UTF-8 BOM，保证 Windows 记事本正确识别） */
 export function downloadText(filename: string, text: string): void {
+  const safeName = sanitizeFilename(filename);
   const blob = new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = filename;
+  a.download = safeName;
   document.body.appendChild(a);
   a.click();
   a.remove();

@@ -7,19 +7,35 @@ import type { CatalogEntry, DaizhigeCatalog } from "./types";
 
 export type { CatalogEntry, DaizhigeCatalog };
 
-const INDEX_URL = "/index/daizhige-catalog.json";
+// 主源 + CDN 镜像降级（jsDelivr / statically），避免单点失败导致全站书目瘫痪
+const INDEX_CANDIDATES = [
+  "/index/daizhige-catalog.json",
+  "https://cdn.jsdelivr.net/gh/sutchan/ancient-book-lib@main/public/index/daizhige-catalog.json",
+  "https://cdn.statically.io/gh/sutchan/ancient-book-lib/main/public/index/daizhige-catalog.json",
+];
 
 let cache: DaizhigeCatalog | null = null;
 let idMap: Map<string, CatalogEntry> | null = null;
 
-/** 加载全量书目索引（浏览器端懒加载，带内存缓存 + O(1) ID 查找 Map） */
+/** 加载全量书目索引（浏览器端懒加载，带内存缓存 + O(1) ID 查找 Map + CDN 镜像降级） */
 export async function loadCatalog(): Promise<DaizhigeCatalog> {
   if (cache) return cache;
-  const resp = await fetch(INDEX_URL);
-  if (!resp.ok) throw new Error(`书目索引加载失败: ${resp.status}`);
-  cache = (await resp.json()) as DaizhigeCatalog;
-  idMap = new Map(cache.books.map((b) => [b.id, b]));
-  return cache;
+  let lastError: Error | null = null;
+  for (const url of INDEX_CANDIDATES) {
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        lastError = new Error(`书目索引加载失败: ${resp.status}`);
+        continue;
+      }
+      cache = (await resp.json()) as DaizhigeCatalog;
+      idMap = new Map(cache.books.map((b) => [b.id, b]));
+      return cache;
+    } catch (e) {
+      lastError = e as Error;
+    }
+  }
+  throw lastError || new Error("书目索引加载失败");
 }
 
 /** 书目级搜索（标题/馆藏/子类匹配，不做全文检索） */
@@ -61,7 +77,7 @@ export function getSubcategories(
   const set = new Set<string>();
   for (const b of catalog.books) {
     if (b.category === category && b.subcategories.length > 0) {
-      set.add(b.subcategories[0]);
+      b.subcategories.forEach((s) => set.add(s));
     }
   }
   return Array.from(set).sort();

@@ -12,6 +12,12 @@ const PAGE_SIZE = 8;
 const LARGE_FILE_THRESHOLD = 5 * 1024 * 1024; // 5MB 以上视为大文件
 const FETCH_TIMEOUT = 60000; // 60秒超时（大文件需要更长时间）
 
+/** 仅允许 http/https 协议，阻断 javascript:/data: 等危险协议（防御 XSS） */
+function safeHttpUrl(url: string | undefined): string | null {
+  if (!url || !/^https?:\/\//i.test(url)) return null;
+  return url;
+}
+
 /** 章节标题识别：卷X / 第X回 / 第X章 / 篇X / 学而第一 等短行 */
 const CHAPTER_PATTERNS = [
   /^卷[之其]?[一二三四五六七八九十百千零\d]+/,
@@ -241,7 +247,8 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     if (!book || !content) return;
     // 大文件（>5MB）直接打开上游原文（跨域 download 属性无效，用户可右键另存为）
     if (book.size > LARGE_FILE_THRESHOLD) {
-      window.open(book.rawUrl, "_blank", "noopener");
+      const u = safeHttpUrl(book.rawUrl);
+      if (u) window.open(u, "_blank", "noopener");
       return;
     }
     if (!confirmDownload()) return;
@@ -303,7 +310,11 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         </p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button className="btn btn-primary" onClick={confirmLargeLoad}>仍然在线阅读</button>
-          <a className="btn btn-secondary" href={book.rawUrl} target="_blank" rel="noopener">打开原文（可另存为）</a>
+          {safeHttpUrl(book.rawUrl) ? (
+            <a className="btn btn-secondary" href={safeHttpUrl(book.rawUrl)!} target="_blank" rel="noopener">打开原文（可另存为）</a>
+          ) : (
+            <span className="btn btn-secondary" style={{ opacity: 0.6 }}>原文链接不可用</span>
+          )}
           <Link href="/catalog" className="btn btn-secondary">返回书目</Link>
         </div>
       </div>
@@ -316,7 +327,11 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
       <p style={{ color: "#c00" }}>{error}</p>
       {book && (
         <p style={{ marginTop: 8 }}>
-          可直接访问上游原文：<a href={book.rawUrl} target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>{book.rawUrl}</a>
+          {safeHttpUrl(book.rawUrl) ? (
+            <>可直接访问上游原文：<a href={safeHttpUrl(book.rawUrl)!} target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>{book.rawUrl}</a></>
+          ) : (
+            <span>上游原文链接不可用，请返回书目重试。</span>
+          )}
         </p>
       )}
       <div style={{ marginTop: 16, display: "flex", gap: 10 }}>
@@ -332,7 +347,11 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
       <div className="reader-title">{book.title}</div>
       <div className="reader-sub">
         {book.category} › {book.subcategories.join(" › ")} · {formatSize(book.size)} · {chapters.length} 章
-        · <a href={book.rawUrl} target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>上游原文</a>
+        · {safeHttpUrl(book.rawUrl) ? (
+          <a href={safeHttpUrl(book.rawUrl)!} target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>上游原文</a>
+        ) : (
+          <span>上游原文链接不可用</span>
+        )}
       </div>
 
       {/* 工具栏 */}

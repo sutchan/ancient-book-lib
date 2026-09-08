@@ -16,4 +16,4 @@
 - **环境与工具链坑**：无 sharp/pngjs/PIL；PowerShell 脚本必须 UTF-8 BOM 否则中文乱码；IDE 的 safe-delete shim 会让 `fs.rmSync('.next')` 报 trash 错误，重跑 build 即可。
 - **Actions 版本基线（2026-09，v1.2.4）**：Node 24 运行时要求 `checkout@v7` / `setup-node@v7` / `upload-artifact@v7` / `upload-pages-artifact@v5` / `deploy-pages@v5`；旧版（v4/v3）会被强制以 Node 24 运行并产生 `Node.js 20 is deprecated` 告警。坑：`upload-pages-artifact` v4+ 默认不上传隐藏文件，需 `include-hidden-files: true` 才能带上 `.nojekyll`。
 - **构建环境变量红线（v1.2.6 起）**：生产（EdgeOne / guji.ewuse.com）为**根路径**部署，构建环境**禁止**设置 `NEXT_PUBLIC_BASE_PATH`——该变量仅 GitHub Pages 子路径部署使用。误设会使产物内 CSS/JS/icon/站内链接全部带 `/ancient-book-lib` 前缀而 404（v1.2.6 前 `next.config.mjs` 在生产环境默认就带此前缀，已修）。注意 Next export 不会把页面输出到 `out/ancient-book-lib/`，因此页面 URL 仍 200、只有资源 404，极易误判。
-- **待办**：仓库缺 LICENSE 文件，许可证选择待用户确认（尚未创建）。
+- **待办**：仓库 LICENSE 文件已于 2026-09-08 创建（MIT，用户未明确指定协议，默认 MIT 待确认是否改用其他协议）。

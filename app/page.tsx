@@ -12,6 +12,7 @@ export default function HomePage() {
           开源公益古籍检索阅读与考据平台 · 殆知阁 v20 全量 <strong>15,694</strong> 部古籍在线
         </p>
         <p className="hero-badge">原始数据 4.9GB 托管于上游仓库 · 本仓库零复制 · 阅读时按需加载</p>
+        <p style={{ marginTop: 6, fontSize: 13, color: "var(--color-text-secondary)" }}>精选典籍支持前端全文检索；全馆藏 15,694 部支持书目检索与原文按需阅读</p>
         <form className="search-box hero-search" action="/search" method="get">
           <input
             className="input-text"

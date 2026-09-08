@@ -44,6 +44,7 @@ export default function BookActions({ book }: { book: Book }) {
         下载整本（简体对照）
       </button>
       <span className="download-notice">
+        下载内容取自精选典籍演示样张（节选示例），完整古籍请通过「全馆藏」检索上游原文。
         下载即视为同意：本资源仅供学术研究与个人学习，禁止商用与二次售卖。
       </span>
     </div>

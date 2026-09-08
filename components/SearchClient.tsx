@@ -37,7 +37,8 @@ export default function SearchClient() {
   }, [kw, mode, category, dynasty, limit, run]);
 
   const shown = results;
-  const hasMore = results.length >= limit;
+  // searchAll 已按 limit 截断；仅有结果恰好达到上限时才提示「可能还有更多」
+  const hasMore = results.length === limit;
   const dynasties = useMemo(() => distinctDynasties(), []);
   const cats = useMemo(() => categoryNames(), []);
 

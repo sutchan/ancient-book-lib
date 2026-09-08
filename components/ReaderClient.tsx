@@ -77,16 +77,28 @@ export default function ReaderClient({ bookTitle }: ReaderClientProps) {
 
   const title = chapters[idx];
 
+  // 将段落文本按生僻字切分为可点击的高亮片段（用 React 元素渲染，避免 dangerouslySetInnerHTML）
   const renderParas = () => {
-    let out = text;
-    if (simplified) out = toSimplified(out);
-    // 生僻字标注（仅繁体原版时保留可点击）
-    data.glossary.forEach((g) => {
-      if (out.includes(g.char)) {
-        out = out.split(g.char).join(`<span class="guji-char" data-char="${g.char}">${g.char}</span>`);
+    const src = simplified ? toSimplified(text) : text;
+    const paras = src.split("\n");
+    const glossaryChars = data.glossary.map((g) => g.char);
+    if (glossaryChars.length === 0) {
+      return paras.map((p, i) => <p key={i}>{p}</p>);
+    }
+    const esc = glossaryChars.map((c) => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+    const regex = new RegExp(`(${esc})`, "g");
+    return paras.map((p, i) => {
+      if (!p) return <p key={i}><br /></p>;
+      const parts: React.ReactNode[] = [];
+      let last = 0, k = 0, m: RegExpExecArray | null;
+      while ((m = regex.exec(p)) !== null) {
+        if (m.index > last) parts.push(p.slice(last, m.index));
+        parts.push(<span key={k++} className="guji-char" data-char={m[0]}>{m[0]}</span>);
+        last = m.index + m[0].length;
       }
+      if (last < p.length) parts.push(p.slice(last));
+      return <p key={i}>{parts}</p>;
     });
-    return out.split("\n").map((p, i) => <p key={i} dangerouslySetInnerHTML={{ __html: p }} />);
   };
 
   const paras = renderParas();
@@ -154,6 +166,12 @@ export default function ReaderClient({ bookTitle }: ReaderClientProps) {
         <span>{toSimplified(title)}</span>
       </div>
       <div className="reader-wrap">
+        <div
+          className="reader-demo-note"
+          style={{ fontSize: 13, color: "var(--color-text-secondary, #888)", background: "var(--color-surface, #faf6ec)", border: "1px solid var(--color-border, #e3d9c2)", borderRadius: 8, padding: "8px 12px", marginBottom: 16 }}
+        >
+          本页为精选典籍演示样张，正文为节选示例；完整古籍请通过「全馆藏」检索并阅读上游原文。
+        </div>
         <div className="reader-title">
           {toSimplified(book.title)} · {toSimplified(title)}
         </div>

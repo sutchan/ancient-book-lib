@@ -1,7 +1,9 @@
-// components/Navbar.tsx v1.2.2
+// components/Navbar.tsx v1.2.9
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { toSimplified } from "@/lib/t2s";
 
 interface NavbarProps {
@@ -21,7 +23,14 @@ const MENU: { key: string; href: string; label: string }[] = [
   { key: "help", href: "/help", label: "帮助" },
 ];
 
-export default function Navbar({ current = "home" }: NavbarProps) {
+export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
+  const pathname = usePathname();
+  // 当前页高亮：优先按路由推导，回退到传入的 current
+  const current =
+    currentProp !== "home"
+      ? currentProp
+      : (MENU.find((m) => m.href !== "/" && pathname.startsWith(m.href))?.key ||
+        (pathname === "/" ? "home" : currentProp));
   const [theme, setTheme] = useState<"light" | "paper" | "dark">("light");
   const [simplified, setSimplified] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -57,19 +66,19 @@ export default function Navbar({ current = "home" }: NavbarProps) {
     <>
       <header className="navbar">
         <div className="nav-inner">
-          <a className="brand" href="/" id="brand-home-link">
+          <Link className="brand" href="/" id="brand-home-link">
             <img
               id="brand-logo"
               className="brand-logo"
               src={theme === "dark" ? "/brand/logo-full-light-512.png" : "/brand/logo-full-512.png"}
               alt="古籍通 AncientBook"
             />
-          </a>
+          </Link>
           <nav className="nav-menu">
             {MENU.map((m) => (
-              <a key={m.key} href={m.href} className={current === m.key ? "active" : ""}>
+              <Link key={m.key} href={m.href} className={current === m.key ? "active" : ""}>
                 {simplified ? toSimplified(m.label) : m.label}
-              </a>
+              </Link>
             ))}
           </nav>
           <div className="nav-actions">
@@ -87,9 +96,9 @@ export default function Navbar({ current = "home" }: NavbarProps) {
       </header>
       <nav className={`mobile-menu ${menuOpen ? "open" : ""}`}>
         {MENU.map((m) => (
-          <a key={m.key} href={m.href} className={current === m.key ? "active" : ""} onClick={() => setMenuOpen(false)}>
+          <Link key={m.key} href={m.href} className={current === m.key ? "active" : ""} onClick={() => setMenuOpen(false)}>
             {simplified ? toSimplified(m.label) : m.label}
-          </a>
+          </Link>
         ))}
       </nav>
     </>
