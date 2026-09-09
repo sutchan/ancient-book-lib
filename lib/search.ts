@@ -1,3 +1,4 @@
+// lib/search.ts v1.4.3
 /**
  * 检索工具（纯静态无数据库）
  * - 标题/元数据检索：始终可用，基于 daizhige-catalog.json（loadCatalog + searchCatalog）

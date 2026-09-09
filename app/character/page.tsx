@@ -1,3 +1,4 @@
+// app/character/page.tsx v1.4.3
 import type { Metadata } from "next";
 import Link from "next/link";
 import CharacterList from "@/components/CharacterList";

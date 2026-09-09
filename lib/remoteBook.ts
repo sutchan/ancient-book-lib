@@ -1,3 +1,4 @@
+// lib/remoteBook.ts v1.4.3
 /**
  * 远程书分片加载（超大书 HTTP Range 懒加载）
  * - loadChapterSupport：读取构建期生成的章节清单索引，判断该书是否支持 Range 分片

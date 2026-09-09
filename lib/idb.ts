@@ -1,3 +1,4 @@
+// lib/idb.ts v1.4.3
 /**
  * IndexedDB 封装：远程书原文缓存
  * 容量上限 100MB，LRU 淘汰

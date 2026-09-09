@@ -1,8 +1,8 @@
-// components/Footer.tsx
+// components/Footer.tsx v1.4.3
 import Link from "next/link";
 
 // 应用版本单一来源为 package.json，构建时由 Next.js 内联该环境变量。
-const APP_VERSION = process.env.npm_package_version || "1.3.0";
+const APP_VERSION = process.env.npm_package_version || "1.4.3";
 
 // 真实馆藏总数（与 daizhige-catalog.json 同步；上游 garychowcmu/daizhigev20 15,694 部）
 const TOTAL_BOOKS = 15694;

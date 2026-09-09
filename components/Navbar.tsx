@@ -1,4 +1,4 @@
-// components/Navbar.tsx
+// components/Navbar.tsx v1.4.3
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";

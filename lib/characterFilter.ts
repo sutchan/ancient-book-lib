@@ -1,3 +1,4 @@
+// lib/characterFilter.ts v1.4.3
 /**
  * 人物考据检索与筛选（纯函数，便于单测）。
  * - uniqueDynasties / uniqueTags：从数据派生筛选维度

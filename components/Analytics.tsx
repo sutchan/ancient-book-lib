@@ -1,3 +1,4 @@
+// components/Analytics.tsx v1.4.3
 /**
  * Google Analytics 4 埋点组件（Server Component，SSG 时直接写入初始 HTML）
  * 衡量 ID: G-H76XG9L6FZ

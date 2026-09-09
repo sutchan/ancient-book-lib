@@ -1,3 +1,4 @@
+// lib/catalog.ts v1.4.3
 /**
  * 殆知阁 v20 全量书目索引工具
  * 数据来源：public/index/daizhige-catalog.json（由 scripts/build-daizhige-catalog.mjs 生成）

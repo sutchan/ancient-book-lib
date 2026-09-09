@@ -1,4 +1,4 @@
-// app/layout.tsx v1.2.6
+// app/layout.tsx v1.4.3
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -49,8 +49,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN" data-theme="light">
+    <html lang="zh-CN" data-theme="light" suppressHydrationWarning>
       <body>
+        {/* 首帧同步恢复用户主题，避免深色/护眼主题 FOUC 闪烁（CSS 变量挂在 body[data-theme]） */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("ab-theme");if(t==="paper"||t==="dark"){document.body.dataset.theme=t;}}catch(e){}})();`,
+          }}
+        />
         <div className="app-container">
           <Navbar />
           <main className="main-content">{children}</main>

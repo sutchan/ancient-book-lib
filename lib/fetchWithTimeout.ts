@@ -1,3 +1,4 @@
+// lib/fetchWithTimeout.ts v1.4.3
 /**
  * 带超时的 fetch 封装（AbortController）
  * 用于远程书原文加载等可能耗时的网络请求

@@ -1,4 +1,4 @@
-// components/RandomBook.tsx v1.4.0
+// components/RandomBook.tsx v1.4.3
 "use client";
 
 import { useEffect, useState } from "react";

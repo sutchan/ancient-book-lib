@@ -1,3 +1,4 @@
+// app/search/page.tsx v1.4.3
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import SearchClient from "@/components/SearchClient";

@@ -1,3 +1,4 @@
+// components/ReaderToc.tsx v1.4.3
 "use client";
 
 interface ReaderTocProps {

@@ -1,3 +1,4 @@
+// components/ReaderToolbar.tsx v1.4.3
 "use client";
 
 interface ReaderToolbarProps {

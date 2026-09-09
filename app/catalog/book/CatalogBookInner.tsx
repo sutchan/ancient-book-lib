@@ -1,3 +1,4 @@
+// app/catalog/book/CatalogBookInner.tsx v1.4.3
 "use client";
 
 import { useEffect, useState, useCallback } from "react";

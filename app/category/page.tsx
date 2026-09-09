@@ -1,3 +1,4 @@
+// app/category/page.tsx v1.4.3
 import Link from "next/link";
 
 export default function CategoryIndexPage() {

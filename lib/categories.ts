@@ -1,3 +1,4 @@
+// lib/categories.ts v1.4.3
 import type { Category } from "./types";
 
 /**

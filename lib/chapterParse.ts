@@ -1,3 +1,4 @@
+// lib/chapterParse.ts v1.4.3
 /**
  * 章节解析（纯函数，客户端与构建脚本共用）
  * - CHAPTER_PATTERNS / NON_CHAPTER_KEYWORDS / isChapterTitle：章节标题识别

@@ -1,3 +1,4 @@
+// app/catalog/page.tsx v1.4.3
 import { Suspense } from "react";
 import CatalogInner from "./CatalogInner";
 

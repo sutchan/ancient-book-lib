@@ -1,3 +1,4 @@
+// app/stats/page.tsx v1.4.3
 import type { Metadata } from "next";
 import StatsClient from "@/components/StatsClient";
 

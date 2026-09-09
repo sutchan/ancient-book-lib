@@ -1,3 +1,4 @@
+// lib/types.ts v1.4.3
 /**
  * 古籍通 AncientBook 数据类型定义
  */

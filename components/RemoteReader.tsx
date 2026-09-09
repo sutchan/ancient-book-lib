@@ -1,3 +1,4 @@
+// components/RemoteReader.tsx v1.4.3
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";

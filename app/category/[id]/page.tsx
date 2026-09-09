@@ -1,3 +1,4 @@
+// app/category/[id]/page.tsx v1.4.3
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
 
