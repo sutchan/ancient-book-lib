@@ -108,7 +108,7 @@ export default function CharacterList() {
           <div>请调整检索词或筛选条件。</div>
         </div>
       ) : (
-        <div style={{ display: "grid", gap: 12 }}>
+        <div className="character-grid">
           {filtered.map((c) => (
             <CharacterCard key={c.id} c={c} />
           ))}

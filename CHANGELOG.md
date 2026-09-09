@@ -3,7 +3,11 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
+## [1.4.3] - 2026-09-09
+
+### 优化（人物考据档案页卡片式布局）
+- `app/globals.css`：新增 `.character-grid` 响应式卡片网格（多列 `auto-fill minmax(280px,1fr)`、等高等距），替换原单列堆叠
+- `components/CharacterList.tsx`：人物考据列表容器由单列 `grid` 改用 `.character-grid`，实现真正的卡片式排布，窄屏自动回落单列
 
 ## [1.4.2] - 2026-09-08
 

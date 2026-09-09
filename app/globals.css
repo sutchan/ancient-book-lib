@@ -156,6 +156,9 @@ label.btn-toggle:has(input:focus-visible){outline:2px solid var(--color-primary)
 
 .character-card{background:var(--color-card-bg);border:1px solid var(--color-border);border-radius:6px;padding:20px;transition:transform 0.2s ease,box-shadow 0.2s ease;}
 .character-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.05);}
+/* 人物考据档案页：响应式卡片网格（单列堆叠 → 多列卡片） */
+.character-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+.character-grid > .character-card{height:100%;}
 .char-name{font-size:20px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .char-zi{font-size:14px;color:var(--color-text-secondary);font-weight:400;}
 .info-row{margin-top:10px;font-size:15px;line-height:1.7;}
