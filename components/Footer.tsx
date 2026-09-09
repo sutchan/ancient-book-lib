@@ -12,10 +12,10 @@ export default function Footer() {
     <footer className="footer" id="site-footer">
       <div className="footer-inner">
         <div className="foot-links">
-          <Link href="/help">开源协议</Link>
-          <Link href="/help">数据来源</Link>
-          <Link href="/help">免责声明</Link>
-          <Link href="/help">反馈渠道</Link>
+          <Link href="/license">开源协议</Link>
+          <Link href="/data-source">数据来源</Link>
+          <Link href="/disclaimer">免责声明</Link>
+          <Link href="/feedback">反馈渠道</Link>
         </div>
         <p>
           资源下载公示：全站古籍均可在书籍页/馆藏页按章、按本、按馆藏下载；统一解压密码与备用网盘链接将于全量数据发布时公示。

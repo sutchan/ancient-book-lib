@@ -9,6 +9,14 @@
 - `app/globals.css`：新增 `.character-grid` 响应式卡片网格（多列 `auto-fill minmax(280px,1fr)`、等高等距），替换原单列堆叠
 - `components/CharacterList.tsx`：人物考据列表容器由单列 `grid` 改用 `.character-grid`，实现真正的卡片式排布，窄屏自动回落单列
 
+### 新增（合规说明拆分为独立页面）
+- `app/license/page.tsx`：新增「开源协议」独立页（代码 MIT、古籍公有领域与上游授权、CBDB 署名 CC BY-NC-SA 4.0、非商用定位）
+- `app/data-source/page.tsx`：新增「数据来源」独立页（殆知阁 v20 书目原文、哈佛 CBDB 人物考据溯源与零复制架构）
+- `app/disclaimer/page.tsx`：新增「免责声明」独立页（非商用、内容仅供参考、版权与责任、下载附言）
+- `app/feedback/page.tsx`：新增「反馈渠道」独立页（GitHub Issues 主渠道与使用说明）
+- `components/Footer.tsx`：页脚四项链接由统一 `/help` 改为分别指向上述四个独立页面
+- `app/help/page.tsx`：原聚合的「数据来源与版权」小节重构为「相关说明」卡片，引导至四个独立页
+
 ## [1.4.2] - 2026-09-08
 
 ### 修复与增强（人物考据页）

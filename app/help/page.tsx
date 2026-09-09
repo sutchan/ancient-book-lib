@@ -16,7 +16,7 @@ export default function HelpPage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>帮助与说明</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        本页面向读者，介绍如何检索、浏览与在线阅读古籍，以及主题、繁简、下载等常用功能。如需技术架构或贡献说明，请参阅 <Link href="/help#data">数据来源与版权</Link> 与仓库 README。
+        本页面向读者，介绍如何检索、浏览与在线阅读古籍，以及主题、繁简、下载等常用功能。如需技术架构或贡献说明，请参阅 <Link href="/data-source">数据来源</Link> 与仓库 README。
       </p>
 
       {/* 快速上手 */}
@@ -39,7 +39,7 @@ export default function HelpPage() {
           ["#history", "阅读历史与下载"],
           ["#tools", "考据与统计"],
           ["#faq", "常见问题"],
-          ["#data", "数据来源与版权"],
+          ["#legal", "相关说明"],
         ].map(([href, label]) => (
           <a key={href} href={href} className="tag" style={{ textDecoration: "none" }}>{label}</a>
         ))}
@@ -178,12 +178,16 @@ export default function HelpPage() {
         <p>A：本站使用 Google Analytics 4 进行匿名访问统计（仅页面浏览量、来源、设备类型），已开启 IP 匿名化，不采集姓名、账号、联系方式等个人身份信息。你在浏览器隐私设置中屏蔽第三方 Cookie 即可停止统计。</p>
       </div>
 
-      {/* 数据来源与版权 */}
-      <h3 className="section-title" id="data">数据来源、开源与隐私</h3>
+      {/* 相关说明 */}
+      <h3 className="section-title" id="legal">相关说明（开源协议 / 数据来源 / 免责声明 / 反馈）</h3>
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
-        <p><strong>数据来源</strong>：书目与原文基于殆知阁 v20 全量 15,694 部（上游仓库 <code style={{ background: "var(--color-highlight)", padding: "1px 6px", borderRadius: 4 }}>garychowcmu/daizhigev20</code>），原始数据约 4.9 GB 由上游托管，本仓库零复制、阅读时按需加载。</p>
-        <p><strong>开源协议</strong>：项目代码遵循 MIT 协议；古籍原文为公有领域资源，整理文本遵循原数据源授权协议，仅供学术研究与个人学习，商用需自行核实版权。</p>
-        <p><strong>隐私</strong>：匿名统计已开启 IP 匿名化，不采集个人身份信息；屏蔽第三方 Cookie 即可停止。阅读进度、繁简与主题偏好仅保存在你本机浏览器，不上传。</p>
+        <p>本站运营相关的详细声明已拆分为独立页面，便于查阅与引用：</p>
+        <ul style={{ paddingLeft: 20, margin: "4px 0" }}>
+          <li><Link href="/license">开源协议</Link>：代码 MIT 协议、古籍公有领域与上游授权、非商用定位。</li>
+          <li><Link href="/data-source">数据来源</Link>：殆知阁 v20 书目原文、CBDB 人物考据等数据源与溯源。</li>
+          <li><Link href="/disclaimer">免责声明</Link>：非商用、内容仅供参考、使用责任归属。</li>
+          <li><Link href="/feedback">反馈渠道</Link>：勘误、建议与问题反馈方式。</li>
+        </ul>
       </div>
     </section>
   );
