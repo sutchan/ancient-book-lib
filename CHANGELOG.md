@@ -16,8 +16,12 @@
 - `app/feedback/page.tsx`：新增「反馈渠道」独立页（GitHub Issues 主渠道与使用说明）
 - `components/Footer.tsx`：页脚四项链接由统一 `/help` 改为分别指向上述四个独立页面
 - `app/help/page.tsx`：原聚合的「数据来源与版权」小节重构为「相关说明」卡片，引导至四个独立页
-- `components/Navbar.tsx`：顶部导航新增「开源协议 / 数据来源 / 免责声明 / 反馈渠道」四项（移动端折叠菜单同步）
 - 原型 `prototype/`：新增 `pages/license.html`、`data-source.html`、`disclaimer.html`、`feedback.html` 四个独立页（静态内容镜像线上页）；`prototype.html` 与 9 个 `pages/*.html` 页脚四项链接由统一 `./help.html`（`#page-help`）拆为分别指向四个独立页
+
+### 调整（顶部导航精简）
+- `components/Navbar.tsx`：顶部导航移除「数据统计」「开源协议 / 数据来源 / 免责声明 / 反馈渠道」，仅保留核心功能入口（首页 / 全馆藏 / 检索 / 人物考据 / 社会关系 / 帮助）
+- `components/Footer.tsx`：页脚新增「数据统计」链接（置于四项合规链接之后）
+- 原型 `prototype/`：14 个文件同步——导航移除「数据统计」（枢纽用 `#page-stats` 锚点、各页用 `./stats.html`，含移动端折叠菜单），页脚新增对应链接（枢纽用 `./pages/stats.html`、各页用 `./stats.html`）
 
 ## [1.4.2] - 2026-09-08
 
