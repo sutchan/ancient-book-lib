@@ -19,6 +19,10 @@ const MENU: { key: string; href: string; label: string }[] = [
   { key: "relation", href: "/relation", label: "社会关系" },
   { key: "stats", href: "/stats", label: "数据统计" },
   { key: "help", href: "/help", label: "帮助" },
+  { key: "license", href: "/license", label: "开源协议" },
+  { key: "data-source", href: "/data-source", label: "数据来源" },
+  { key: "disclaimer", href: "/disclaimer", label: "免责声明" },
+  { key: "feedback", href: "/feedback", label: "反馈渠道" },
 ];
 
 export default function Navbar({ current: currentProp = "home" }: NavbarProps) {

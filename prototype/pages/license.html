@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>人物考据｜古籍通 AncientBook 高保真原型</title>
+<title>开源协议｜古籍通 AncientBook 高保真原型</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,17 +14,12 @@
 <link rel="stylesheet" href="../assets/css/reader.css"/>
 <link rel="stylesheet" href="../assets/css/pages.css"/>
 <link rel="stylesheet" href="../assets/css/responsive.css"/>
-
-<!-- 品牌资料：与线上 public/brand 同源（favicon / 主屏图标 / 分享图） -->
 <link rel="icon" type="image/png" sizes="64x64" href="../assets/brand/logo-mark-64.png"/>
 <link rel="apple-touch-icon" href="../assets/brand/logo-mark-solid-180.png"/>
 <link rel="manifest" href="../assets/brand/site.webmanifest"/>
 <meta name="theme-color" content="#A93320"/>
-<meta property="og:type" content="website"/>
-<meta property="og:image" content="../assets/brand/og-image.png"/>
-<meta name="twitter:card" content="summary_large_image"/>
 </head>
-<body data-theme="light" data-device="desktop" data-page="character">
+<body data-theme="light" data-device="desktop" data-page="license">
 <div class="app-container">
   <div class="device-bar">
     <span style="font-size:13px;color:var(--color-text-secondary);margin-right:6px;">预览设备</span>
@@ -39,7 +34,7 @@
         <a href="./index.html">首页</a>
         <a href="./book-list.html">全馆藏</a>
         <a href="./search.html">检索</a>
-        <a href="./character.html" class="active">人物考据</a>
+        <a href="./character.html">人物考据</a>
         <a href="./relation.html">社会关系</a>
         <a href="./stats.html">数据统计</a>
         <a href="./help.html">帮助</a>
@@ -55,12 +50,48 @@
         <a href="./index.html">首页</a>
         <a href="./book-list.html">全馆藏</a>
         <a href="./search.html">检索</a>
-        <a href="./character.html" class="active">人物考据</a>
+        <a href="./character.html">人物考据</a>
         <a href="./relation.html">社会关系</a>
         <a href="./stats.html">数据统计</a>
         <a href="./help.html">帮助</a>
       </nav>
-  <main class="main-content" id="page-body"></main>
+  <main class="main-content" id="page-body">
+    <div class="breadcrumb">
+      <a href="./index.html">首页</a>
+      <span class="sep">/</span>
+      <span>开源协议</span>
+    </div>
+    <h2 style="margin-bottom:8px;">开源协议</h2>
+    <p style="color:var(--color-text-secondary);margin-bottom:20px;font-size:15px;">古籍通 AncientBook 是公益免费、开源共享、非商用的传统文化传播工具。下方说明项目代码、古籍资源与学术数据的授权方式。</p>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-body">
+        <h3 class="card-title">项目代码</h3>
+        <p style="line-height:2;font-size:15px;">本项目源代码以 <strong>MIT 协议</strong> 开源（详见仓库根目录 LICENSE 文件），允许在遵守协议的前提下自由使用、修改与再分发。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-body">
+        <h3 class="card-title">古籍原文</h3>
+        <p style="line-height:2;font-size:15px;">古籍原文属公有领域资源，整理文本遵循上游数据源授权协议（殆知阁开源古籍资源）。本站资源<strong>仅供学术研究与个人学习</strong>，禁止商用、二次售卖或篡改后伪造成原创资料库；商用或二次分发需自行核实版权状态并获授权。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-body">
+        <h3 class="card-title">学术数据（人物考据）</h3>
+        <p style="line-height:2;font-size:15px;">人物考据数据来自哈佛 CBDB 等公开学术数据集，遵循其 <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名并标注非商用。所有人物数据均标注史料来源，可溯源、不杜撰。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">非商用定位</h3>
+        <p style="line-height:2;font-size:15px;">全站无广告、无弹窗、无付费功能、无商业变现模块；全功能零注册、零登录、零门槛开放。详见 <a href="./disclaimer.html">免责声明</a> 与 <a href="./data-source.html">数据来源</a>。</p>
+      </div>
+    </div>
+  </main>
   <footer class="footer">
     <div class="footer-inner">
       <div class="foot-links">
@@ -70,7 +101,7 @@
         <a href="./feedback.html">反馈渠道</a>
       </div>
       <p>古籍通 AncientBook · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
-      <p class="footer-stats" id="footer-stats" style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">馆藏 10 类 · 精选典籍 45 部 · 全馆藏 15,694 部（殆知阁 v20）· 人物 38 位 · 考据关系 6 条</p>
+      <p class="footer-stats" style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">馆藏 10 类 · 精选典籍 45 部 · 全馆藏 15,694 部（殆知阁 v20）· 人物 38 位 · 考据关系 6 条</p>
     </div>
   </footer>
 </div>

@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>人物考据｜古籍通 AncientBook 高保真原型</title>
+<title>数据来源｜古籍通 AncientBook 高保真原型</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,17 +14,12 @@
 <link rel="stylesheet" href="../assets/css/reader.css"/>
 <link rel="stylesheet" href="../assets/css/pages.css"/>
 <link rel="stylesheet" href="../assets/css/responsive.css"/>
-
-<!-- 品牌资料：与线上 public/brand 同源（favicon / 主屏图标 / 分享图） -->
 <link rel="icon" type="image/png" sizes="64x64" href="../assets/brand/logo-mark-64.png"/>
 <link rel="apple-touch-icon" href="../assets/brand/logo-mark-solid-180.png"/>
 <link rel="manifest" href="../assets/brand/site.webmanifest"/>
 <meta name="theme-color" content="#A93320"/>
-<meta property="og:type" content="website"/>
-<meta property="og:image" content="../assets/brand/og-image.png"/>
-<meta name="twitter:card" content="summary_large_image"/>
 </head>
-<body data-theme="light" data-device="desktop" data-page="character">
+<body data-theme="light" data-device="desktop" data-page="data-source">
 <div class="app-container">
   <div class="device-bar">
     <span style="font-size:13px;color:var(--color-text-secondary);margin-right:6px;">预览设备</span>
@@ -39,7 +34,7 @@
         <a href="./index.html">首页</a>
         <a href="./book-list.html">全馆藏</a>
         <a href="./search.html">检索</a>
-        <a href="./character.html" class="active">人物考据</a>
+        <a href="./character.html">人物考据</a>
         <a href="./relation.html">社会关系</a>
         <a href="./stats.html">数据统计</a>
         <a href="./help.html">帮助</a>
@@ -55,12 +50,48 @@
         <a href="./index.html">首页</a>
         <a href="./book-list.html">全馆藏</a>
         <a href="./search.html">检索</a>
-        <a href="./character.html" class="active">人物考据</a>
+        <a href="./character.html">人物考据</a>
         <a href="./relation.html">社会关系</a>
         <a href="./stats.html">数据统计</a>
         <a href="./help.html">帮助</a>
       </nav>
-  <main class="main-content" id="page-body"></main>
+  <main class="main-content" id="page-body">
+    <div class="breadcrumb">
+      <a href="./index.html">首页</a>
+      <span class="sep">/</span>
+      <span>数据来源</span>
+    </div>
+    <h2 style="margin-bottom:8px;">数据来源</h2>
+    <p style="color:var(--color-text-secondary);margin-bottom:20px;font-size:15px;">本站采用「零复制」架构：仅存储书目索引，古籍原文与考据数据阅读时按需从上游权威源加载。各数据源均可溯源。</p>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-body">
+        <h3 class="card-title">古籍书目与原文（殆知阁 v20）</h3>
+        <p style="line-height:2;font-size:15px;">全馆藏 15,694 部古籍书目与原文来自开源仓库 <code style="background:var(--color-highlight);padding:1px 6px;border-radius:4px;">garychowcmu/daizhigev20</code>（殆知阁 v20，原始数据约 4.9 GB）。本仓库不复制原文，阅读时按字节区间（HTTP Range）向上游按需拉取，保障原文保真。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-body">
+        <h3 class="card-title">人物考据（哈佛 CBDB）</h3>
+        <p style="line-height:2;font-size:15px;">人物考据档案（姓名、字、号、籍贯、生卒、官职、著作）来自哈佛 CBDB（Chinese Biographical Database），遵循 <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。当前已导入 28 位历史名人考据，详见 <a href="./character.html">人物考据</a>。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-body">
+        <h3 class="card-title">学术数据集</h3>
+        <p style="line-height:2;font-size:15px;">学术人物与关系数据同时参考中研院史语所、北京大学等公开学术数据集规范，确保史料严谨、可溯源、不臆断。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">合规说明</h3>
+        <p style="line-height:2;font-size:15px;">所有数据遵循上游开源与学术协议，仅供学术研究与文化传播。更多授权细节见 <a href="./license.html">开源协议</a> 与 <a href="./disclaimer.html">免责声明</a>。</p>
+      </div>
+    </div>
+  </main>
   <footer class="footer">
     <div class="footer-inner">
       <div class="foot-links">
@@ -70,7 +101,7 @@
         <a href="./feedback.html">反馈渠道</a>
       </div>
       <p>古籍通 AncientBook · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
-      <p class="footer-stats" id="footer-stats" style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">馆藏 10 类 · 精选典籍 45 部 · 全馆藏 15,694 部（殆知阁 v20）· 人物 38 位 · 考据关系 6 条</p>
+      <p class="footer-stats" style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">馆藏 10 类 · 精选典籍 45 部 · 全馆藏 15,694 部（殆知阁 v20）· 人物 38 位 · 考据关系 6 条</p>
     </div>
   </footer>
 </div>
