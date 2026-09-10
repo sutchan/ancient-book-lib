@@ -4,8 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { searchPersons } from "@/lib/cbdb";
 
+interface Hit {
+  id: number;
+  name: string;
+  matched?: "name" | "alias";
+  alias?: string;
+}
+
 export default function PeopleSearchResults({ query }: { query: string }) {
-  const [people, setPeople] = useState<{ id: number; name: string }[] | null>(null);
+  const [people, setPeople] = useState<Hit[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -16,7 +23,7 @@ export default function PeopleSearchResults({ query }: { query: string }) {
     let cancelled = false;
     searchPersons(query.trim(), 8)
       .then((r) => !cancelled && setPeople(r))
-      .catch((e) => !cancelled && setError(String(e?.message || e)));
+      .catch((e) => !cancelled && setError(String((e as Error)?.message || e)));
     return () => { cancelled = true; };
   }, [query]);
 
@@ -34,17 +41,22 @@ export default function PeopleSearchResults({ query }: { query: string }) {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {people.map((p) => (
           <Link
-            key={p.id}
+            key={`${p.id}-${p.matched}`}
             href={`/people/detail?id=${p.id}`}
             className="tag"
             style={{ textDecoration: "none", padding: "6px 12px", fontSize: 14 }}
           >
             {p.name}
+            {p.matched === "alias" && p.alias && (
+              <span style={{ fontSize: 12, color: "var(--color-primary)", marginLeft: 6 }}>
+                （{p.alias}）
+              </span>
+            )}
           </Link>
         ))}
       </div>
       <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 10 }}>
-        数据来源：CBDB 中国历代人物传记资料库（661,350 人）
+        数据来源：CBDB 中国历代人物传记资料库（661,350 人，含 163,634 条字/号/諡號别名检索）
       </div>
     </div>
   );

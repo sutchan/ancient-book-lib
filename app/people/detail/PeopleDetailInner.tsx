@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import {
   findPersonById,
   formatLife,
+  getPersonAltnames,
   getPersonOffices,
   getPersonRelations,
   getPersonTexts,
@@ -33,6 +34,7 @@ export default function PeopleDetailInner() {
   const [assoc, setAssoc] = useState<RelationItem[] | null>(null);
   const [texts, setTexts] = useState<{ title: string; role: string; year: number }[] | null>(null);
   const [offices, setOffices] = useState<{ office: string; firstYear: number; lastYear: number; appt: string }[] | null>(null);
+  const [altnames, setAltnames] = useState<{ name: string; type: string }[] | null>(null);
   const [relError, setRelError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,10 +62,11 @@ export default function PeopleDetailInner() {
     let cancelled = false;
     (async () => {
       try {
-        const [rel, texts, offices] = await Promise.all([
+        const [rel, texts, offices, altnames] = await Promise.all([
           getPersonRelations(id),
           getPersonTexts(id),
           getPersonOffices(id),
+          getPersonAltnames(id),
         ]);
         if (cancelled) return;
         const names = await loadRelNames();
@@ -73,6 +76,7 @@ export default function PeopleDetailInner() {
         setAssoc(decorate(rel.assoc));
         setTexts(texts);
         setOffices(offices);
+        setAltnames(altnames);
       } catch (e) {
         if (!cancelled) setRelError(String((e as Error)?.message || e));
       }
@@ -144,6 +148,26 @@ export default function PeopleDetailInner() {
           <Link href="/people" className="btn btn-secondary">返回人物库</Link>
         </div>
       </div>
+
+      {/* 字/号/别名 */}
+      {!relLoading && !relError && altnames && altnames.length > 0 && (
+        <>
+          <h3 className="section-title" style={{ marginTop: 28 }}>字/號/別名（CBDB）</h3>
+          <div className="card" style={{ padding: 16, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {altnames.map((a, i) => (
+                <span key={i} className="tag" style={{ fontSize: 13, padding: "5px 10px" }}>
+                  {a.name}
+                  {a.type && <span style={{ color: "var(--color-text-secondary)" }}>（{a.type}）</span>}
+                </span>
+              ))}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)" }}>
+              古籍原文常以字、號、諡號等称呼人物，搜索姓名或别名均可命中。
+            </div>
+          </div>
+        </>
+      )}
 
       {/* 人物关系 */}
       <h3 className="section-title" style={{ marginTop: 28 }}>生平任职（CBDB）</h3>
@@ -253,9 +277,9 @@ export default function PeopleDetailInner() {
       <div className="card" style={{ marginTop: 24, padding: 16, fontSize: 13, color: "var(--color-text-secondary)" }}>
         <strong>数据说明</strong>：本页数据来自 {meta?.source.name || "CBDB 中国历代人物传记资料库"}（{meta?.source.release_date || ""} 版，
         {meta?.source.license || ""}），字段含姓名、拼音、生卒年、指数年（CBDB 推算的基准年）、性别、朝代、籍贯/主要活动地。
-        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。亲属/社会关系、任职与著作分别来自 CBDB 的
-        KIN_DATA、ASSOC_DATA、POSTED_TO_OFFICE_DATA、BIOG_TEXT_DATA 表，均为 CBDB 原始口径；「在馆藏检索」仅在
-        本站古籍书目中查找同名著作，不代表 CBDB 确认两者为同一版本。
+        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。字/號/別名（163,634 条）、亲属/社会关系、任职与著作
+        分别来自 CBDB 的 ALTNAME_DATA、KIN_DATA、ASSOC_DATA、POSTED_TO_OFFICE_DATA、BIOG_TEXT_DATA 表，均为 CBDB
+        原始口径；「在馆藏检索」仅在本站古籍书目中查找同名著作，不代表 CBDB 确认两者为同一版本。
       </div>
     </section>
   );
