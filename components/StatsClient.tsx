@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { loadCatalog, formatSize, type DaizhigeCatalog } from "@/lib/catalog";
 import { loadCbdbMeta, type CbdbMeta } from "@/lib/cbdb";
-import { loadRelMeta, type RelMeta } from "@/lib/cbdb";
+import { loadRelMeta, loadOfficesMeta, type RelMeta, type OfficesMeta } from "@/lib/cbdb";
 
 const PALETTE = ["#8C3130", "#B8754E", "#C9A227", "#4E7A5A", "#5B7A9D", "#7A5B9D", "#9D5B6E", "#3E7A78", "#8A6D3B", "#5A6B8C"];
 
@@ -39,6 +39,7 @@ export default function StatsClient() {
   const [catalog, setCatalog] = useState<DaizhigeCatalog | null>(null);
   const [cbdb, setCbdb] = useState<CbdbMeta | null>(null);
   const [rel, setRel] = useState<RelMeta | null>(null);
+  const [offices, setOffices] = useState<OfficesMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,6 +51,9 @@ export default function StatsClient() {
       .catch(() => {});
     loadRelMeta()
       .then(setRel)
+      .catch(() => {});
+    loadOfficesMeta()
+      .then(setOffices)
       .catch(() => {});
   }, []);
 
@@ -158,6 +162,12 @@ export default function StatsClient() {
             </span>{" "}
             <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>位涉及关系人物</span>
           </div>
+          <div>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>
+              {offices ? offices.stats.officeTotal.toLocaleString() : "…"}
+            </span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条任职记录（CBDB）</span>
+          </div>
         </div>
         <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-secondary)" }}>
           数据源：
@@ -216,6 +226,42 @@ export default function StatsClient() {
             关系覆盖 {rel.stats.personTotal.toLocaleString()} 位人物，可在{" "}
             <Link href="/relation" style={{ color: "var(--color-primary)" }}>社会关系溯源</Link> 中按人物查看，
             支持直接关系与二级中间关系的双人溯源。
+          </div>
+        </div>
+      )}
+
+      {offices && (
+        <div className="card stat-panel" style={{ marginTop: 16 }}>
+          <div className="stat-panel-title">人物任职数据（CBDB POSTED_TO_OFFICE_DATA · 2026-09-05 版）</div>
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap", padding: "12px 4px" }}>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {offices.stats.officeTotal.toLocaleString()}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条任职记录</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {offices.stats.personTotal.toLocaleString()}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>位有任职记载的人物</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {offices.stats.officeNameCount.toLocaleString()}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>种官职名</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {offices.stats.apptCodeCount}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>种任命类型（正授/權/守/試/攝等）</span>
+            </div>
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+            任职记录（官职、起止年、任命类型）展示于{" "}
+            <Link href="/people" style={{ color: "var(--color-primary)" }}>人物库</Link> 详情页「生平任职」区块。
           </div>
         </div>
       )}

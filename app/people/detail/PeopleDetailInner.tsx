@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import {
   findPersonById,
   formatLife,
+  getPersonOffices,
   getPersonRelations,
   getPersonTexts,
   loadCbdbMeta,
@@ -31,6 +32,7 @@ export default function PeopleDetailInner() {
   const [kin, setKin] = useState<RelationItem[] | null>(null);
   const [assoc, setAssoc] = useState<RelationItem[] | null>(null);
   const [texts, setTexts] = useState<{ title: string; role: string; year: number }[] | null>(null);
+  const [offices, setOffices] = useState<{ office: string; firstYear: number; lastYear: number; appt: string }[] | null>(null);
   const [relError, setRelError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,7 +60,11 @@ export default function PeopleDetailInner() {
     let cancelled = false;
     (async () => {
       try {
-        const [rel, texts] = await Promise.all([getPersonRelations(id), getPersonTexts(id)]);
+        const [rel, texts, offices] = await Promise.all([
+          getPersonRelations(id),
+          getPersonTexts(id),
+          getPersonOffices(id),
+        ]);
         if (cancelled) return;
         const names = await loadRelNames();
         const decorate = (list: { id: number; rel: string; year?: number }[]): RelationItem[] =>
@@ -66,6 +72,7 @@ export default function PeopleDetailInner() {
         setKin(decorate(rel.kin));
         setAssoc(decorate(rel.assoc));
         setTexts(texts);
+        setOffices(offices);
       } catch (e) {
         if (!cancelled) setRelError(String((e as Error)?.message || e));
       }
@@ -139,7 +146,34 @@ export default function PeopleDetailInner() {
       </div>
 
       {/* 人物关系 */}
-      <h3 className="section-title" style={{ marginTop: 28 }}>人物关系（CBDB）</h3>
+      <h3 className="section-title" style={{ marginTop: 28 }}>生平任职（CBDB）</h3>
+      {!relLoading && !relError && offices && offices.length > 0 && (
+        <div className="card" style={{ padding: 16, marginBottom: 20 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {offices.slice(0, 60).map((o, i) => (
+              <span key={i} className="tag" style={{ fontSize: 13, padding: "5px 10px" }}>
+                {o.office}
+                {o.appt && <span style={{ color: "var(--color-primary)" }}>（{o.appt}）</span>}
+                {o.firstYear || o.lastYear ? (
+                  <span style={{ color: "var(--color-text-secondary)" }}>
+                    {" "}{o.firstYear ? o.firstYear : "?"}{o.lastYear && o.lastYear !== o.firstYear ? `-${o.lastYear}` : ""} 年
+                  </span>
+                ) : null}
+              </span>
+            ))}
+            {offices.length > 60 && (
+              <span className="tag" style={{ fontSize: 13 }}>另有 {offices.length - 60} 条，详见 CBDB</span>
+            )}
+          </div>
+        </div>
+      )}
+      {!relLoading && !relError && offices && offices.length === 0 && (
+        <div className="card" style={{ padding: 14, marginBottom: 20, color: "var(--color-text-secondary)", fontSize: 13 }}>
+          CBDB 暂无此人任职记录
+        </div>
+      )}
+
+      <h3 className="section-title">人物关系（CBDB）</h3>
       {relLoading && <div className="card" style={{ padding: 24, textAlign: "center", color: "var(--color-text-secondary)" }}>加载关系中...</div>}
       {relError && <div className="card" style={{ padding: 16, color: "#c00", fontSize: 14 }}>关系加载失败：{relError}</div>}
       {!relLoading && !relError && (kin?.length === 0) && (assoc?.length === 0) && (texts?.length === 0) && (
@@ -200,6 +234,13 @@ export default function PeopleDetailInner() {
                   {t.title}
                   {t.role && <span className="tag" style={{ marginLeft: 8, fontSize: 12 }}>{t.role}</span>}
                   {t.year ? <span style={{ color: "var(--color-text-secondary)", marginLeft: 6, fontSize: 13 }}>{t.year} 年</span> : null}
+                  {" "}
+                  <Link
+                    href={`/search?q=${encodeURIComponent(t.title.split(":")[0].trim())}&mode=title`}
+                    style={{ fontSize: 12, color: "var(--color-primary)", textDecoration: "none" }}
+                  >
+                    在馆藏检索
+                  </Link>
                 </li>
               ))}
               {texts.length > 40 && <li style={{ color: "var(--color-text-secondary)" }}>另有 {texts.length - 40} 条，详见 CBDB</li>}
@@ -212,8 +253,9 @@ export default function PeopleDetailInner() {
       <div className="card" style={{ marginTop: 24, padding: 16, fontSize: 13, color: "var(--color-text-secondary)" }}>
         <strong>数据说明</strong>：本页数据来自 {meta?.source.name || "CBDB 中国历代人物传记资料库"}（{meta?.source.release_date || ""} 版，
         {meta?.source.license || ""}），字段含姓名、拼音、生卒年、指数年（CBDB 推算的基准年）、性别、朝代、籍贯/主要活动地。
-        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。亲属/社会关系与著作来自 CBDB 的
-        KIN_DATA、ASSOC_DATA、BIOG_TEXT_DATA 表，关系描述为 CBDB 原始口径。
+        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。亲属/社会关系、任职与著作分别来自 CBDB 的
+        KIN_DATA、ASSOC_DATA、POSTED_TO_OFFICE_DATA、BIOG_TEXT_DATA 表，均为 CBDB 原始口径；「在馆藏检索」仅在
+        本站古籍书目中查找同名著作，不代表 CBDB 确认两者为同一版本。
       </div>
     </section>
   );

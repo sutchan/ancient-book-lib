@@ -16,7 +16,8 @@
     "test": "tsx --test test/*.test.ts",
     "export": "next build && next export",
     "build:cbdb": "node scripts/build-cbdb-index.mjs",
-    "build:cbdb-rel": "node scripts/build-cbdb-relations.mjs"
+    "build:cbdb-rel": "node scripts/build-cbdb-relations.mjs",
+    "build:cbdb-offices": "node scripts/build-cbdb-offices.mjs"
   },
   "dependencies": {
     "next": "^14.2.15",

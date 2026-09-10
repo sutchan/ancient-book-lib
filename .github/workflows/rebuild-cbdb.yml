@@ -57,15 +57,16 @@ jobs:
           echo "Using: $SQLITE"
           node scripts/build-cbdb-index.mjs "$SQLITE"
           node scripts/build-cbdb-relations.mjs "$SQLITE"
+          node scripts/build-cbdb-offices.mjs "$SQLITE"
 
       - name: Verify index
         run: |
-          node -e "const m=require('./public/index/cbdb/meta.json'); const r=require('./public/index/cbdb/rel/rel-meta.json'); console.log('total:', m.total, '| surnames:', m.surnameTotal, '| kin:', r.stats.kinTotal, '| assoc:', r.stats.assocTotal); if(m.total < 600000 || r.stats.kinTotal < 500000) { console.error('数据量异常，中止'); process.exit(1); }"
+          node -e "const m=require('./public/index/cbdb/meta.json'); const r=require('./public/index/cbdb/rel/rel-meta.json'); const o=require('./public/index/cbdb/offices/offices-meta.json'); console.log('total:', m.total, '| kin:', r.stats.kinTotal, '| assoc:', r.stats.assocTotal, '| offices:', o.stats.officeTotal); if(m.total < 600000 || r.stats.kinTotal < 500000 || o.stats.officeTotal < 500000) { console.error('数据量异常，中止'); process.exit(1); }"
 
       - name: Commit index
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/index/cbdb/
-          git diff --cached --quiet || git commit -m "chore: 重建 CBDB 人物与关系索引（$(node -e "console.log(require('./public/index/cbdb/meta.json').total)") 人 / $(node -e "console.log(require('./public/index/cbdb/rel/rel-meta.json').stats.kinTotal)") 亲属）"
+          git diff --cached --quiet || git commit -m "chore: 重建 CBDB 人物/关系/任职索引（$(node -e "console.log(require('./public/index/cbdb/meta.json').total)") 人 / $(node -e "console.log(require('./public/index/cbdb/offices/offices-meta.json').stats.officeTotal)") 任职）"
           git push

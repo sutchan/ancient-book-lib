@@ -117,7 +117,7 @@ export default function HelpPage() {
       <h3 className="section-title" id="tools">六、人物考据、社会关系与数据统计</h3>
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
         <ul style={{ paddingLeft: 20, margin: "4px 0" }}>
-          <li><strong>人物库</strong>：已接入 CBDB 全量 661,350 位历代人物（姓名、拼音、生卒年、指数年、性别、朝代、籍贯），支持人名搜索、朝代筛选与姓氏浏览；详情页可一键在古籍中检索该人物。</li>
+          <li><strong>人物库</strong>：已接入 CBDB 全量 661,350 位历代人物（姓名、拼音、生卒年、指数年、性别、朝代、籍贯），支持人名搜索、朝代筛选与姓氏浏览；详情页含生平任职（59.1 万条）与人物关系，可一键在古籍中检索该人物。</li>
           <li><strong>人物考据</strong>：精选 28 位历史名人档案（字、号、籍贯、生卒、官职、著作与史料出处），支持重名人物按朝代+籍贯+官职多维区分。</li>
           <li><strong>社会关系</strong>：已接入 CBDB 亲属关系 56.1 万条与社会关系 19 万条，支持按人物查看关系网络与双人溯源（直接/二级关系）。</li>
           <li><strong>数据统计</strong>：已可查看馆藏规模、十大藏库分布、原始数据量与 CBDB 人物规模；关系类指标待元数据接入后补充。</li>

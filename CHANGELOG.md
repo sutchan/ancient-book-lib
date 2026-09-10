@@ -3,6 +3,15 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.7.0] - 2026-09-10
+
+### 新增（CBDB 生平任职 + 著作-馆藏联动）
+- 新增 `scripts/build-cbdb-offices.mjs`（npm `build:cbdb-offices`）：提取 POSTED_TO_OFFICE_DATA + OFFICE_CODES + APPOINTMENT_CODES，生成按 personid 值区间分片的任职索引（590,540 条 / 298,954 人 / 11,291 种官职 / 16.7MB，产物 `public/index/cbdb/offices/`，已提交）
+- `lib/cbdb.ts`：新增 `loadOfficesMeta` / `getPersonOffices`（官职 + 首末年 + 任命类型：正授/權/守/試/攝等）
+- 人物详情页新增「生平任职」区块（前 60 条官职标签，含任命类型与起止年）；著作列表新增「在馆藏检索」链接（在殆知阁书目中查找同名著作，标注口径）
+- 数据统计页：概览与任职面板接入 59.1 万条任职 / 29.9 万人 / 11,291 种官职 / 任命类型统计
+- CI 重建 workflow 同步重建任职索引；README / 帮助页 / 数据来源页更新
+
 ## [1.6.0] - 2026-09-10
 
 ### 新增（CBDB 关系网络：亲属 + 社会关系 + 人物著作）
