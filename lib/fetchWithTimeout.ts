@@ -1,4 +1,4 @@
-// lib/fetchWithTimeout.ts v1.4.3
+// lib/fetchWithTimeout.ts v1.5.1
 /**
  * 带超时的 fetch 封装（AbortController）
  * 用于远程书原文加载等可能耗时的网络请求
@@ -100,11 +100,15 @@ export async function fetchRangeText(
   }
   const text = await resp.text();
   if (resp.status === 200) {
-    // 源未支持 Range：整文返回，按字节区间截取后返回
+    // 源未支持 Range：整文返回，按 UTF-8 字节区间截取后返回。
+    // 注意不能用 text.slice（字符索引），章节偏移是 Buffer.byteLength 字节偏移，
+    // 中文一个字符占 3 字节，按字符切会得到错误内容。
     const [startStr, endStr] = range.split("-");
     const start = parseInt(startStr, 10) || 0;
-    const end = endStr ? parseInt(endStr, 10) : text.length;
-    return text.slice(start, end + 1);
+    const bytes = new TextEncoder().encode(text);
+    const end = endStr ? parseInt(endStr, 10) : bytes.byteLength - 1;
+    // 章节起止偏移本身都落在 UTF-8 字符边界（按行/按字符累加生成），subarray 安全
+    return new TextDecoder().decode(bytes.subarray(start, end + 1));
   }
   return text;
 }

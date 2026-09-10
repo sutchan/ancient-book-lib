@@ -1,4 +1,4 @@
-// lib/search.ts v1.4.3
+// lib/search.ts v1.5.1
 /**
  * 检索工具（纯静态无数据库）
  * - 标题/元数据检索：始终可用，基于 daizhige-catalog.json（loadCatalog + searchCatalog）
@@ -7,6 +7,7 @@
  */
 import type { DaizhigeCatalog } from "./types";
 import { loadCatalog, searchCatalog } from "./catalog";
+import { T2S_MAP } from "./t2s";
 
 export interface SearchResult {
   kind: "book";
@@ -33,9 +34,21 @@ export async function loadFulltextIndex(baseUrl = ""): Promise<Record<string, st
   }
 }
 
+/**
+ * 查询归一化：必须与 scripts/build-fulltext-index.mjs 的 normalize 完全一致
+ * （繁→简 + 去除标点/空白/数字），否则繁体查询打不中简体倒排索引。
+ */
+function normalizeQuery(q: string): string {
+  return q
+    .split("")
+    .map((c) => T2S_MAP[c] || c)
+    .join("")
+    .replace(/[「」『』“”‘’《》〈〉：；，。！？、·\s\d]/g, "");
+}
+
 /** 查询分词：单字 + 二元组（与 build-fulltext-index.mjs 一致） */
 function tokenize(q: string): string[] {
-  const norm = q.replace(/\s+/g, "");
+  const norm = normalizeQuery(q);
   const toks = new Set<string>();
   for (let i = 0; i < norm.length; i++) {
     toks.add(norm[i]);
