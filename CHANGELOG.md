@@ -3,6 +3,16 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.6.0] - 2026-09-10
+
+### 新增（CBDB 关系网络：亲属 + 社会关系 + 人物著作）
+- 新增 `scripts/build-cbdb-relations.mjs`（npm `build:cbdb-rel`）：从 CBDB SQLite 提取 KIN_DATA（亲属 561,361 条）、ASSOC_DATA（社会关系 189,938 条）、BIOG_TEXT_DATA（人物-著作 50,783 条），生成按 personid 值区间分片的索引 + 关系人名映射 + 代码表，产物 `public/index/cbdb/rel/`（21.9MB，已提交，覆盖 311,202 人）
+- `lib/cbdb.ts`：新增关系加载能力——`getPersonRelations`（亲属/社会）、`getPersonTexts`（著作）、`findRelationPath`（双人溯源：直接关系 + 二级中间关系，受控广度）
+- 人物详情页新增「人物关系」区块：亲属（前 60）、社会关系（前 60，含年份）、著作列表（前 40），关系标签可点击直达对应人物
+- `components/RelationClient.tsx` 全面重写：社会关系溯源页从占位变为真实 CBDB 数据——人物搜索联想（防抖）、单人关系网络（亲属/社会分组）、双人溯源（A→B 或 A→X→B 路径展示）、顶部数据统计
+- `components/StatsClient.tsx`：数据统计页 KPI 与概览接入真实人物/关系数据，新增「CBDB 人物朝代分布（前 10）」柱状图与关系数据面板（亲属/社会/著作/称谓/关系类型计数）
+- 首页「社会关系溯源」卡片、帮助页、数据来源页、README 更新为真实数据口径
+
 ## [1.5.0] - 2026-09-10
 
 ### 新增（CBDB 全量人物库）

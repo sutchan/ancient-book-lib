@@ -56,15 +56,16 @@ jobs:
           SQLITE=$(ls tmp/cbdb/*.sqlite3 | head -1)
           echo "Using: $SQLITE"
           node scripts/build-cbdb-index.mjs "$SQLITE"
+          node scripts/build-cbdb-relations.mjs "$SQLITE"
 
       - name: Verify index
         run: |
-          node -e "const m=require('./public/index/cbdb/meta.json'); console.log('total:', m.total, '| surnames:', m.surnameTotal); if(m.total < 600000) { console.error('人物数异常，中止'); process.exit(1); }"
+          node -e "const m=require('./public/index/cbdb/meta.json'); const r=require('./public/index/cbdb/rel/rel-meta.json'); console.log('total:', m.total, '| surnames:', m.surnameTotal, '| kin:', r.stats.kinTotal, '| assoc:', r.stats.assocTotal); if(m.total < 600000 || r.stats.kinTotal < 500000) { console.error('数据量异常，中止'); process.exit(1); }"
 
       - name: Commit index
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/index/cbdb/
-          git diff --cached --quiet || git commit -m "chore: 重建 CBDB 人物索引（$(node -e "console.log(require('./public/index/cbdb/meta.json').total)") 人）"
+          git diff --cached --quiet || git commit -m "chore: 重建 CBDB 人物与关系索引（$(node -e "console.log(require('./public/index/cbdb/meta.json').total)") 人 / $(node -e "console.log(require('./public/index/cbdb/rel/rel-meta.json').stats.kinTotal)") 亲属）"
           git push

@@ -41,12 +41,14 @@ export default function DataSourcePage() {
       </div>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
-        <h3 className="section-title">人物库（CBDB 全量）</h3>
+        <h3 className="section-title">人物库与关系网络（CBDB 全量）</h3>
         <p>
           人物库 <Link href="/people">661,350 位历代人物</Link>（姓名、拼音、生卒年、指数年、性别、朝代、籍贯）来自
           CBDB 官方 SQLite 数据包（<code>cbdb-project/cbdb_sqlite</code>，2026-09-05 版，SHA-256{" "}
           <code style={{ fontSize: 13, wordBreak: "break-all" }}>437a253a8e49cb24d2d5209234781d03fcbcc04476aafc3cf9d68453cea7e980</code>），
-          遵循 CBDB 授权条款。本地仅保存 49.8MB 提取索引（按姓氏分片），新增版本可经 GitHub Actions 手动重建。
+          遵循 CBDB 授权条款。关系网络（亲属 56.1 万条、社会关系 19 万条、人物-著作 5.1 万条，覆盖 31.1 万人）来自
+          CBDB 的 KIN_DATA / ASSOC_DATA / BIOG_TEXT_DATA 表。本地仅保存提取索引（人物 49.8MB + 关系 21.9MB），
+          新增版本可经 GitHub Actions 手动重建。
         </p>
       </div>
 

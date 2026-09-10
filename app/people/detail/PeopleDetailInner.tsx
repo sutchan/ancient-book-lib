@@ -3,8 +3,23 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { findPersonById, formatLife, type CbdbMeta, type CbdbPerson } from "@/lib/cbdb";
-import { loadCbdbMeta } from "@/lib/cbdb";
+import {
+  findPersonById,
+  formatLife,
+  getPersonRelations,
+  getPersonTexts,
+  loadCbdbMeta,
+  loadRelNames,
+  type CbdbMeta,
+  type CbdbPerson,
+} from "@/lib/cbdb";
+
+interface RelationItem {
+  id: number;
+  name: string;
+  rel: string;
+  year?: number;
+}
 
 export default function PeopleDetailInner() {
   const params = useSearchParams();
@@ -13,6 +28,10 @@ export default function PeopleDetailInner() {
   const [meta, setMeta] = useState<CbdbMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [kin, setKin] = useState<RelationItem[] | null>(null);
+  const [assoc, setAssoc] = useState<RelationItem[] | null>(null);
+  const [texts, setTexts] = useState<{ title: string; role: string; year: number }[] | null>(null);
+  const [relError, setRelError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -33,6 +52,27 @@ export default function PeopleDetailInner() {
     return () => { cancelled = true; };
   }, [id]);
 
+  // 加载关系与著作（独立于基本信息，失败不影响主信息展示）
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [rel, texts] = await Promise.all([getPersonRelations(id), getPersonTexts(id)]);
+        if (cancelled) return;
+        const names = await loadRelNames();
+        const decorate = (list: { id: number; rel: string; year?: number }[]): RelationItem[] =>
+          list.map((r) => ({ ...r, name: names.get(r.id) || `人物 ${r.id}` }));
+        setKin(decorate(rel.kin));
+        setAssoc(decorate(rel.assoc));
+        setTexts(texts);
+      } catch (e) {
+        if (!cancelled) setRelError(String((e as Error)?.message || e));
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
+
   if (loading) return <div style={{ padding: 60, textAlign: "center" }}>加载人物详情...</div>;
 
   if (error || !person) return (
@@ -47,6 +87,7 @@ export default function PeopleDetailInner() {
 
   const [pid, name, pinyin, birth, death, indexYear, female, dynasty, place] = person;
   const cbdbUrl = `https://cbdb.hsites.harvard.edu/cbdbapi/person.php?id=${pid}`;
+  const relLoading = kin === null && assoc === null && !relError;
 
   return (
     <section>
@@ -84,6 +125,9 @@ export default function PeopleDetailInner() {
           <Link href={`/search?q=${encodeURIComponent(name)}&mode=full`} className="btn btn-primary">
             在古籍中检索「{name}」
           </Link>
+          <Link href={`/relation?name=${encodeURIComponent(name)}`} className="btn btn-secondary">
+            关系溯源
+          </Link>
           <Link href={`/search?q=${encodeURIComponent(name)}`} className="btn btn-secondary">
             检索书目
           </Link>
@@ -94,11 +138,82 @@ export default function PeopleDetailInner() {
         </div>
       </div>
 
+      {/* 人物关系 */}
+      <h3 className="section-title" style={{ marginTop: 28 }}>人物关系（CBDB）</h3>
+      {relLoading && <div className="card" style={{ padding: 24, textAlign: "center", color: "var(--color-text-secondary)" }}>加载关系中...</div>}
+      {relError && <div className="card" style={{ padding: 16, color: "#c00", fontSize: 14 }}>关系加载失败：{relError}</div>}
+      {!relLoading && !relError && (kin?.length === 0) && (assoc?.length === 0) && (texts?.length === 0) && (
+        <div className="card" style={{ padding: 24, textAlign: "center", color: "var(--color-text-secondary)" }}>
+          CBDB 暂无此人的亲属/社会关系与著作记录
+        </div>
+      )}
+
+      <div style={{ display: "grid", gap: 16, marginBottom: 20 }}>
+        {kin && kin.length > 0 && (
+          <div className="card" style={{ padding: 16 }}>
+            <h4 style={{ margin: "0 0 10px" }}>亲属关系（{kin.length}）</h4>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {kin.slice(0, 60).map((r) => (
+                <Link
+                  key={`k-${r.id}`}
+                  href={`/people/detail?id=${r.id}`}
+                  className="tag"
+                  style={{ textDecoration: "none", padding: "5px 10px", fontSize: 13 }}
+                >
+                  {r.name}（{r.rel}）
+                </Link>
+              ))}
+              {kin.length > 60 && (
+                <span className="tag" style={{ fontSize: 13 }}>另有 {kin.length - 60} 位，详见 CBDB</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {assoc && assoc.length > 0 && (
+          <div className="card" style={{ padding: 16 }}>
+            <h4 style={{ margin: "0 0 10px" }}>社会关系（{assoc.length}）</h4>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {assoc.slice(0, 60).map((r) => (
+                <Link
+                  key={`a-${r.id}`}
+                  href={`/people/detail?id=${r.id}`}
+                  className="tag"
+                  style={{ textDecoration: "none", padding: "5px 10px", fontSize: 13 }}
+                >
+                  {r.name}（{r.rel}{r.year ? `，${r.year} 年` : ""}）
+                </Link>
+              ))}
+              {assoc.length > 60 && (
+                <span className="tag" style={{ fontSize: 13 }}>另有 {assoc.length - 60} 条，详见 CBDB</span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {texts && texts.length > 0 && (
+          <div className="card" style={{ padding: 16 }}>
+            <h4 style={{ margin: "0 0 10px" }}>著作与文献（{texts.length}）</h4>
+            <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, lineHeight: 1.9 }}>
+              {texts.slice(0, 40).map((t, i) => (
+                <li key={i}>
+                  {t.title}
+                  {t.role && <span className="tag" style={{ marginLeft: 8, fontSize: 12 }}>{t.role}</span>}
+                  {t.year ? <span style={{ color: "var(--color-text-secondary)", marginLeft: 6, fontSize: 13 }}>{t.year} 年</span> : null}
+                </li>
+              ))}
+              {texts.length > 40 && <li style={{ color: "var(--color-text-secondary)" }}>另有 {texts.length - 40} 条，详见 CBDB</li>}
+            </ul>
+          </div>
+        )}
+      </div>
+
       {/* 数据说明 */}
       <div className="card" style={{ marginTop: 24, padding: 16, fontSize: 13, color: "var(--color-text-secondary)" }}>
         <strong>数据说明</strong>：本页数据来自 {meta?.source.name || "CBDB 中国历代人物传记资料库"}（{meta?.source.release_date || ""} 版，
         {meta?.source.license || ""}），字段含姓名、拼音、生卒年、指数年（CBDB 推算的基准年）、性别、朝代、籍贯/主要活动地。
-        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。
+        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。亲属/社会关系与著作来自 CBDB 的
+        KIN_DATA、ASSOC_DATA、BIOG_TEXT_DATA 表，关系描述为 CBDB 原始口径。
       </div>
     </section>
   );

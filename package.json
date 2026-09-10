@@ -15,7 +15,8 @@
     "build:book-samples": "node scripts/build-book-samples.mjs",
     "test": "tsx --test test/*.test.ts",
     "export": "next build && next export",
-    "build:cbdb": "node scripts/build-cbdb-index.mjs"
+    "build:cbdb": "node scripts/build-cbdb-index.mjs",
+    "build:cbdb-rel": "node scripts/build-cbdb-relations.mjs"
   },
   "dependencies": {
     "next": "^14.2.15",

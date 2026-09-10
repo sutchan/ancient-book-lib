@@ -22,7 +22,7 @@
 - **保真双语阅读**：古籍级繁简对照（不改写原文）、字号与行距自由调节、章节目录跳转、划词一键检索。
 - **主题与个性化**：日间 / 护眼（纸感）/ 深色三主题，繁简偏好自动记忆。
 - **下载与复用**：单本导出 TXT（UTF-8 BOM，附非商用免责），零复制书单导出。
-- **考据与统计**：人物库（已接入 CBDB 全量 **661,350** 位历代人物）、人物考据、社会关系溯源、馆藏数据统计（关系数据持续接入中）。
+- **考据与统计**：人物库（CBDB 全量 **661,350** 位历代人物）、社会关系溯源（亲属 56.1 万条 + 社会关系 19 万条，支持双人溯源）、人物考据、馆藏数据统计。
 
 ## 🚀 快速开始
 
@@ -35,7 +35,9 @@ npm run start    # 启动静态预览
 
 > 书目索引由 `npm run build:catalog` 生成（`public/index/daizhige-catalog.json`，15,694 部）；
 > 全文倒排索引由 `npm run build:fulltext` 生成（缺失时检索自动回退标题检索）；
-> CBDB 人物索引由 `npm run build:cbdb` 生成（`public/index/cbdb/`，661,350 人，49.8MB，已提交；新版发布可手动运行 GitHub Actions `Rebuild CBDB Index`）。
+> CBDB 人物索引由 `npm run build:cbdb` 生成（`public/index/cbdb/`，661,350 人，49.8MB，已提交）；
+> CBDB 关系索引由 `npm run build:cbdb-rel` 生成（`public/index/cbdb/rel/`，亲属 56.1 万 + 社会 19 万条，21.9MB，已提交）；
+> 上游发布新版时可手动运行 GitHub Actions `Rebuild CBDB Index` 重建两套索引。
 
 ## 📖 使用帮助
 

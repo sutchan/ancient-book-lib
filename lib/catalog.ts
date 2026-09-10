@@ -70,7 +70,7 @@ export function searchCatalog(
   let results = catalog.books;
   if (opts.category) results = results.filter((b) => b.category === opts.category);
   if (q) {
-    // 原文匹配（繁体查询）+ 简体归一化匹配（简体查询命中繁体书目）
+    // 原文匹配（繁简直查）+ 简体归一化匹配（查询词与书目统一转简后匹配，繁简双向可命中）
     const qNorm = toSimplified(keyword).trim().toLowerCase();
     const norm = getNormHaystack(catalog);
     results = results.filter(
@@ -78,7 +78,7 @@ export function searchCatalog(
         b.title.toLowerCase().includes(q) ||
         b.category.includes(q) ||
         b.subcategories.some((s) => s.includes(q)) ||
-        (qNorm !== q && (norm.get(b.id) || "").includes(qNorm))
+        (norm.get(b.id) || "").includes(qNorm)
     );
   }
   return results.slice(0, limit);

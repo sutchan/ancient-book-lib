@@ -1,71 +1,147 @@
-// components/RelationClient.tsx v1.4.3
+// components/RelationClient.tsx v1.5.0
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { Relation } from "@/lib/types";
+import { useSearchParams } from "next/navigation";
+import {
+  findRelationPath,
+  getPersonRelations,
+  loadRelMeta,
+  loadRelNames,
+  searchPersons,
+  type RelMeta,
+  type RelationPathStep,
+} from "@/lib/cbdb";
 
-/**
- * 社会关系溯源（数据驱动）。
- * 数据来源：public/index/relations.json（由 CBDB 等元数据 ingest 脚本生成）。
- * 数据为空时回退「待接入」空态，接入后自动渲染，并支持双人关系检索。
- */
+interface SelectedPerson {
+  id: number;
+  name: string;
+}
+
+interface RelItem {
+  id: number;
+  name: string;
+  rel: string;
+  year?: number;
+}
+
 export default function RelationClient() {
-  const [relations, setRelations] = useState<Relation[] | null>(null);
+  const sp = useSearchParams();
+  const [meta, setMeta] = useState<RelMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [a, setA] = useState("");
-  const [b, setB] = useState("");
+
+  // 人物 A
+  const [aInput, setAInput] = useState(sp.get("name") || "");
+  const [aSuggestions, setASuggestions] = useState<SelectedPerson[]>([]);
+  const [aSelected, setASelected] = useState<SelectedPerson | null>(null);
+  // 人物 B（双人溯源可选）
+  const [bInput, setBInput] = useState("");
+  const [bSuggestions, setBSuggestions] = useState<SelectedPerson[]>([]);
+  const [bSelected, setBSelected] = useState<SelectedPerson | null>(null);
+
+  const [relations, setRelations] = useState<{ kin: RelItem[]; assoc: RelItem[] } | null>(null);
+  const [path, setPath] = useState<RelationPathStep[] | null>(null);
+  const [pathMsg, setPathMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    fetch("/index/relations.json")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((d: Relation[]) => {
-        if (!cancelled) setRelations(Array.isArray(d) ? d : []);
-      })
-      .catch((e) => {
-        if (!cancelled) setError(String(e));
-      });
-    return () => {
-      cancelled = true;
-    };
+    loadRelMeta().then(setMeta).catch((e) => setError(String(e)));
   }, []);
 
-  const matched = useMemo(() => {
-    if (!relations) return [];
-    const ka = a.trim();
-    const kb = b.trim();
-    if (!ka && !kb) return relations;
-    return relations.filter(
-      (r) =>
-        (!ka || r.a.includes(ka) || r.b.includes(ka)) &&
-        (!kb || r.a.includes(kb) || r.b.includes(kb))
-    );
-  }, [relations, a, b]);
+  // 初始 ?name= 参数：自动选中第一个匹配人物
+  useEffect(() => {
+    const init = sp.get("name");
+    if (init) {
+      searchPersons(init, 5)
+        .then((r) => {
+          if (r.length) {
+            setASelected({ id: r[0].id, name: r[0].name });
+            setAInput(r[0].name);
+          }
+        })
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // A 搜索联想（防抖）
+  useEffect(() => {
+    const q = aInput.trim();
+    if (!q || aSelected?.name === aInput.trim()) {
+      setASuggestions([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      searchPersons(q, 8)
+        .then((r) => setASuggestions(r))
+        .catch(() => setASuggestions([]));
+    }, 250);
+    return () => clearTimeout(t);
+  }, [aInput, aSelected]);
+
+  // B 搜索联想（防抖）
+  useEffect(() => {
+    const q = bInput.trim();
+    if (!q || bSelected?.name === bInput.trim()) {
+      setBSuggestions([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      searchPersons(q, 8)
+        .then((r) => setBSuggestions(r))
+        .catch(() => setBSuggestions([]));
+    }, 250);
+    return () => clearTimeout(t);
+  }, [bInput, bSelected]);
+
+  // A 选中后加载其关系
+  useEffect(() => {
+    if (!aSelected) {
+      setRelations(null);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    (async () => {
+      try {
+        const [rel, names] = await Promise.all([getPersonRelations(aSelected.id), loadRelNames()]);
+        if (cancelled) return;
+        const deco = (list: { id: number; rel: string; year?: number }[]): RelItem[] =>
+          list.map((r) => ({ ...r, name: names.get(r.id) || `人物 ${r.id}` }));
+        setRelations({ kin: deco(rel.kin), assoc: deco(rel.assoc) });
+      } catch (e) {
+        if (!cancelled) setError(String((e as Error)?.message || e));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [aSelected]);
+
+  // 双人溯源
+  const runTrace = async () => {
+    if (!aSelected || !bSelected) return;
+    setLoading(true);
+    setPathMsg(null);
+    setPath(null);
+    try {
+      const names = await loadRelNames();
+      const steps = await findRelationPath(aSelected.id, bSelected.id);
+      if (steps.length) {
+        setPath(steps);
+      } else {
+        setPathMsg(`未找到「${aSelected.name}」与「${bSelected.name}」的直接关系或二级中间关系。`);
+      }
+    } catch (e) {
+      setPathMsg(`溯源失败：${String((e as Error)?.message || e)}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (error) return <div style={{ padding: 40, color: "#c00" }}>关系数据加载失败：{error}</div>;
-  if (relations === null) return <div style={{ padding: 40 }}>加载关系数据…</div>;
-
-  if (relations.length === 0) {
-    return (
-      <section id="relation-client-main">
-        <div className="breadcrumb">
-          <Link href="/">首页</Link>
-          <span className="sep">/</span>
-          <span>社会关系溯源</span>
-        </div>
-        <h2 style={{ marginBottom: 8 }}>社会关系溯源</h2>
-        <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-          基于史料建立人物多维关系网络 · 支持双人关系溯源（数据待接入）
-        </p>
-        <div className="empty-state">
-          <div className="empty-icon">🔗</div>
-          <div className="empty-title">关系数据待接入</div>
-          <div>关系溯源将在导入 CBDB 等权威元数据后开放，支持师生、君臣、思想传承等关系网络与双人溯源。</div>
-        </div>
-      </section>
-    );
-  }
+  if (!meta) return <div style={{ padding: 60, textAlign: "center" }}>加载关系网络...</div>;
 
   return (
     <section id="relation-client-main">
@@ -75,57 +151,154 @@ export default function RelationClient() {
         <span>社会关系溯源</span>
       </div>
       <h2 style={{ marginBottom: 8 }}>社会关系溯源</h2>
-      <p style={{ color: "var(--color-text-secondary)", marginBottom: 16 }}>
-        共 {relations.length} 条关系 · 支持双人检索（师生 / 君臣 / 思想传承等）
+      <p style={{ color: "var(--color-text-secondary)", marginBottom: 16, fontSize: 14 }}>
+        CBDB 真实数据 · 亲属 {meta.stats.kinTotal.toLocaleString()} 条 / 社会关系{" "}
+        {meta.stats.assocTotal.toLocaleString()} 条 / 著作 {meta.stats.textTotal.toLocaleString()} 条 ·
+        涉及 {meta.stats.personTotal.toLocaleString()} 人
       </p>
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
-        <input
-          className="input-text"
-          value={a}
-          onChange={(e) => setA(e.target.value)}
-          placeholder="人物 A（如：孔子）"
-          style={{ maxWidth: 240 }}
-          aria-label="人物 A"
-        />
-        <input
-          className="input-text"
-          value={b}
-          onChange={(e) => setB(e.target.value)}
-          placeholder="人物 B（可选）"
-          style={{ maxWidth: 240 }}
-          aria-label="人物 B"
-        />
+      {/* 输入区 */}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8, position: "relative" }}>
+        <div style={{ position: "relative", flex: "1 1 220px", maxWidth: 300 }}>
+          <input
+            className="input-text"
+            value={aInput}
+            onChange={(e) => { setAInput(e.target.value); setASelected(null); setPath(null); }}
+            placeholder="人物 A（如：朱熹）"
+            style={{ width: "100%" }}
+            aria-label="人物 A"
+          />
+          {aSuggestions.length > 0 && (
+            <div className="rel-suggest">
+              {aSuggestions.map((s) => (
+                <button key={s.id} className="rel-suggest-item" onClick={() => { setASelected(s); setAInput(s.name); setASuggestions([]); }}>
+                  {s.name} <span style={{ opacity: 0.6, fontSize: 12 }}>CBDB {s.id}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ position: "relative", flex: "1 1 220px", maxWidth: 300 }}>
+          <input
+            className="input-text"
+            value={bInput}
+            onChange={(e) => { setBInput(e.target.value); setBSelected(null); setPath(null); }}
+            placeholder="人物 B（可选，双人溯源）"
+            style={{ width: "100%" }}
+            aria-label="人物 B"
+          />
+          {bSuggestions.length > 0 && (
+            <div className="rel-suggest">
+              {bSuggestions.map((s) => (
+                <button key={s.id} className="rel-suggest-item" onClick={() => { setBSelected(s); setBInput(s.name); setBSuggestions([]); }}>
+                  {s.name} <span style={{ opacity: 0.6, fontSize: 12 }}>CBDB {s.id}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <button className="btn btn-primary" disabled={!aSelected || !bSelected || loading} onClick={runTrace} style={{ fontSize: 14 }}>
+          双人溯源
+        </button>
       </div>
 
-      <div style={{ display: "grid", gap: 10 }}>
-        {matched.map((r, i) => (
-          <div
-            key={i}
-            style={{
-              padding: "12px 14px",
-              border: "1px solid var(--color-border)",
-              borderRadius: 8,
-              background: "var(--color-card-bg)",
-            }}
-          >
-            <div style={{ fontSize: 15, fontWeight: 600 }}>
-              {r.a} <span style={{ color: "var(--color-primary)", fontWeight: 400 }}>— {r.type} —</span> {r.b}
-            </div>
-            <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginTop: 4, lineHeight: 1.7 }}>
-              {r.dynasty && <span>{r.dynasty}　</span>}
-              {r.detail && <span>{r.detail}</span>}
-              {r.source && <span>　出处：{r.source}</span>}
-            </div>
+      {/* 已选人物 */}
+      <div style={{ marginBottom: 16, fontSize: 13, color: "var(--color-text-secondary)" }}>
+        {aSelected ? <>已选 A：<strong>{aSelected.name}</strong>（CBDB {aSelected.id}）</> : "输入并选择人物 A 查看其关系网络"}
+        {bSelected && <>　已选 B：<strong>{bSelected.name}</strong>（CBDB {bSelected.id}）</>}
+      </div>
+
+      {/* 溯源结果 */}
+      {path && path.length > 0 && (
+        <div className="card" style={{ padding: 16, marginBottom: 20 }}>
+          <h4 style={{ margin: "0 0 12px" }}>关系路径</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, fontSize: 14 }}>
+            <PathNode id={path[0].from} />
+            {path.map((step, i) => (
+              <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ color: "var(--color-primary)", fontSize: 13 }}>— {step.rel} —</span>
+                <PathNode id={step.to} />
+              </span>
+            ))}
           </div>
-        ))}
-        {matched.length === 0 && (
-          <div className="empty-state">
-            <div className="empty-title">未找到匹配的关系</div>
-            <div>请调整检索人物名称。</div>
+        </div>
+      )}
+      {pathMsg && (
+        <div className="card" style={{ padding: 14, marginBottom: 20, color: "var(--color-text-secondary)", fontSize: 14 }}>{pathMsg}</div>
+      )}
+
+      {/* 单人关系网络 */}
+      {loading && <div style={{ padding: 40, textAlign: "center" }}>加载关系网络...</div>}
+      {!loading && aSelected && relations && (relations.kin.length === 0 && relations.assoc.length === 0) && (
+        <div className="card" style={{ padding: 24, textAlign: "center", color: "var(--color-text-secondary)" }}>
+          CBDB 暂无「{aSelected.name}」的亲属/社会关系记录
+        </div>
+      )}
+      {!loading && aSelected && relations && relations.kin.length > 0 && (
+        <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+          <h4 style={{ margin: "0 0 10px" }}>亲属关系（{relations.kin.length}）</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {relations.kin.slice(0, 80).map((r) => (
+              <Link
+                key={`k-${r.id}`}
+                href={`/people/detail?id=${r.id}`}
+                className="tag"
+                style={{ textDecoration: "none", padding: "5px 10px", fontSize: 13 }}
+              >
+                {r.name}（{r.rel}）
+              </Link>
+            ))}
+            {relations.kin.length > 80 && (
+              <span className="tag" style={{ fontSize: 13 }}>另有 {relations.kin.length - 80} 位，详见 CBDB</span>
+            )}
           </div>
-        )}
+        </div>
+      )}
+      {!loading && aSelected && relations && relations.assoc.length > 0 && (
+        <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+          <h4 style={{ margin: "0 0 10px" }}>社会关系（{relations.assoc.length}）</h4>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {relations.assoc.slice(0, 80).map((r) => (
+              <Link
+                key={`a-${r.id}`}
+                href={`/people/detail?id=${r.id}`}
+                className="tag"
+                style={{ textDecoration: "none", padding: "5px 10px", fontSize: 13 }}
+              >
+                {r.name}（{r.rel}{r.year ? `，${r.year}` : ""}）
+              </Link>
+            ))}
+            {relations.assoc.length > 80 && (
+              <span className="tag" style={{ fontSize: 13 }}>另有 {relations.assoc.length - 80} 条，详见 CBDB</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!aSelected && (
+        <div className="card" style={{ padding: 32, textAlign: "center", color: "var(--color-text-secondary)" }}>
+          <div style={{ fontSize: 15, marginBottom: 8 }}>输入人物姓名，查看其亲属与社会关系网络</div>
+          <div style={{ fontSize: 13 }}>支持双人溯源：输入人物 B 可查找两人之间的直接关系或二级中间关系</div>
+        </div>
+      )}
+
+      <div className="card" style={{ marginTop: 24, padding: 14, fontSize: 13, color: "var(--color-text-secondary)" }}>
+        <strong>数据说明</strong>：关系数据来自 CBDB（2026-09-05 版）KIN_DATA（亲属）与 ASSOC_DATA（社会关系）
+        表，关系描述为 CBDB 原始口径（如「友」「為Y之門人」等），方向以 CBDB 记录为准；双人溯源仅支持直接关系
+        与二级中间关系。
       </div>
     </section>
+  );
+}
+
+function PathNode({ id }: { id: number }) {
+  const [name, setName] = useState("");
+  useEffect(() => {
+    loadRelNames().then((m) => setName(m.get(id) || `人物 ${id}`)).catch(() => setName(`人物 ${id}`));
+  }, [id]);
+  return (
+    <Link href={`/people/detail?id=${id}`} style={{ fontWeight: 600, color: "var(--color-primary)", textDecoration: "none" }}>
+      {name}
+    </Link>
   );
 }

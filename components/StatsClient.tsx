@@ -1,9 +1,11 @@
-// components/StatsClient.tsx v1.4.3
+// components/StatsClient.tsx v1.5.0
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { loadCatalog, formatSize, type DaizhigeCatalog } from "@/lib/catalog";
+import { loadCbdbMeta, type CbdbMeta } from "@/lib/cbdb";
+import { loadRelMeta, type RelMeta } from "@/lib/cbdb";
 
 const PALETTE = ["#8C3130", "#B8754E", "#C9A227", "#4E7A5A", "#5B7A9D", "#7A5B9D", "#9D5B6E", "#3E7A78", "#8A6D3B", "#5A6B8C"];
 
@@ -35,12 +37,20 @@ function BarChart({ title, rows }: { title: string; rows: { name: string; count:
 
 export default function StatsClient() {
   const [catalog, setCatalog] = useState<DaizhigeCatalog | null>(null);
+  const [cbdb, setCbdb] = useState<CbdbMeta | null>(null);
+  const [rel, setRel] = useState<RelMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadCatalog()
       .then(setCatalog)
       .catch((e) => setError(String(e)));
+    loadCbdbMeta()
+      .then(setCbdb)
+      .catch(() => {});
+    loadRelMeta()
+      .then(setRel)
+      .catch(() => {});
   }, []);
 
   const byCat = useMemo(() => {
@@ -49,6 +59,11 @@ export default function StatsClient() {
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
   }, [catalog]);
+
+  const byDynasty = useMemo(() => {
+    if (!cbdb) return [];
+    return cbdb.dynasty.slice(0, 10).map((d) => ({ name: d.dynasty, count: d.count }));
+  }, [cbdb]);
 
   if (error) {
     return (
@@ -77,6 +92,7 @@ export default function StatsClient() {
   }
 
   const total = catalog.total;
+  const relTotal = rel ? rel.stats.kinTotal + rel.stats.assocTotal : null;
 
   return (
     <section>
@@ -87,7 +103,7 @@ export default function StatsClient() {
       </div>
       <h2 style={{ marginBottom: 8 }}>馆藏数据统计与分析</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-        基于殆知阁 v20 全量 {total.toLocaleString()} 部古籍（上游托管，本仓库零复制）的馆藏规模与分布分析
+        基于殆知阁 v20 全量 {total.toLocaleString()} 部古籍与 CBDB 全量人物传记数据的真实统计
       </p>
 
       <div className="stat-kpis">
@@ -104,17 +120,17 @@ export default function StatsClient() {
           <div className="kpi-label">原始数据量</div>
         </div>
         <div className="stat-kpi">
-          <div className="kpi-num">待接入</div>
-          <div className="kpi-label">考据人物</div>
+          <div className="kpi-num">{cbdb ? cbdb.total.toLocaleString() : "…"}</div>
+          <div className="kpi-label">人物库（CBDB）</div>
         </div>
         <div className="stat-kpi">
-          <div className="kpi-num">待接入</div>
+          <div className="kpi-num">{relTotal !== null ? relTotal.toLocaleString() : "…"}</div>
           <div className="kpi-label">关系条目</div>
         </div>
       </div>
 
       <div className="card stat-panel" style={{ marginTop: 20, padding: "16px 20px" }}>
-        <div className="stat-panel-title">全量数据概览（殆知阁 v20 · 原始数据上游托管 · 本仓库零复制）</div>
+        <div className="stat-panel-title">全量数据概览（殆知阁 v20 + CBDB · 原始数据上游托管 · 本仓库零复制原文）</div>
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 12 }}>
           <div>
             <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>{total.toLocaleString()}</span>{" "}
@@ -125,33 +141,84 @@ export default function StatsClient() {
             <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>GB 原始 TXT</span>
           </div>
           <div>
-            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>10</span>{" "}
-            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>大馆藏</span>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>
+              {cbdb ? cbdb.total.toLocaleString() : "…"}
+            </span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>位历代人物（CBDB）</span>
           </div>
           <div>
-            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>5.7</span>{" "}
-            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>MB 书目索引（本仓库）</span>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>
+              {relTotal !== null ? relTotal.toLocaleString() : "…"}
+            </span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条关系（亲属+社会）</span>
+          </div>
+          <div>
+            <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>
+              {rel ? rel.stats.personTotal.toLocaleString() : "…"}
+            </span>{" "}
+            <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>位涉及关系人物</span>
           </div>
         </div>
         <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-secondary)" }}>
           数据源：
           <a href="https://github.com/garychowcmu/daizhigev20" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>
             garychowcmu/daizhigev20
-          </a>{" "}
-          · 阅读时按需 fetch raw URL，不预加载全量数据
+          </a>
+          {" · "}
+          <a href="https://cbdb.hsites.harvard.edu/" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>
+            CBDB 中国历代人物传记资料库
+          </a>
+          {" · 阅读时按需 fetch raw URL，不预加载全量数据"}
         </div>
       </div>
 
       <div className="stat-grid" style={{ marginTop: 16 }}>
         <BarChart title="馆藏分布（按十大藏库）" rows={byCat} />
-        <div className="card stat-panel">
-          <div className="stat-panel-title">人物 / 关系考据</div>
-          <div style={{ padding: 16, color: "var(--color-text-secondary)", lineHeight: 1.8 }}>
-            人物考据与关系溯源数据待接入，将随 CBDB 等权威元数据导入后开放，
-            届时可展示身份标签分布、关系类型分布与考据洞察。
+        <BarChart title="CBDB 人物朝代分布（前 10 朝代）" rows={byDynasty} />
+      </div>
+
+      {rel && (
+        <div className="card stat-panel" style={{ marginTop: 16 }}>
+          <div className="stat-panel-title">人物关系数据（CBDB · 2026-09-05 版）</div>
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap", padding: "12px 4px" }}>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {rel.stats.kinTotal.toLocaleString()}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条亲属关系（KIN_DATA）</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {rel.stats.assocTotal.toLocaleString()}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条社会关系（ASSOC_DATA）</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {rel.stats.textTotal.toLocaleString()}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条人物-著作关联</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {rel.stats.kinCodeCount}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>种亲属称谓</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
+                {rel.stats.assocCodeCount}
+              </span>{" "}
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>种社会关系类型</span>
+            </div>
+          </div>
+          <div style={{ marginTop: 6, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+            关系覆盖 {rel.stats.personTotal.toLocaleString()} 位人物，可在{" "}
+            <Link href="/relation" style={{ color: "var(--color-primary)" }}>社会关系溯源</Link> 中按人物查看，
+            支持直接关系与二级中间关系的双人溯源。
           </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

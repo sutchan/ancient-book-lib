@@ -89,7 +89,7 @@ export default function HomePage() {
         <Link href="/relation" className="card category-card">
           <div className="cat-icon">系</div>
           <div className="cat-name">社会关系溯源</div>
-          <div className="cat-desc">人物多维关系与双人溯源（数据待接入）</div>
+          <div className="cat-desc">CBDB 亲属 56.1 万条 + 社会关系 19 万条，支持双人溯源</div>
         </Link>
         <Link href="/stats" className="card category-card">
           <div className="cat-icon">统</div>
