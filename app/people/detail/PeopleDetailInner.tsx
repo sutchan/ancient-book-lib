@@ -7,8 +7,10 @@ import {
   findPersonById,
   formatLife,
   getPersonAltnames,
+  getPersonEntries,
   getPersonOffices,
   getPersonRelations,
+  getPersonSources,
   getPersonTexts,
   loadCbdbMeta,
   loadRelNames,
@@ -35,6 +37,8 @@ export default function PeopleDetailInner() {
   const [texts, setTexts] = useState<{ title: string; role: string; year: number }[] | null>(null);
   const [offices, setOffices] = useState<{ office: string; firstYear: number; lastYear: number; appt: string }[] | null>(null);
   const [altnames, setAltnames] = useState<{ name: string; type: string }[] | null>(null);
+  const [entries, setEntries] = useState<{ entry: string; year: number; rank: string }[] | null>(null);
+  const [sources, setSources] = useState<string[] | null>(null);
   const [relError, setRelError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,11 +66,13 @@ export default function PeopleDetailInner() {
     let cancelled = false;
     (async () => {
       try {
-        const [rel, texts, offices, altnames] = await Promise.all([
+        const [rel, texts, offices, altnames, entries, sources] = await Promise.all([
           getPersonRelations(id),
           getPersonTexts(id),
           getPersonOffices(id),
           getPersonAltnames(id),
+          getPersonEntries(id),
+          getPersonSources(id),
         ]);
         if (cancelled) return;
         const names = await loadRelNames();
@@ -77,6 +83,8 @@ export default function PeopleDetailInner() {
         setTexts(texts);
         setOffices(offices);
         setAltnames(altnames);
+        setEntries(entries);
+        setSources(sources);
       } catch (e) {
         if (!cancelled) setRelError(String((e as Error)?.message || e));
       }
@@ -164,6 +172,43 @@ export default function PeopleDetailInner() {
             </div>
             <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)" }}>
               古籍原文常以字、號、諡號等称呼人物，搜索姓名或别名均可命中。
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* 科舉/入仕 */}
+      {!relLoading && !relError && entries && entries.length > 0 && (
+        <>
+          <h3 className="section-title" style={{ marginTop: 28 }}>科舉/入仕（CBDB）</h3>
+          <div className="card" style={{ padding: 16, marginBottom: 20 }}>
+            <ul style={{ margin: 0, paddingLeft: 20, fontSize: 14, lineHeight: 2 }}>
+              {entries.map((e, i) => (
+                <li key={i}>
+                  {e.entry}
+                  {e.year ? <span style={{ color: "var(--color-text-secondary)", marginLeft: 6 }}>{e.year} 年</span> : null}
+                  {e.rank && <span style={{ color: "var(--color-text-secondary)", marginLeft: 6 }}>名次/第 {e.rank}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      )}
+
+      {/* 史料來源 */}
+      {!relLoading && !relError && sources && sources.length > 0 && (
+        <>
+          <h3 className="section-title" style={{ marginTop: 28 }}>史料來源（CBDB 主要来源）</h3>
+          <div className="card" style={{ padding: 16, marginBottom: 20 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {sources.map((s, i) => (
+                <span key={i} className="tag" style={{ fontSize: 13, padding: "5px 10px" }}>
+                  {s}
+                </span>
+              ))}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)" }}>
+              列出来自 CBDB BIOG_SOURCE_DATA 的主要文献来源（每书为 CBDB 原始书目）。
             </div>
           </div>
         </>
@@ -277,9 +322,10 @@ export default function PeopleDetailInner() {
       <div className="card" style={{ marginTop: 24, padding: 16, fontSize: 13, color: "var(--color-text-secondary)" }}>
         <strong>数据说明</strong>：本页数据来自 {meta?.source.name || "CBDB 中国历代人物传记资料库"}（{meta?.source.release_date || ""} 版，
         {meta?.source.license || ""}），字段含姓名、拼音、生卒年、指数年（CBDB 推算的基准年）、性别、朝代、籍贯/主要活动地。
-        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。字/號/別名（163,634 条）、亲属/社会关系、任职与著作
-        分别来自 CBDB 的 ALTNAME_DATA、KIN_DATA、ASSOC_DATA、POSTED_TO_OFFICE_DATA、BIOG_TEXT_DATA 表，均为 CBDB
-        原始口径；「在馆藏检索」仅在本站古籍书目中查找同名著作，不代表 CBDB 确认两者为同一版本。
+        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。字/號/別名（163,634 条）、科舉/入仕（26.5 万条，
+        登科方式如「進士」「鄉貢舉人」及制舉科目）、史料來源（主要来源书目）、亲属/社会关系、任职与著作分别来自 CBDB 的
+        ALTNAME_DATA、ENTRY_DATA、BIOG_SOURCE_DATA、KIN_DATA、ASSOC_DATA、POSTED_TO_OFFICE_DATA、BIOG_TEXT_DATA
+        表，均为 CBDB 原始口径；「在馆藏检索」仅在本站古籍书目中查找同名著作，不代表 CBDB 确认两者为同一版本。
       </div>
     </section>
   );

@@ -22,7 +22,7 @@
 - **保真双语阅读**：古籍级繁简对照（不改写原文）、字号与行距自由调节、章节目录跳转、划词一键检索。
 - **主题与个性化**：日间 / 护眼（纸感）/ 深色三主题，繁简偏好自动记忆。
 - **下载与复用**：单本导出 TXT（UTF-8 BOM，附非商用免责），零复制书单导出。
-- **考据与统计**：人物库（CBDB 全量 **661,350** 位历代人物，支持字/號/別名检索）、社会关系溯源（亲属 56.1 万条 + 社会关系 19 万条，支持双人溯源）、生平任职（59.1 万条）、人物考据、馆藏数据统计。
+- **考据与统计**：人物库（CBDB 全量 **661,350** 位历代人物，含字/號/別名检索、科舉檔案、史料來源）、社会关系溯源（亲属 56.1 万条 + 社会关系 19 万条，支持双人溯源）、生平任职（59.1 万条）、人物考据、馆藏数据统计。
 
 ## 🚀 快速开始
 
@@ -40,6 +40,8 @@ npm run start    # 启动静态预览
 > CBDB 任职索引由 `npm run build:cbdb-offices` 生成（`public/index/cbdb/offices/`，59.1 万条任职，16.7MB，已提交）；
 > CBDB 分析产物由 `npm run build:cbdb-analysis` 生成（`public/index/cbdb/geo/` 籍贯分布 + `offices-dynasty.json` 官职-朝代联动，已提交）；
 > CBDB 别名字号索引由 `npm run build:cbdb-altnames` 生成（`public/index/cbdb/altnames/`，163,634 条字/號/諡號，7.8MB，已提交）；
+> CBDB 科举索引由 `npm run build:cbdb-entry` 生成（`public/index/cbdb/entry/`，26.5 万条登科记录 + 朝代统计，5.6MB，已提交）；
+> CBDB 史料来源索引由 `npm run build:cbdb-sources` 生成（`public/index/cbdb/sources/`，50.5 万条主要来源，5.8MB，已提交）；
 > 上游发布新版时可手动运行 GitHub Actions `Rebuild CBDB Index` 重建全部索引。
 
 ## 📖 使用帮助

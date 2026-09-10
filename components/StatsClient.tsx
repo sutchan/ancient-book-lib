@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { loadCatalog, formatSize, type DaizhigeCatalog } from "@/lib/catalog";
-import { loadCbdbMeta, loadGeoMeta, loadOfficeDynastyMeta, loadOfficesMeta, loadRelMeta, type CbdbMeta, type GeoMeta, type OfficeDynastyMeta, type OfficesMeta, type RelMeta } from "@/lib/cbdb";
+import { loadCbdbMeta, loadEntryDynastyMeta, loadGeoMeta, loadOfficeDynastyMeta, loadOfficesMeta, loadRelMeta, type CbdbMeta, type EntryDynastyMeta, type GeoMeta, type OfficeDynastyMeta, type OfficesMeta, type RelMeta } from "@/lib/cbdb";
 
 const PALETTE = ["#8C3130", "#B8754E", "#C9A227", "#4E7A5A", "#5B7A9D", "#7A5B9D", "#9D5B6E", "#3E7A78", "#8A6D3B", "#5A6B8C"];
 
@@ -41,8 +41,10 @@ export default function StatsClient() {
   const [offices, setOffices] = useState<OfficesMeta | null>(null);
   const [geo, setGeo] = useState<GeoMeta | null>(null);
   const [offDyn, setOffDyn] = useState<OfficeDynastyMeta | null>(null);
+  const [entryDyn, setEntryDyn] = useState<EntryDynastyMeta | null>(null);
   const [geoDynasty, setGeoDynasty] = useState<string | null>(null);
   const [offDynasty, setOffDynasty] = useState<string | null>(null);
+  const [entryDynasty, setEntryDynasty] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,6 +70,12 @@ export default function StatsClient() {
       .then((m) => {
         setOffDyn(m);
         setOffDynasty(m.byDynasty[0]?.dynasty ?? null);
+      })
+      .catch(() => {});
+    loadEntryDynastyMeta()
+      .then((m) => {
+        setEntryDyn(m);
+        setEntryDynasty(m.byDynasty[0]?.dynasty ?? null);
       })
       .catch(() => {});
   }, []);
@@ -337,6 +345,37 @@ export default function StatsClient() {
           />
           <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
             {offDyn.method}；官职名为 CBDB 原始名称，同一官职在不同朝代可能有不同名称与含义。
+          </div>
+        </div>
+      )}
+
+      {entryDyn && entryDynasty && (
+        <div className="card stat-panel" style={{ marginTop: 16 }}>
+          <div className="stat-panel-title">科举-朝代分析（CBDB · 按朝代筛选）</div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", margin: "12px 0" }}>
+            <select
+              aria-label="科举朝代"
+              value={entryDynasty}
+              onChange={(e) => setEntryDynasty(e.target.value)}
+              style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid var(--color-border)", background: "var(--color-card-bg)", fontSize: 13 }}
+            >
+              {entryDyn.byDynasty.map((d) => (
+                <option key={d.dynasty} value={d.dynasty}>
+                  {d.dynasty}（{d.entryTotal.toLocaleString()} 条）
+                </option>
+              ))}
+            </select>
+            <span style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
+              共 {entryDyn.stats.entryTotal.toLocaleString()} 条科举/入仕记录 /{" "}
+              {entryDyn.byDynasty.find((d) => d.dynasty === entryDynasty)?.personTotal.toLocaleString()} 人
+            </span>
+          </div>
+          <BarChart
+            title={`${entryDynasty} · 登科方式 Top 12`}
+            rows={(entryDyn.byDynasty.find((d) => d.dynasty === entryDynasty)?.topEntries ?? []).map((e) => ({ name: e.entry, count: e.count }))}
+          />
+          <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+            {entryDyn.method}；登科方式为 CBDB 原始名称（如「科舉: 進士」「科舉: 鄉貢舉人」「監生」等）。
           </div>
         </div>
       )}

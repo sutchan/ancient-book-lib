@@ -7,7 +7,17 @@
 
 > 以下 1.5.0–1.8.0 为已规划/已开发的超前草稿，尚未随版本发布（package.json 当前 `1.4.5`）。正式发布时归入对应版本号。
 
-### [1.9.0] - 2026-09-10
+### [1.10.0] - 2026-09-10
+
+### 新增（人物科舉檔案 + 史料來源）
+- 新增 `scripts/build-cbdb-entry.mjs`（npm `build:cbdb-entry`）：提取 ENTRY_DATA + ENTRY_CODES + BIOG_MAIN 朝代，生成科举索引（264,820 条 / 220,665 人 / 300+ 登科方式 / 5.6MB，产物 `public/index/cbdb/entry/` 含 entry-dynasty.json 朝代×登科统计，已提交）
+- 新增 `scripts/build-cbdb-sources.mjs`（npm `build:cbdb-sources`）：提取 BIOG_SOURCE_DATA 主要来源 + TEXT_CODES 书名（书名字典化压缩，516 种去重书名），生成史料来源索引（504,591 条 / 452,070 人 / 5.8MB，产物 `public/index/cbdb/sources/`，已提交）
+- `lib/cbdb.ts`：新增 `loadEntryMeta` / `getPersonEntries` / `loadEntryDynastyMeta` / `loadSourcesMeta` / `getPersonSources`
+- 人物详情页新增「科舉/入仕」区块（登科方式+年份+名次，如蘇軾 1057 進士第二名、1061 賢良方正科制舉）与「史料來源」区块（主要来源书目）
+- 数据统计页新增「科举-朝代分析」面板（朝代下拉 + 登科方式 Top 12）
+- CI 重建 workflow 同步重建科举/来源索引；README / 帮助页 / 数据来源页 / CHANGELOG 更新
+
+## [1.9.0] - 2026-09-10
 
 ### 新增（人物字/號/別名接入）
 - 新增 `scripts/build-cbdb-altnames.mjs`（npm `build:cbdb-altnames`）：提取 ALTNAME_DATA + ALTNAME_CODES，生成别名索引（163,634 条 / 100,585 人 / 7.8MB，产物 `public/index/cbdb/altnames/`，已提交）
