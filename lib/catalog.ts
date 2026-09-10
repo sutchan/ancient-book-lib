@@ -1,4 +1,4 @@
-// lib/catalog.ts v1.5.1
+// lib/catalog.ts v1.4.4
 /**
  * 殆知阁 v20 全量书目索引工具
  * 数据来源：public/index/daizhige-catalog.json（由 scripts/build-daizhige-catalog.mjs 生成）
@@ -82,16 +82,6 @@ export function searchCatalog(
     );
   }
   return results.slice(0, limit);
-}
-
-/** 按馆藏分组 */
-export function groupByCategory(catalog: DaizhigeCatalog): Record<string, CatalogEntry[]> {
-  const groups: Record<string, CatalogEntry[]> = {};
-  for (const b of catalog.books) {
-    if (!groups[b.category]) groups[b.category] = [];
-    groups[b.category].push(b);
-  }
-  return groups;
 }
 
 /** 获取某馆藏下的子类列表（去重有序） */

@@ -58,10 +58,11 @@ jobs:
           node scripts/build-cbdb-index.mjs "$SQLITE"
           node scripts/build-cbdb-relations.mjs "$SQLITE"
           node scripts/build-cbdb-offices.mjs "$SQLITE"
+          node scripts/build-cbdb-analysis.mjs "$SQLITE"
 
       - name: Verify index
         run: |
-          node -e "const m=require('./public/index/cbdb/meta.json'); const r=require('./public/index/cbdb/rel/rel-meta.json'); const o=require('./public/index/cbdb/offices/offices-meta.json'); console.log('total:', m.total, '| kin:', r.stats.kinTotal, '| assoc:', r.stats.assocTotal, '| offices:', o.stats.officeTotal); if(m.total < 600000 || r.stats.kinTotal < 500000 || o.stats.officeTotal < 500000) { console.error('数据量异常，中止'); process.exit(1); }"
+          node -e "const m=require('./public/index/cbdb/meta.json'); const r=require('./public/index/cbdb/rel/rel-meta.json'); const o=require('./public/index/cbdb/offices/offices-meta.json'); const g=require('./public/index/cbdb/geo/geo-meta.json'); console.log('total:', m.total, '| kin:', r.stats.kinTotal, '| assoc:', r.stats.assocTotal, '| offices:', o.stats.officeTotal, '| geo:', g.stats.personTotal); if(m.total < 600000 || r.stats.kinTotal < 500000 || o.stats.officeTotal < 500000 || g.stats.personTotal < 300000) { console.error('数据量异常，中止'); process.exit(1); }"
 
       - name: Commit index
         run: |

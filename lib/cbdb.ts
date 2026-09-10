@@ -316,106 +316,91 @@ export interface RelationPathStep {
   kind: "kin" | "assoc";
 }
 
+export interface TraceOptions {
+  maxDepth?: number; // 最大探索深度（1=直接，2=二级，3=三级），默认 2
+  maxBreadth?: number; // 第一层探索宽度，后续层按 2 的幂递减，默认 12
+}
+
+export interface TraceResult {
+  steps: RelationPathStep[];
+  explored: number; // 实际展开的人物数
+}
+
+// 邻居缓存：personId → Map(邻居id → {rel, kind})，避免 BFS 中重复加载分片
+const neighborsCache = new Map<number, Map<number, { rel: string; kind: "kin" | "assoc" }>>();
+
+/** 获取某人的全部关系对象（亲属+社会，带缓存） */
+async function getNeighborsCached(
+  personId: number,
+  meta: RelMeta
+): Promise<Map<number, { rel: string; kind: "kin" | "assoc" }>> {
+  const cached = neighborsCache.get(personId);
+  if (cached) return cached;
+  const shard = locateShard(meta, personId);
+  const neighbors = new Map<number, { rel: string; kind: "kin" | "assoc" }>();
+  if (shard) {
+    if (shard.kinFile) {
+      const edges = await loadShardFile<KinEdge[]>(shard.kinFile);
+      for (const e of edges) {
+        if (e[0] !== personId) continue;
+        const rel = meta.kinCodes[e[2]];
+        if (rel) neighbors.set(e[1], { rel, kind: "kin" });
+      }
+    }
+    if (shard.assocFile) {
+      const edges = await loadShardFile<AssocEdge[]>(shard.assocFile);
+      for (const e of edges) {
+        if (e[0] !== personId) continue;
+        const rel = meta.assocCodes[e[2]];
+        if (rel && !neighbors.has(e[1])) neighbors.set(e[1], { rel, kind: "assoc" });
+      }
+    }
+  }
+  neighborsCache.set(personId, neighbors);
+  return neighbors;
+}
+
 /**
- * 双人关系溯源：先找直接关系；若无，则从 A 的关系对象中取前 N 个做二级探索。
- * 返回路径步列表（含中间人），空数组表示未找到。
+ * 双人关系溯源（分层 BFS）：
+ * 逐层展开 A 的关系网络，支持直接（1 级）/ 二级 / 三级中间关系。
+ * 每层广度递减（breadth(level) = max(4, maxBreadth / 2^(level-1))），
+ * 通过 visited 去重与邻居缓存控制分片加载次数。
  */
 export async function findRelationPath(
   a: number,
   b: number,
-  maxBreadth = 20
-): Promise<RelationPathStep[]> {
+  opts: TraceOptions = {}
+): Promise<TraceResult> {
+  const maxDepth = Math.min(3, Math.max(1, opts.maxDepth ?? 2));
+  const maxBreadth = Math.max(4, opts.maxBreadth ?? 12);
   const meta = await loadRelMeta();
-  const shardA = locateShard(meta, a);
-  const shardB = locateShard(meta, b);
-  if (!shardA || !shardB) return [];
+  if (a === b) return { steps: [], explored: 0 };
 
-  const loadEdges = async (shard: RelMeta["shards"][number]) => {
-    const kin: KinEdge[] = shard.kinFile
-      ? (await loadShardFile<KinEdge[]>(shard.kinFile)).filter((e) => e[0] === a || e[0] === b)
-      : [];
-    const assoc: AssocEdge[] = shard.assocFile
-      ? (await loadShardFile<AssocEdge[]>(shard.assocFile)).filter((e) => e[0] === a || e[0] === b)
-      : [];
-    return { kin, assoc };
-  };
+  const visited = new Set<number>([a]);
+  let queue: { id: number; path: RelationPathStep[] }[] = [{ id: a, path: [] }];
+  let explored = 0;
 
-  // 直接关系：A→B 或 B→A
-  const shardAB = locateShard(meta, a) || locateShard(meta, b);
-  if (shardAB && (shardAB.kinFile || shardAB.assocFile)) {
-    // 只加载涉及 a/b 的分片
-    for (const person of [a, b]) {
-      const shard = locateShard(meta, person);
-      if (!shard) continue;
-      const edges = await loadEdges(shard);
-      const kinHit = edges.kin.find((e) => (e[0] === a && e[1] === b) || (e[0] === b && e[1] === a));
-      if (kinHit) {
-        const rel = meta.kinCodes[kinHit[2]];
-        if (rel) return [{ from: a, to: b, rel, kind: "kin" }];
-      }
-      const assocHit = edges.assoc.find((e) => (e[0] === a && e[1] === b) || (e[0] === b && e[1] === a));
-      if (assocHit) {
-        const rel = meta.assocCodes[assocHit[2]];
-        if (rel) return [{ from: a, to: b, rel, kind: "assoc" }];
+  for (let depth = 1; depth <= maxDepth; depth++) {
+    const breadth = Math.max(4, Math.floor(maxBreadth / Math.pow(2, depth - 1)));
+    const next: { id: number; path: RelationPathStep[] }[] = [];
+    for (const node of queue) {
+      const neighbors = await getNeighborsCached(node.id, meta);
+      explored++;
+      let count = 0;
+      for (const [nid, info] of Array.from(neighbors.entries())) {
+        if (count++ >= breadth) break;
+        const step: RelationPathStep = { from: node.id, to: nid, rel: info.rel, kind: info.kind };
+        if (nid === b) return { steps: [...node.path, step], explored };
+        if (!visited.has(nid)) {
+          visited.add(nid);
+          next.push({ id: nid, path: [...node.path, step] });
+        }
       }
     }
+    queue = next;
+    if (!queue.length) break;
   }
-
-  // 二级探索：A 的关系对象 X（maxBreadth 个），检查 X 与 B 的关系
-  const edgesA = await loadEdges(shardA);
-  const neighborsA = new Map<number, { rel: string; kind: "kin" | "assoc" }>();
-  for (const e of edgesA.kin) {
-    const rel = meta.kinCodes[e[2]];
-    if (rel) neighborsA.set(e[1], { rel, kind: "kin" });
-  }
-  for (const e of edgesA.assoc) {
-    const rel = meta.assocCodes[e[2]];
-    if (rel && !neighborsA.has(e[1])) neighborsA.set(e[1], { rel, kind: "assoc" });
-  }
-  let count = 0;
-  const neighborList = Array.from(neighborsA.entries());
-  for (const [x, relInfo] of neighborList) {
-    if (count++ >= maxBreadth) break;
-    const shardX = locateShard(meta, x);
-    if (!shardX) continue;
-    const edgesX = await loadEdgesX(shardX, x, b);
-    const kinHit = edgesX.kin.find((e) => (e[0] === x && e[1] === b) || (e[0] === b && e[1] === x));
-    if (kinHit) {
-      const rel2 = meta.kinCodes[kinHit[2]];
-      if (rel2) {
-        return [
-          { from: a, to: x, rel: relInfo.rel, kind: relInfo.kind },
-          { from: x, to: b, rel: rel2, kind: "kin" },
-        ];
-      }
-    }
-    const assocHit = edgesX.assoc.find((e) => (e[0] === x && e[1] === b) || (e[0] === b && e[1] === x));
-    if (assocHit) {
-      const rel2 = meta.assocCodes[assocHit[2]];
-      if (rel2) {
-        return [
-          { from: a, to: x, rel: relInfo.rel, kind: relInfo.kind },
-          { from: x, to: b, rel: rel2, kind: "assoc" },
-        ];
-      }
-    }
-  }
-  return [];
-}
-
-/** 加载分片中与某 ego/other 相关的边（用于二级探索） */
-async function loadEdgesX(
-  shard: RelMeta["shards"][number],
-  x: number,
-  b: number
-): Promise<{ kin: KinEdge[]; assoc: AssocEdge[] }> {
-  const kin: KinEdge[] = shard.kinFile
-    ? (await loadShardFile<KinEdge[]>(shard.kinFile)).filter((e) => e[0] === x || e[1] === x || e[0] === b || e[1] === b)
-    : [];
-  const assoc: AssocEdge[] = shard.assocFile
-    ? (await loadShardFile<AssocEdge[]>(shard.assocFile)).filter((e) => e[0] === x || e[1] === x || e[0] === b || e[1] === b)
-    : [];
-  return { kin, assoc };
+  return { steps: [], explored };
 }
 
 // ============ 人物任职（CBDB POSTED_TO_OFFICE_DATA） ============
@@ -492,4 +477,47 @@ export async function getPersonOffices(
       lastYear: r[3],
       appt: meta.apptCodes[r[4]] || "",
     }));
+}
+
+// ============ 分析统计产物（籍贯分布 + 官职-朝代联动） ============
+
+export interface GeoMeta {
+  version: string;
+  generatedAt: string;
+  source: { name: string; release_file: string; release_date: string };
+  method: string;
+  stats: { personTotal: number; provinceCount: number };
+  topProvinces: { province: string; count: number }[];
+  byDynasty: { dynasty: string; count: number; topProvinces: { province: string; count: number }[] }[];
+}
+
+export interface OfficeDynastyMeta {
+  version: string;
+  generatedAt: string;
+  source: { name: string; release_file: string; release_date: string };
+  method: string;
+  stats: { officeTotal: number; dynastyCount: number };
+  byDynasty: { dynasty: string; officeTotal: number; personTotal: number; topOffices: { office: string; count: number }[] }[];
+}
+
+const GEO_META_URL = `${CBDB_BASE}/geo/geo-meta.json`;
+const OFF_DYN_URL = `${CBDB_BASE}/offices/offices-dynasty.json`;
+
+let geoMetaCache: GeoMeta | null = null;
+let offDynMetaCache: OfficeDynastyMeta | null = null;
+
+export async function loadGeoMeta(): Promise<GeoMeta> {
+  if (geoMetaCache) return geoMetaCache;
+  const resp = await fetch(GEO_META_URL);
+  if (!resp.ok) throw new Error(`籍贯分布索引加载失败: ${resp.status}`);
+  geoMetaCache = (await resp.json()) as GeoMeta;
+  return geoMetaCache;
+}
+
+export async function loadOfficeDynastyMeta(): Promise<OfficeDynastyMeta> {
+  if (offDynMetaCache) return offDynMetaCache;
+  const resp = await fetch(OFF_DYN_URL);
+  if (!resp.ok) throw new Error(`官职-朝代索引加载失败: ${resp.status}`);
+  offDynMetaCache = (await resp.json()) as OfficeDynastyMeta;
+  return offDynMetaCache;
 }

@@ -44,6 +44,7 @@ export default function RelationClient() {
   const [path, setPath] = useState<RelationPathStep[] | null>(null);
   const [pathMsg, setPathMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [depth, setDepth] = useState(2);
 
   useEffect(() => {
     loadRelMeta().then(setMeta).catch((e) => setError(String(e)));
@@ -126,12 +127,16 @@ export default function RelationClient() {
     setPathMsg(null);
     setPath(null);
     try {
-      const names = await loadRelNames();
-      const steps = await findRelationPath(aSelected.id, bSelected.id);
+      const { steps, explored } = await findRelationPath(aSelected.id, bSelected.id, {
+        maxDepth: depth,
+      });
       if (steps.length) {
         setPath(steps);
+        setPathMsg(`共展开 ${explored} 位中间人物。`);
       } else {
-        setPathMsg(`未找到「${aSelected.name}」与「${bSelected.name}」的直接关系或二级中间关系。`);
+        setPathMsg(
+          `在 ${depth} 级范围内未找到「${aSelected.name}」与「${bSelected.name}」的关系（展开 ${explored} 位人物）。可尝试更深探索或更换人物。`
+        );
       }
     } catch (e) {
       setPathMsg(`溯源失败：${String((e as Error)?.message || e)}`);
@@ -200,6 +205,19 @@ export default function RelationClient() {
         <button className="btn btn-primary" disabled={!aSelected || !bSelected || loading} onClick={runTrace} style={{ fontSize: 14 }}>
           双人溯源
         </button>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+          <span style={{ color: "var(--color-text-secondary)" }}>深度</span>
+          <select
+            aria-label="溯源深度"
+            value={depth}
+            onChange={(e) => setDepth(parseInt(e.target.value, 10))}
+            style={{ padding: "6px 8px", borderRadius: 6, border: "1px solid var(--color-border)", background: "var(--color-card-bg)", fontSize: 13 }}
+          >
+            <option value={1}>1 级（直接）</option>
+            <option value={2}>2 级</option>
+            <option value={3}>3 级（较慢）</option>
+          </select>
+        </div>
       </div>
 
       {/* 已选人物 */}
@@ -284,8 +302,8 @@ export default function RelationClient() {
 
       <div className="card" style={{ marginTop: 24, padding: 14, fontSize: 13, color: "var(--color-text-secondary)" }}>
         <strong>数据说明</strong>：关系数据来自 CBDB（2026-09-05 版）KIN_DATA（亲属）与 ASSOC_DATA（社会关系）
-        表，关系描述为 CBDB 原始口径（如「友」「為Y之門人」等），方向以 CBDB 记录为准；双人溯源仅支持直接关系
-        与二级中间关系。
+        表，关系描述为 CBDB 原始口径（如「友」「為Y之門人」等），方向以 CBDB 记录为准；双人溯源为分层广度优先搜索，
+        支持直接关系与 2-3 级中间关系（每层探索宽度受限，3 级可能较慢且不一定覆盖全部路径）。
       </div>
     </section>
   );

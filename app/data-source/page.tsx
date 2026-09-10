@@ -48,8 +48,9 @@ export default function DataSourcePage() {
           <code style={{ fontSize: 13, wordBreak: "break-all" }}>437a253a8e49cb24d2d5209234781d03fcbcc04476aafc3cf9d68453cea7e980</code>），
           遵循 CBDB 授权条款。关系网络（亲属 56.1 万条、社会关系 19 万条、人物-著作 5.1 万条，覆盖 31.1 万人）来自
           CBDB 的 KIN_DATA / ASSOC_DATA / BIOG_TEXT_DATA 表；生平任职（59.1 万条、11,291 种官职）来自
-          POSTED_TO_OFFICE_DATA 表。本地仅保存提取索引（人物 49.8MB + 关系 21.9MB + 任职 16.7MB），
-          新增版本可经 GitHub Actions 手动重建。
+          POSTED_TO_OFFICE_DATA 表；籍贯分布与官职-朝代联动由 BIOG_ADDR_DATA / ADDR_BELONGS_DATA /
+          BIOG_MAIN 等表聚合（378,745 位有籍贯可归省人物）。本地仅保存提取索引（人物 49.8MB + 关系 21.9MB +
+          任职 16.7MB + 分析 0.1MB），新增版本可经 GitHub Actions 手动重建。
         </p>
       </div>
 

@@ -4,8 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { loadCatalog, formatSize, type DaizhigeCatalog } from "@/lib/catalog";
-import { loadCbdbMeta, type CbdbMeta } from "@/lib/cbdb";
-import { loadRelMeta, loadOfficesMeta, type RelMeta, type OfficesMeta } from "@/lib/cbdb";
+import { loadCbdbMeta, loadGeoMeta, loadOfficeDynastyMeta, loadOfficesMeta, loadRelMeta, type CbdbMeta, type GeoMeta, type OfficeDynastyMeta, type OfficesMeta, type RelMeta } from "@/lib/cbdb";
 
 const PALETTE = ["#8C3130", "#B8754E", "#C9A227", "#4E7A5A", "#5B7A9D", "#7A5B9D", "#9D5B6E", "#3E7A78", "#8A6D3B", "#5A6B8C"];
 
@@ -40,6 +39,10 @@ export default function StatsClient() {
   const [cbdb, setCbdb] = useState<CbdbMeta | null>(null);
   const [rel, setRel] = useState<RelMeta | null>(null);
   const [offices, setOffices] = useState<OfficesMeta | null>(null);
+  const [geo, setGeo] = useState<GeoMeta | null>(null);
+  const [offDyn, setOffDyn] = useState<OfficeDynastyMeta | null>(null);
+  const [geoDynasty, setGeoDynasty] = useState<string | null>(null);
+  const [offDynasty, setOffDynasty] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,6 +57,18 @@ export default function StatsClient() {
       .catch(() => {});
     loadOfficesMeta()
       .then(setOffices)
+      .catch(() => {});
+    loadGeoMeta()
+      .then((m) => {
+        setGeo(m);
+        setGeoDynasty(m.byDynasty[0]?.dynasty ?? null);
+      })
+      .catch(() => {});
+    loadOfficeDynastyMeta()
+      .then((m) => {
+        setOffDyn(m);
+        setOffDynasty(m.byDynasty[0]?.dynasty ?? null);
+      })
       .catch(() => {});
   }, []);
 
@@ -225,7 +240,7 @@ export default function StatsClient() {
           <div style={{ marginTop: 6, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
             关系覆盖 {rel.stats.personTotal.toLocaleString()} 位人物，可在{" "}
             <Link href="/relation" style={{ color: "var(--color-primary)" }}>社会关系溯源</Link> 中按人物查看，
-            支持直接关系与二级中间关系的双人溯源。
+            支持直接关系与 2-3 级中间关系的双人溯源（每层探索宽度受限）。
           </div>
         </div>
       )}
@@ -262,6 +277,66 @@ export default function StatsClient() {
           <div style={{ marginTop: 6, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
             任职记录（官职、起止年、任命类型）展示于{" "}
             <Link href="/people" style={{ color: "var(--color-primary)" }}>人物库</Link> 详情页「生平任职」区块。
+          </div>
+        </div>
+      )}
+
+      {geo && geoDynasty && (
+        <div className="card stat-panel" style={{ marginTop: 16 }}>
+          <div className="stat-panel-title">人物籍贯分布（CBDB · 按朝代筛选）</div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", margin: "12px 0" }}>
+            <select
+              aria-label="籍贯朝代"
+              value={geoDynasty}
+              onChange={(e) => setGeoDynasty(e.target.value)}
+              style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid var(--color-border)", background: "var(--color-card-bg)", fontSize: 13 }}
+            >
+              {geo.byDynasty.map((d) => (
+                <option key={d.dynasty} value={d.dynasty}>
+                  {d.dynasty}（{d.count.toLocaleString()} 人）
+                </option>
+              ))}
+            </select>
+            <span style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
+              共 {geo.stats.personTotal.toLocaleString()} 位有籍贯可归省的人物 / {geo.stats.provinceCount} 个省级行政区
+            </span>
+          </div>
+          <BarChart
+            title={`${geoDynasty} · 籍贯地区 Top 15（省/道/路）`}
+            rows={(geo.byDynasty.find((d) => d.dynasty === geoDynasty)?.topProvinces ?? []).map((p) => ({ name: p.province, count: p.count }))}
+          />
+          <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+            {geo.method}；古代行政区名按原数据呈现（如明「浙江布政司」、宋「福建路」、唐「河北道」），与今省名不可直接等同。
+          </div>
+        </div>
+      )}
+
+      {offDyn && offDynasty && (
+        <div className="card stat-panel" style={{ marginTop: 16 }}>
+          <div className="stat-panel-title">官职-朝代联动分析（CBDB · 按朝代筛选）</div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", margin: "12px 0" }}>
+            <select
+              aria-label="官职朝代"
+              value={offDynasty}
+              onChange={(e) => setOffDynasty(e.target.value)}
+              style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid var(--color-border)", background: "var(--color-card-bg)", fontSize: 13 }}
+            >
+              {offDyn.byDynasty.map((d) => (
+                <option key={d.dynasty} value={d.dynasty}>
+                  {d.dynasty}（{d.officeTotal.toLocaleString()} 条任职）
+                </option>
+              ))}
+            </select>
+            <span style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
+              共 {offDyn.stats.officeTotal.toLocaleString()} 条任职-朝代记录
+            </span>
+          </div>
+          <BarChart
+            title={`${offDynasty} · 高频官职 Top 15`}
+            rows={(offDyn.byDynasty.find((d) => d.dynasty === offDynasty)?.topOffices ?? []).map((o) => ({ name: o.office, count: o.count }))}
+          />
+          <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+            {offDyn.method}；官职名为 CBDB 原始名称，同一官职在不同朝代可能有不同名称与含义。
           </div>
         </div>
       )}
