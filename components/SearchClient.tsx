@@ -12,6 +12,7 @@ import {
   type SearchResult,
 } from "@/lib/search";
 import { toSimplified } from "@/lib/t2s";
+import PeopleSearchResults from "@/components/PeopleSearchResults";
 
 export default function SearchClient() {
   const sp = useSearchParams();
@@ -134,6 +135,9 @@ export default function SearchClient() {
           索引加载失败：{error}
         </div>
       )}
+
+      {/* CBDB 人物匹配（懒加载） */}
+      {kw.trim() && <PeopleSearchResults query={kw} />}
 
       <div className="search-stat">
         关键词「{kw}」· {mode === "title" ? "标题模式" : "全文模式"} · 命中 {total} 部

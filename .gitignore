@@ -36,6 +36,7 @@ next-env.d.ts
 # 古籍索引大文件（5GB源文本不入库，索引若超限可git lfs或独立托管）
 *.txt.bak
 /scripts/tmp/
+/tmp/
 
 # 构建期生成的全文索引与章节分片清单（体积大，由 build:fulltext 在 CI/部署时生成，不入库）
 /public/index/fulltext-index.json

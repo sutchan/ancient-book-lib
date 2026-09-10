@@ -1,0 +1,70 @@
+name: Rebuild CBDB Index
+
+# 手动触发的 CBDB 人物索引重建 workflow
+# 上游 cbdb-project/cbdb_sqlite 发布新版时，运行此 workflow 重建 public/index/cbdb/
+# 产物会被提交到仓库（与 daizhige 索引一致策略）
+
+on:
+  workflow_dispatch:
+    inputs:
+      sqlite_url:
+        description: "CBDB SQLite 压缩包 URL（默认使用 latest.json 指向的 HuggingFace 地址）"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get latest release info
+        id: latest
+        run: |
+          curl -sL "https://raw.githubusercontent.com/cbdb-project/cbdb_sqlite/master/latest.json" -o latest.json
+          echo "url=$(node -e "console.log(JSON.parse(require('fs').readFileSync('latest.json','utf8')).huggingface_url)")" >> "$GITHUB_OUTPUT"
+
+      - name: Download CBDB SQLite
+        run: |
+          mkdir -p tmp/cbdb
+          URL="${{ github.event.inputs.sqlite_url || steps.latest.outputs.url }}"
+          echo "Downloading from: $URL"
+          curl -sL --retry 3 "$URL" -o tmp/cbdb/cbdb.zip
+          ls -lh tmp/cbdb/cbdb.zip
+
+      - name: Extract SQLite
+        run: |
+          cd tmp/cbdb
+          unzip -o cbdb.zip
+          ls -lh *.sqlite3
+
+      - name: Build CBDB index
+        run: |
+          SQLITE=$(ls tmp/cbdb/*.sqlite3 | head -1)
+          echo "Using: $SQLITE"
+          node scripts/build-cbdb-index.mjs "$SQLITE"
+
+      - name: Verify index
+        run: |
+          node -e "const m=require('./public/index/cbdb/meta.json'); console.log('total:', m.total, '| surnames:', m.surnameTotal); if(m.total < 600000) { console.error('人物数异常，中止'); process.exit(1); }"
+
+      - name: Commit index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/index/cbdb/
+          git diff --cached --quiet || git commit -m "chore: 重建 CBDB 人物索引（$(node -e "console.log(require('./public/index/cbdb/meta.json').total)") 人）"
+          git push

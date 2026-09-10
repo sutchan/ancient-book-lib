@@ -117,9 +117,10 @@ export default function HelpPage() {
       <h3 className="section-title" id="tools">六、人物考据、社会关系与数据统计</h3>
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
         <ul style={{ paddingLeft: 20, margin: "4px 0" }}>
-          <li><strong>人物考据</strong>：人物档案（字、号、籍贯、生卒、官职、著作与史料出处）规划中，将随 CBDB 等权威元数据接入后开放，支持重名人物按朝代+籍贯+官职多维区分。</li>
+          <li><strong>人物库</strong>：已接入 CBDB 全量 661,350 位历代人物（姓名、拼音、生卒年、指数年、性别、朝代、籍贯），支持人名搜索、朝代筛选与姓氏浏览；详情页可一键在古籍中检索该人物。</li>
+          <li><strong>人物考据</strong>：精选 28 位历史名人档案（字、号、籍贯、生卒、官职、著作与史料出处），支持重名人物按朝代+籍贯+官职多维区分。</li>
           <li><strong>社会关系</strong>：师生、君臣、思想传承等多维关系与双人溯源功能规划中。</li>
-          <li><strong>数据统计</strong>：已可查看馆藏规模、十大藏库分布与原始数据量；人物/关系类指标待元数据接入后补充。</li>
+          <li><strong>数据统计</strong>：已可查看馆藏规模、十大藏库分布、原始数据量与 CBDB 人物规模；关系类指标待元数据接入后补充。</li>
         </ul>
         <p>以上标注「待接入」的模块当前为占位，功能上线后无需更换网址即可使用。</p>
       </div>
@@ -166,8 +167,11 @@ export default function HelpPage() {
         <p><strong>Q：看到乱码或生僻字无法正常显示怎么办？</strong></p>
         <p>A：请确认使用较新的浏览器（Chrome / Edge / Safari / Firefox 等），并确保系统装有中文字体。原文为 UTF‑8 编码、下载文件带 BOM，Windows 记事本也能正确识别。个别极生僻字若设备缺字库可能显示为方框，属系统字体限制而非数据缺失。</p>
 
+        <p><strong>Q：人物库的 66 万人物数据是哪来的？准确吗？</strong></p>
+        <p>A：来自 CBDB（中国历代人物传记资料库，哈佛大学/北京大学/中研院合作项目）官方 SQLite 数据包（2026-09-05 版，661,350 人）。数据按姓氏分片索引后存入本仓库，原始数据仍托管于 CBDB 官方仓库，未做任何虚构或篡改；「指数年」为 CBDB 推算的编年基准，并非真实出生年。</p>
+
         <p><strong>Q：人物考据、社会关系、数据统计为什么显示「待接入」？</strong></p>
-        <p>A：这些模块依赖 CBDB 等权威人物/关系元数据，目前尚未导入，故为占位。数据接入后将直接开放，无需更换网址。</p>
+        <p>A：社会关系模块依赖 CBDB 关系类元数据（人物-人物、人物-著述等），目前尚未导入，故为占位。人物库与人物考据已接入真实数据。数据接入后将直接开放，无需更换网址。</p>
 
         <p><strong>Q：为什么网站需要联网才能读原文？为什么不用数据库？</strong></p>
         <p>A：古籍原文（约 4.9 GB）托管在上游仓库，本站采用「零复制」架构——只存 5.7 MB 书目索引，阅读时按需拉取原文，因此必须联网。省去数据库既避免体积膨胀与付费托管，也契合纯静态、可免费托管的定位；目录级检索已在前端内存中毫秒返回。</p>
@@ -185,7 +189,7 @@ export default function HelpPage() {
         <p>本站运营相关的详细声明已拆分为独立页面，便于查阅与引用：</p>
         <ul style={{ paddingLeft: 20, margin: "4px 0" }}>
           <li><Link href="/license">开源协议</Link>：代码 MIT 协议、古籍公有领域与上游授权、非商用定位。</li>
-          <li><Link href="/data-source">数据来源</Link>：殆知阁 v20 书目原文、CBDB 人物考据等数据源与溯源。</li>
+          <li><Link href="/data-source">数据来源</Link>：殆知阁 v20 书目原文、CBDB 全量人物库与人物考据等数据源与溯源。</li>
           <li><Link href="/disclaimer">免责声明</Link>：非商用、内容仅供参考、使用责任归属。</li>
           <li><Link href="/feedback">反馈渠道</Link>：勘误、建议与问题反馈方式。</li>
         </ul>

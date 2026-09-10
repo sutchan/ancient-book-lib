@@ -3,6 +3,16 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.5.0] - 2026-09-10
+
+### 新增（CBDB 全量人物库）
+- 接入 CBDB（中国历代人物传记资料库）**全量 661,350 位人物**，新建 `scripts/build-cbdb-index.mjs`（npm `build:cbdb`）：读取 CBDB 官方 SQLite（cbdb-project/cbdb_sqlite 2026-09-05 版），提取 BIOG_MAIN 基本信息（姓名/拼音/生卒年/指数年/性别/朝代/籍贯），生成按姓氏分片 + 排序姓名索引，产物 `public/index/cbdb/`（49.8MB，已提交）
+- 新增 `app/people/` 人物库：搜索（防抖前缀匹配）、朝代筛选（前 12）、姓氏浏览（前 60）、分页列表；新增 `app/people/detail/` 人物详情（生卒年/指数年/性别/籍贯 + 「在古籍中检索」「CBDB 官方档案」入口）
+- 检索页新增「人物匹配（CBDB）」卡片（`components/PeopleSearchResults.tsx`），搜索关键词同时匹配人物姓名，最多 8 人直达详情
+- 首页 Hero 与「学术工具」新增「人物库」入口；导航栏新增「人物库」；页脚统计口径更新为「人物 661,350 人（CBDB）」
+- 新增 `.github/workflows/rebuild-cbdb.yml`：手动触发重建 CBDB 索引并提交（上游发布新版时使用）
+- `.gitignore` 增加 `/tmp/`，防止 585MB SQLite 临时数据入库
+
 ## [1.4.3] - 2026-09-09
 
 ### 优化（人物考据档案页卡片式布局）

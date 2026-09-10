@@ -15,6 +15,7 @@ const MENU: { key: string; href: string; label: string }[] = [
   { key: "home", href: "/", label: "首页" },
   { key: "catalog", href: "/catalog", label: "全馆藏" },
   { key: "search", href: "/search", label: "检索" },
+  { key: "people", href: "/people", label: "人物库" },
   { key: "character", href: "/character", label: "人物考据" },
   { key: "relation", href: "/relation", label: "社会关系" },
   { key: "help", href: "/help", label: "帮助" },

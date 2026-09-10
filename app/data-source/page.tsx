@@ -35,8 +35,18 @@ export default function DataSourcePage() {
         <h3 className="section-title">人物考据（哈佛 CBDB）</h3>
         <p>
           人物考据档案（姓名、字、号、籍贯、生卒、官职、著作）来自哈佛 CBDB（Chinese Biographical Database），遵循{" "}
-          <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。当前已导入 28 位历史名人考据，详见{" "}
+          <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。已导入 28 位历史名人考据，详见{" "}
           <Link href="/character">人物考据</Link>。
+        </p>
+      </div>
+
+      <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
+        <h3 className="section-title">人物库（CBDB 全量）</h3>
+        <p>
+          人物库 <Link href="/people">661,350 位历代人物</Link>（姓名、拼音、生卒年、指数年、性别、朝代、籍贯）来自
+          CBDB 官方 SQLite 数据包（<code>cbdb-project/cbdb_sqlite</code>，2026-09-05 版，SHA-256{" "}
+          <code style={{ fontSize: 13, wordBreak: "break-all" }}>437a253a8e49cb24d2d5209234781d03fcbcc04476aafc3cf9d68453cea7e980</code>），
+          遵循 CBDB 授权条款。本地仅保存 49.8MB 提取索引（按姓氏分片），新增版本可经 GitHub Actions 手动重建。
         </p>
       </div>
 
