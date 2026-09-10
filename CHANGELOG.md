@@ -3,9 +3,13 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [1.8.0] - 2026-09-10
+## [未发布]
 
-### 新增（关系溯源升级 + 籍贯分布 + 官职-朝代联动）
+> 以下 1.5.0–1.8.0 为已规划/已开发的超前草稿，尚未随版本发布（package.json 当前 `1.4.5`）。正式发布时归入对应版本号。
+
+### [1.8.0] - 2026-09-10
+
+#### 新增（关系溯源升级 + 籍贯分布 + 官职-朝代联动）
 - 双人溯源升级为**分层 BFS**（`findRelationPath` 重构）：支持直接/2/3 级中间关系，深度可选（1-3 级），每层探索宽度按 2 的幂递减，引入邻居缓存与 visited 去重控制分片加载；返回路径步数 + 实际展开人物数
 - 新增 `scripts/build-cbdb-analysis.mjs`（npm `build:cbdb-analysis`）：生成两类分析产物
   - 人物籍贯分布 `public/index/cbdb/geo/geo-meta.json`（378,745 位有籍贯可归省人物 / 217 个省级行政区，按朝代×省/道/路聚合，行政区名忠实历史地理）
@@ -14,17 +18,17 @@
 - 数据统计页新增「人物籍贯分布」（朝代下拉 + 地区柱状图）与「官职-朝代联动分析」（朝代下拉 + 官职排行）两个面板
 - 帮助页 / 数据来源页同步更新
 
-## [1.7.0] - 2026-09-10
+### [1.7.0] - 2026-09-10
 
-### 新增（CBDB 生平任职 + 著作-馆藏联动）- 新增 `scripts/build-cbdb-offices.mjs`（npm `build:cbdb-offices`）：提取 POSTED_TO_OFFICE_DATA + OFFICE_CODES + APPOINTMENT_CODES，生成按 personid 值区间分片的任职索引（590,540 条 / 298,954 人 / 11,291 种官职 / 16.7MB，产物 `public/index/cbdb/offices/`，已提交）
+#### 新增（CBDB 生平任职 + 著作-馆藏联动）- 新增 `scripts/build-cbdb-offices.mjs`（npm `build:cbdb-offices`）：提取 POSTED_TO_OFFICE_DATA + OFFICE_CODES + APPOINTMENT_CODES，生成按 personid 值区间分片的任职索引（590,540 条 / 298,954 人 / 11,291 种官职 / 16.7MB，产物 `public/index/cbdb/offices/`，已提交）
 - `lib/cbdb.ts`：新增 `loadOfficesMeta` / `getPersonOffices`（官职 + 首末年 + 任命类型：正授/權/守/試/攝等）
 - 人物详情页新增「生平任职」区块（前 60 条官职标签，含任命类型与起止年）；著作列表新增「在馆藏检索」链接（在殆知阁书目中查找同名著作，标注口径）
 - 数据统计页：概览与任职面板接入 59.1 万条任职 / 29.9 万人 / 11,291 种官职 / 任命类型统计
 - CI 重建 workflow 同步重建任职索引；README / 帮助页 / 数据来源页更新
 
-## [1.6.0] - 2026-09-10
+### [1.6.0] - 2026-09-10
 
-### 新增（CBDB 关系网络：亲属 + 社会关系 + 人物著作）
+#### 新增（CBDB 关系网络：亲属 + 社会关系 + 人物著作）
 - 新增 `scripts/build-cbdb-relations.mjs`（npm `build:cbdb-rel`）：从 CBDB SQLite 提取 KIN_DATA（亲属 561,361 条）、ASSOC_DATA（社会关系 189,938 条）、BIOG_TEXT_DATA（人物-著作 50,783 条），生成按 personid 值区间分片的索引 + 关系人名映射 + 代码表，产物 `public/index/cbdb/rel/`（21.9MB，已提交，覆盖 311,202 人）
 - `lib/cbdb.ts`：新增关系加载能力——`getPersonRelations`（亲属/社会）、`getPersonTexts`（著作）、`findRelationPath`（双人溯源：直接关系 + 二级中间关系，受控广度）
 - 人物详情页新增「人物关系」区块：亲属（前 60）、社会关系（前 60，含年份）、著作列表（前 40），关系标签可点击直达对应人物
@@ -32,15 +36,21 @@
 - `components/StatsClient.tsx`：数据统计页 KPI 与概览接入真实人物/关系数据，新增「CBDB 人物朝代分布（前 10）」柱状图与关系数据面板（亲属/社会/著作/称谓/关系类型计数）
 - 首页「社会关系溯源」卡片、帮助页、数据来源页、README 更新为真实数据口径
 
-## [1.5.0] - 2026-09-10
+### [1.5.0] - 2026-09-10
 
-### 新增（CBDB 全量人物库）
+#### 新增（CBDB 全量人物库）
 - 接入 CBDB（中国历代人物传记资料库）**全量 661,350 位人物**，新建 `scripts/build-cbdb-index.mjs`（npm `build:cbdb`）：读取 CBDB 官方 SQLite（cbdb-project/cbdb_sqlite 2026-09-05 版），提取 BIOG_MAIN 基本信息（姓名/拼音/生卒年/指数年/性别/朝代/籍贯），生成按姓氏分片 + 排序姓名索引，产物 `public/index/cbdb/`（49.8MB，已提交）
 - 新增 `app/people/` 人物库：搜索（防抖前缀匹配）、朝代筛选（前 12）、姓氏浏览（前 60）、分页列表；新增 `app/people/detail/` 人物详情（生卒年/指数年/性别/籍贯 + 「在古籍中检索」「CBDB 官方档案」入口）
 - 检索页新增「人物匹配（CBDB）」卡片（`components/PeopleSearchResults.tsx`），搜索关键词同时匹配人物姓名，最多 8 人直达详情
 - 首页 Hero 与「学术工具」新增「人物库」入口；导航栏新增「人物库」；页脚统计口径更新为「人物 661,350 人（CBDB）」
 - 新增 `.github/workflows/rebuild-cbdb.yml`：手动触发重建 CBDB 索引并提交（上游发布新版时使用）
 - `.gitignore` 增加 `/tmp/`，防止 585MB SQLite 临时数据入库
+
+## [1.4.5] - 2026-09-10
+
+### 文档（冗余清理收尾）
+- 修复删除 `components/CatalogSearchResults.tsx` 后在 `docs/10-用户研究与需求洞察/02-用户旅程地图.md` 遗留的悬空引用（改为已实现 SearchClient 书目检索）
+- 将 CHANGELOG 中早于 package.json 的 1.5.0–1.8.0 超前草稿归入「未发布」区，消除版本号错位
 
 ## [1.4.4] - 2026-09-10
 
