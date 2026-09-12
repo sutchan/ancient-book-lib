@@ -21,7 +21,8 @@
     "build:cbdb-analysis": "node scripts/build-cbdb-analysis.mjs",
     "build:cbdb-altnames": "node scripts/build-cbdb-altnames.mjs",
     "build:cbdb-entry": "node scripts/build-cbdb-entry.mjs",
-    "build:cbdb-sources": "node scripts/build-cbdb-sources.mjs"
+    "build:cbdb-sources": "node scripts/build-cbdb-sources.mjs",
+    "build:cbdb-years": "node scripts/build-cbdb-years.mjs"
   },
   "dependencies": {
     "next": "^14.2.15",

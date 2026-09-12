@@ -34,7 +34,16 @@
 - `app/people/detail/PeopleDetailInner.tsx`：修正「生平任职」区块注释误写为「人物关系」
 - 新增 `test/cbdb-search.test.ts`（10 用例）：锁死繁简双向、前缀/子串、别名前缀/子串、姓名命中优先于别名、limit 生效
 
-### [1.10.0] - 2026-09-10
+### [1.11.0] - 2026-09-12
+
+### 新增（人物时间分布 + 人物库浏览增强）
+- 新增 `scripts/build-cbdb-years.mjs`（npm `build:cbdb-years`）：聚合 BIOG_MAIN.c_index_year 指数年（有效范围 0<year<2000，排除缺失与异常值），生成 `public/index/cbdb/person-years.json`（30.8 万有效指数年 / 20 个世纪区间 / Top 8 朝代×区间，已提交）
+- 数据统计页新增「历代人物时间分布」面板（全部/朝代切换 + 世纪柱状图，显示隋唐积累、宋元高峰、明清爆发形态）
+- `lib/cbdb.ts`：新增 `PersonYearsMeta` / `loadPersonYears`
+- 人物库浏览页增强：性别筛选（仅看女性，CBDB 共 5.8 万女性人物）、姓氏搜索框（前缀精确筛选复姓如欧阳/司马）、展开全部姓氏按钮
+- CI 重建 workflow 同步时间分布；README / 帮助页 / 数据来源页 / CHANGELOG 更新
+
+## [1.10.0] - 2026-09-10
 
 ### 新增（人物科舉檔案 + 史料來源）
 - 新增 `scripts/build-cbdb-entry.mjs`（npm `build:cbdb-entry`）：提取 ENTRY_DATA + ENTRY_CODES + BIOG_MAIN 朝代，生成科举索引（264,820 条 / 220,665 人 / 300+ 登科方式 / 5.6MB，产物 `public/index/cbdb/entry/` 含 entry-dynasty.json 朝代×登科统计，已提交）

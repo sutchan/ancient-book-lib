@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { loadCatalog, formatSize, type DaizhigeCatalog } from "@/lib/catalog";
-import { loadCbdbMeta, loadEntryDynastyMeta, loadGeoMeta, loadOfficeDynastyMeta, loadOfficesMeta, loadRelMeta, type CbdbMeta, type EntryDynastyMeta, type GeoMeta, type OfficeDynastyMeta, type OfficesMeta, type RelMeta } from "@/lib/cbdb";
+import { loadCbdbMeta, loadEntryDynastyMeta, loadGeoMeta, loadOfficeDynastyMeta, loadOfficesMeta, loadPersonYears, loadRelMeta, type CbdbMeta, type EntryDynastyMeta, type GeoMeta, type OfficeDynastyMeta, type OfficesMeta, type PersonYearsMeta, type RelMeta } from "@/lib/cbdb";
 
 const PALETTE = ["#8C3130", "#B8754E", "#C9A227", "#4E7A5A", "#5B7A9D", "#7A5B9D", "#9D5B6E", "#3E7A78", "#8A6D3B", "#5A6B8C"];
 
@@ -42,9 +42,11 @@ export default function StatsClient() {
   const [geo, setGeo] = useState<GeoMeta | null>(null);
   const [offDyn, setOffDyn] = useState<OfficeDynastyMeta | null>(null);
   const [entryDyn, setEntryDyn] = useState<EntryDynastyMeta | null>(null);
+  const [personYears, setPersonYears] = useState<PersonYearsMeta | null>(null);
   const [geoDynasty, setGeoDynasty] = useState<string | null>(null);
   const [offDynasty, setOffDynasty] = useState<string | null>(null);
   const [entryDynasty, setEntryDynasty] = useState<string | null>(null);
+  const [yearsScope, setYearsScope] = useState<string>("all");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function StatsClient() {
         setEntryDynasty(m.byDynasty[0]?.dynasty ?? null);
       })
       .catch(() => {});
+    loadPersonYears().then(setPersonYears).catch(() => {});
   }, []);
 
   const byCat = useMemo(() => {
@@ -376,6 +379,39 @@ export default function StatsClient() {
           />
           <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
             {entryDyn.method}；登科方式为 CBDB 原始名称（如「科舉: 進士」「科舉: 鄉貢舉人」「監生」等）。
+          </div>
+        </div>
+      )}
+
+      {personYears && (
+        <div className="card stat-panel" style={{ marginTop: 16 }}>
+          <div className="stat-panel-title">历代人物时间分布（CBDB · 指数年按世纪）</div>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", margin: "12px 0" }}>
+            <select
+              aria-label="时间分布范围"
+              value={yearsScope}
+              onChange={(e) => setYearsScope(e.target.value)}
+              style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid var(--color-border)", background: "var(--color-card-bg)", fontSize: 13 }}
+            >
+              <option value="all">全部朝代</option>
+              {personYears.byDynasty.map((d) => (
+                <option key={d.dynasty} value={d.dynasty}>{d.dynasty}</option>
+              ))}
+            </select>
+            <span style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
+              {personYears.stats.withYear.toLocaleString()} 位有指数年人物（占 {personYears.stats.total.toLocaleString()} 的{" "}
+              {Math.round((personYears.stats.withYear / personYears.stats.total) * 100)}%）
+            </span>
+          </div>
+          <BarChart
+            title={`${yearsScope === "all" ? "全部" : yearsScope} · 各世纪人物数量（指数年）`}
+            rows={(yearsScope === "all"
+              ? personYears.buckets
+              : personYears.byDynasty.find((d) => d.dynasty === yearsScope)?.buckets ?? []
+            ).map((b) => ({ name: `${b.from}-${b.from + 99}`, count: b.count }))}
+          />
+          <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
+            {personYears.method}；数据形态呈「隋唐积累、宋元高峰、明清爆发」，与 CBDB 收录史料分布一致。
           </div>
         </div>
       )}

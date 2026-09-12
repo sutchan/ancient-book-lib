@@ -21,6 +21,9 @@ export default function PeopleInner() {
   const [error, setError] = useState<string | null>(null);
   const [surname, setSurname] = useState(params.get("surname") || "");
   const [dynasty, setDynasty] = useState(params.get("dynasty") || "");
+  const [femaleOnly, setFemaleOnly] = useState(false);
+  const [surnameKw, setSurnameKw] = useState("");
+  const [showAllSurnames, setShowAllSurnames] = useState(false);
   const [inputKw, setInputKw] = useState(params.get("q") || "");
   const [kw, setKw] = useState(params.get("q") || "");
   const [persons, setPersons] = useState<CbdbPerson[]>([]);
@@ -66,14 +69,15 @@ export default function PeopleInner() {
     loadSurnamePersons(meta, surname)
       .then((list) => {
         if (cancelled) return;
-        const filtered = dynasty ? list.filter((p) => p[7] === dynasty) : list;
+        let filtered = dynasty ? list.filter((p) => p[7] === dynasty) : list;
+        if (femaleOnly) filtered = filtered.filter((p) => p[6] === 1);
         setPersons(filtered);
         setPage(1);
       })
       .catch((e) => setError(String(e)))
       .finally(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
-  }, [meta, surname, dynasty, kw]);
+  }, [meta, surname, dynasty, femaleOnly, kw]);
 
   const paged = useMemo(() => {
     const list = searchResults
@@ -148,14 +152,44 @@ export default function PeopleInner() {
         </div>
       </div>
 
+      {/* 性别筛选（仅浏览模式） */}
+      {!kw && (
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}>
+            <input type="checkbox" checked={femaleOnly} onChange={(e) => setFemaleOnly(e.target.checked)} />
+            仅看女性人物
+          </label>
+          <span style={{ fontSize: 12, color: "var(--color-text-secondary)", marginLeft: 12 }}>
+            CBDB 共收录女性 {meta.female.toLocaleString()} 位
+          </span>
+        </div>
+      )}
+
       {/* 姓氏选择（仅浏览模式） */}
       {!kw && (
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 8 }}>
-            按姓氏浏览（前 60 个 · 共 {meta.surnameTotal} 个）
+            按姓氏浏览{showAllSurnames ? `（全部 ${meta.surnameTotal} 个）` : `（前 60 个 · 共 ${meta.surnameTotal} 个）`}
+          </div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+            <input
+              className="input-text"
+              value={surnameKw}
+              onChange={(e) => setSurnameKw(e.target.value)}
+              placeholder="输入姓氏精确筛选，如：欧阳、司马、慕容"
+              style={{ maxWidth: 260 }}
+            />
+            <button className="btn btn-secondary" style={{ fontSize: 13 }} onClick={() => setSurnameKw("")}>
+              清除
+            </button>
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {meta.surnames.slice(0, 60).map((s) => (
+            {(surnameKw
+              ? meta.surnames.filter((s) => s.surname.startsWith(surnameKw)).slice(0, 80)
+              : showAllSurnames
+                ? meta.surnames
+                : meta.surnames.slice(0, 60)
+            ).map((s) => (
               <button
                 key={s.surname}
                 className={`btn ${surname === s.surname ? "btn-primary" : "btn-secondary"}`}
@@ -165,7 +199,21 @@ export default function PeopleInner() {
                 {s.surname}（{s.count.toLocaleString()}）
               </button>
             ))}
+            {surnameKw && meta.surnames.filter((s) => s.surname.startsWith(surnameKw)).length === 0 && (
+              <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
+                前 200 大姓中无「{surnameKw}」开头的姓氏；小姓人物可通过上方搜索框按姓名查找
+              </span>
+            )}
           </div>
+          {!surnameKw && (
+            <button
+              className="btn btn-secondary"
+              style={{ fontSize: 13, marginTop: 8 }}
+              onClick={() => setShowAllSurnames(!showAllSurnames)}
+            >
+              {showAllSurnames ? "收起（回到前 60）" : `展开全部姓氏（${meta.surnameTotal} 个）`}
+            </button>
+          )}
         </div>
       )}
 

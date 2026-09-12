@@ -43,6 +43,7 @@ npm run start    # 启动静态预览
 > CBDB 别名字号索引由 `npm run build:cbdb-altnames` 生成（`public/index/cbdb/altnames/`，163,634 条字/號/諡號，7.8MB，已提交）；
 > CBDB 科举索引由 `npm run build:cbdb-entry` 生成（`public/index/cbdb/entry/`，26.5 万条登科记录 + 朝代统计，5.6MB，已提交）；
 > CBDB 史料来源索引由 `npm run build:cbdb-sources` 生成（`public/index/cbdb/sources/`，50.5 万条主要来源，5.8MB，已提交）；
+> CBDB 时间分布由 `npm run build:cbdb-years` 生成（`public/index/cbdb/person-years.json`，30.8 万有效指数年按世纪分布，已提交）；
 > 上游发布新版时可手动运行 GitHub Actions `Rebuild CBDB Index` 重建全部索引。
 
 ## 📖 使用帮助
