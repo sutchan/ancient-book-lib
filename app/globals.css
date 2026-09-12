@@ -143,6 +143,9 @@ label.btn-toggle:has(input:focus-visible){outline:2px solid var(--color-primary)
 .empty-state{padding:60px 20px;text-align:center;color:var(--color-text-secondary);}
 .empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:0.5;}
 .empty-state .empty-title{font-size:16px;font-weight:600;margin-bottom:6px;color:var(--color-text);}
+.empty-state .empty-suggest{margin-top:12px;font-size:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;}
+.empty-state .empty-suggest a{color:var(--color-primary);border:1px solid var(--color-border);border-radius:999px;padding:3px 14px;transition:all .2s ease;text-decoration:none;}
+.empty-state .empty-suggest a:hover{border-color:var(--color-primary);background:rgba(140,49,48,0.06);}
 
 /* ---------- 业务组件 ---------- */
 .book-item{padding:14px 0;border-bottom:1px solid var(--color-border);display:flex;align-items:center;gap:12px;transition:padding 0.2s ease;}

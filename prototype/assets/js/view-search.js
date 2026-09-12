@@ -111,8 +111,18 @@
         '<div class="search-stat">' + AB.toSimplified('关键词「') + AB.esc(kw) + '」· ' +
           (mode === "title" ? AB.toSimplified('标题模式') : AB.toSimplified('全文模式')) +
           (fallback ? AB.toSimplified(' · 未命中，以下为常见检索样例') : AB.toSimplified(' 共命中 ') + results.length + AB.toSimplified(' 条结果')) + '</div>' +
-        (listHtml || '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">' +
-          AB.toSimplified('未找到相关内容') + '</div><div>' + AB.toSimplified('请尝试更换关键词或减少筛选条件') + '</div></div>') +
+        (listHtml || (
+          '<div class="empty-state">' +
+            '<div class="empty-icon">🔍</div>' +
+            '<div class="empty-title">' + AB.toSimplified('未寻得此卷') + '</div>' +
+            '<div>' + AB.toSimplified('书海无涯——换个关键词，或减少筛选条件再试试') + '</div>' +
+            '<div class="empty-suggest">' + AB.toSimplified('试试：') +
+              ['仁', '君子', '天下'].map(function (w) {
+                return '<a href="javascript:void(0)" data-sug="' + AB.esc(w) + '">' + AB.toSimplified(w) + '</a>';
+              }).join('') +
+            '</div>' +
+          '</div>'
+        )) +
         more +
       '</section>';
 
@@ -140,6 +150,15 @@
       bt.addEventListener("click", function () {
         AB.state.searchMode = bt.getAttribute("data-smode");
         AB.lsSet("ab-smode", AB.state.searchMode);
+        renderSearch(AB.getMain());
+      });
+    });
+    AB.$$(".empty-suggest a[data-sug]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        AB.state.searchKeyword = a.getAttribute("data-sug");
+        AB.state.searchMode = "full";
+        AB.lsSet("ab-smode", "full");
         renderSearch(AB.getMain());
       });
     });

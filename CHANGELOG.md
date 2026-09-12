@@ -7,6 +7,24 @@
 
 > 以下 1.5.0–1.8.0 为已规划/已开发的超前草稿，尚未随版本发布（package.json 当前 `1.4.6`）。正式发布时归入对应版本号。
 
+### [1.12.0] - 2026-09-12
+
+#### 新增（愉悦体验层 · 纸墨雅趣）
+- 以「愉悦体验设计师」视角为全站注入**克制而有文气**的微交互，采用「原型（`prototype/`）先行 → 正式站点（`app/`）同步」流程，八组触点：
+  1. **墨韵按钮**：主按钮 hover 时水光自左向右扫过
+  2. **朱砂点睛**：卡片 hover 顶缘展开一条朱砂细线
+  3. **朱笔眉批**：书目行 hover 行首浮现朱笔标记
+  4. **纸墨呼吸**：首页 Hero 背景光晕 16s 缓慢漂移
+  5. **空态寻书**：检索零命中改为「未寻得此卷」+ 可点建议词（仁 / 君子 / 天下，真实跳检索）；空态图标轻摇头张望
+  6. **随机卡重抽**：「🎲 换一本 / 换一位」内容轻弹重放（`key` 驱动）
+  7. **卷首进度**：阅读页顶部 3px 朱砂细条随滚动生长（`components/ScrollProgress.tsx`，`aria-hidden`）
+  8. **页脚彩蛋**：2 秒内连点页脚统计 5 次 → 篆字飞舞 + 「文脉绵延，与君共读」；第 3 次点击渐进提示（纯 CSS/JS 零依赖，动画开销极低）
+- 文案愉悦化：404 页「此卷不在架上」+ 双 CTA；阅读加载「正在向殆知阁取卷…」、失败态温和提示；检索空态建议词真实可点（原型的建议词点击即触发检索）
+- 新增 `components/ScrollProgress.tsx`、`components/EasterEgg.tsx`；`app/globals.css` 末段与 `prototype/assets/css/components.css` 末段同款「愉悦体验层」CSS，源码互注**双向同步契约**
+- 原型 `prototype/assets/js/core.js` 新增 `AB.bindScrollProgress` / `AB.bindEasterEgg`，`boot.js` 挂载；`view-search.js` 空态对齐正式站建议词与文案
+- 无障碍红线：全部动画收敛于 `@media (prefers-reduced-motion: no-preference)`；彩蛋在 reduce 用户下仅出 toast（`role=status`）；进度条 `pointer-events:none`，不抢焦点、不干扰读屏
+- 验证：`tsc --noEmit` 通过、原型 JS `node --check` 通过、`npm run build` 成功（33 静态页 + sitemap）
+
 ### [1.11.0] - 2026-09-12
 
 #### 优化（人物库检索能力）
