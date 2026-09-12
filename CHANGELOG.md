@@ -25,9 +25,7 @@
 - 无障碍红线：全部动画收敛于 `@media (prefers-reduced-motion: no-preference)`；彩蛋在 reduce 用户下仅出 toast（`role=status`）；进度条 `pointer-events:none`，不抢焦点、不干扰读屏
 - 验证：`tsc --noEmit` 通过、原型 JS `node --check` 通过、`npm run build` 成功（33 静态页 + sitemap）
 
-### 人物库检索能力升级（已随 commit add80e5 发布，未单列版本号）
-
-#### 优化（人物库检索能力）
+### 优化（人物库检索能力升级）
 - `lib/cbdb.ts` `searchPersons`：由「仅前缀匹配」升级为**多级命中**——① 姓名前缀 > ② 姓名中任意字（子串）> ③ 别名字号前缀 > ④ 别名字号子串，前一级不足 limit 时由后一级补充；修复搜姓名中间字（如「軾」→蘇軾）落空的问题，人物库空态提示「可尝试输入姓名中的任意字」由此真正成立
 - 修复简繁互通失效：`searchPersons` 原带 `qNorm !== q` 守卫，导致**简体查询永远打不中繁体人名**（简体查询时 `qNorm === q`，归一化副本比对被整体跳过）。姓名与别名两处守卫均已移除（与 `searchCatalog` 此前同类问题同源）
 - `app/people/PeopleInner.tsx`：搜索结果展示别名命中（如 蘇軾（東坡居士））；结果达 100 条上限时提示「仅显示前 100 位，请细化关键词」；搜索模式下禁用朝代筛选按钮并说明原因（结果来自人名索引、不含朝代字段，此前为静默失效）
