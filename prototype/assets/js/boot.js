@@ -11,6 +11,7 @@
     "book-list": function (m) { AB.renderBookList(m); },
     search: function (m) { AB.renderSearch(m); },
     character: function (m) { AB.renderCharacter(m); },
+    people: function (m) { AB.renderPeople(m); },
     relation: function (m) { AB.renderRelation(m); },
     help: function (m) { AB.renderHelp(m); },
     stats: function (m) { AB.renderStats(m); },
