@@ -28,11 +28,11 @@ export default function DataSourcePage() {
       </div>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
-        <h3 className="section-title">人物考据（哈佛 CBDB）</h3>
+        <h3 className="section-title">人物考据（已并入人物库 · 哈佛 CBDB）</h3>
         <p>
           人物考据档案（姓名、字、号、籍贯、生卒、官职、著作）来自哈佛 CBDB（Chinese Biographical Database），遵循{" "}
-          <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。已导入 28 位历史名人考据，详见{" "}
-          <Link href="/character">人物考据</Link>。
+          <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。人物考据现已并入人物库（CBDB 全量 661,350 位历代人物），详见{" "}
+          <Link href="/people">人物库</Link>。
         </p>
       </div>
 

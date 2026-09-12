@@ -3,11 +3,12 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [未发布]
+## [1.13.1] - 2026-09-12
 
-> 以下 1.5.0–1.8.0 为已规划/已开发的超前草稿，尚未随版本发布（package.json 当前 `1.4.6`）。正式发布时归入对应版本号。
+> 本节内容（愉悦体验层「纸墨雅趣」与人物库检索能力升级）早在 `add80e5` / `8dc499c` 即已随代码上线，但当时未单列版本号；
+> v1.13.1 发布时将其正式归档于此（对应提交 `cf40abc`），使线上功能与版本记录对齐。
 
-### 愉悦体验层 · 纸墨雅趣（已随 commit add80e5/8dc499c 发布，未单列版本号）
+### 愉悦体验层 · 纸墨雅趣
 
 #### 新增（愉悦体验层 · 纸墨雅趣）
 - 以「愉悦体验设计师」视角为全站注入**克制而有文气**的微交互，采用「原型（`prototype/`）先行 → 正式站点（`app/`）同步」流程，八组触点：
@@ -32,6 +33,16 @@
 - `app/people/detail/PeopleDetailInner.tsx`：修正「生平任职」区块注释误写为「人物关系」
 - 新增 `test/cbdb-search.test.ts`（10 用例）：锁死繁简双向、前缀/子串、别名前缀/子串、姓名命中优先于别名、limit 生效
 
+## [1.14.0] - 2026-09-12
+
+### 调整（人物考据并入人物库）
+- `/character`（人物考据）不再作为独立考据工作台，调整为**引导页**：说明考据能力已统一接入 CBDB 全量人物索引（661,350 位历代人物），并列出 28 位精选人物直达人物库详情页（`/people/detail?id=`），单一数据源、避免双入口重复维护。
+- 移除 v1.13.2 引入的考据工作台组件与降级链路（这些能力已在「人物库」`/people` 全量提供）：`components/CharacterDossier.tsx`、`components/CharacterProfileView.tsx`、`components/CharacterList.tsx`、`components/CharacterCard.tsx`、`lib/characterProfile.ts`、`lib/characterValidate.ts`、`lib/characterFilter.ts`、`test/characterProfile.test.ts`、`test/characterFilter.test.ts`、`docs/02-架构与开发规范/人物考据模块规格.md`。
+- `app/character/page.tsx` 改为服务端渲染的引导页（读取 `public/index/characters.json` 的 28 位精选，链接至人物库详情），不再依赖客户端 CBDB 索引的运行时可用性，任何部署形态下都能正常渲染。
+
+### 验证
+- `npx tsc --noEmit` 通过；`npm test` 通过（57 用例，移除工作台相关测试后）。
+
 ## [1.13.2] - 2026-09-12
 
 ### 新增（人物考据工作台）
@@ -48,6 +59,12 @@
 
 ### 修复
 - 完整度评分权重原合计 110，会导致满档档案打出超过上限的分数；已调平到 100 并对 score 加 `0–100` 防御性夹取，另补"权重求和恒为 100""score 不溢出"两条防回归断言
+
+### 工具
+- 新增 `scripts/sync-changelog-links.mjs`（npm `sync:changelog`）：自动重建 CHANGELOG 底部的版本比较链接块。仓库此前**从未打过 Git tag**，链接全为死链且手工维护已失序
+- 该脚本采用**双源取证**：主源为提交信息中的版本标注（同一版本取最后一次），辅源为 package.json 首次到达该版本的提交。原因是本仓库 package.json 在 1.4.6–1.13.0 期间长期停在 1.4.x 未跟随功能版本（如自称 v1.8.0 的 `9b61040` 里 package.json 仍是 1.4.4）——**仅凭 package.json 会把 v1.4.4 打到实际属于 v1.8.0 的提交上**
+- 冲突让位：同一提交被多个版本认领时保留主源版本，其余跳过并在文件末尾注释中说明。据此 `1.4.4` 让位于 `1.8.0`；`1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.5.0 / 1.6.0 / 1.7.0` 因两源皆无可靠落点而不生成链接，宁可缺链接也不打语义存疑的标签
+- 据此生成 `tmp/create-tags.sh`（`sync:changelog --emit` 产物），含 **35 个待创建标签**命令（v1.0.0 – v1.13.2）；是否执行补建、是否推送远端由人工确认，故当前仓库 `git tag` 仍为空，下方链接块对应的 tag 待补建后方可访问
 
 ### 验证
 - `npx tsc --noEmit` 0 错误 · `npm test` 63/63 全绿（新增 18 用例）· `npm run build` 成功（`/character` 预渲染为静态页，未因 Suspense 退化为客户端渲染）
@@ -535,26 +552,50 @@
 - 高保真可交互原型 `prototype/`（三套主题 + 真实模拟数据）
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.8...HEAD
-[1.2.8]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.7...v1.2.8
-[1.2.7]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.6...v1.2.7
-[1.2.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.5...v1.2.6
-[1.2.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.4...v1.2.5
-[1.2.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.3...v1.2.4
+<!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.0...HEAD
+[1.14.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.2...v1.14.0
+[1.13.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.1...v1.13.2
+[1.13.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.0...v1.13.1
+[1.13.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.11.0...v1.13.0
+[1.11.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.10.0...v1.11.0
+[1.10.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.9.0...v1.10.0
+[1.9.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.8.0...v1.9.0
+[1.8.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.5.1...v1.8.0
+[1.5.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.4.6...v1.5.1
+[1.4.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.4.5...v1.4.6
+[1.4.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.4.3...v1.4.5
+[1.4.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.4.2...v1.4.3
+[1.4.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.8...v1.4.0
+[1.3.8]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.7...v1.3.8
+[1.3.7]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.6...v1.3.7
 [1.3.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.5...v1.3.6
 [1.3.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.9...v1.3.0
+[1.2.9]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.8...v1.2.9
+[1.2.8]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.6...v1.2.8
+[1.2.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.3...v1.2.6
 [1.2.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.2...v1.2.3
-[1.2.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.1...v1.2.2
-[1.2.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.0...v1.2.1
-[1.2.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.1...v1.2.0
-[1.1.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.0...v1.1.1
+[1.2.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.2.0...v1.2.2
+[1.2.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.4...v1.1.0
 [1.0.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/sutchan/ancient-book-lib/releases/tag/v1.0.0
+
+<!--
+  以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
+  故不打标签、不生成链接：
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0
+
+  以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
+  1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）
+-->

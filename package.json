@@ -1,6 +1,6 @@
 {
   "name": "ancient-book-lib",
-  "version": "1.13.2",
+  "version": "1.14.0",
   "private": true,
   "description": "古籍通 AncientBook 开源古籍文献检索阅读平台（纯静态无数据库架构）",
   "scripts": {
@@ -22,7 +22,8 @@
     "build:cbdb-altnames": "node scripts/build-cbdb-altnames.mjs",
     "build:cbdb-entry": "node scripts/build-cbdb-entry.mjs",
     "build:cbdb-sources": "node scripts/build-cbdb-sources.mjs",
-    "build:cbdb-years": "node scripts/build-cbdb-years.mjs"
+    "build:cbdb-years": "node scripts/build-cbdb-years.mjs",
+    "sync:changelog": "node scripts/sync-changelog-links.mjs"
   },
   "dependencies": {
     "next": "^14.2.15",

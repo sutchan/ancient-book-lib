@@ -81,11 +81,7 @@ export default function HomePage() {
           <div className="cat-name">人物库</div>
           <div className="cat-desc">CBDB 历代人物传记：661,350 人按姓氏/朝代检索</div>
         </Link>
-        <Link href="/character" className="card category-card">
-          <div className="cat-icon">考</div>
-          <div className="cat-name">人物考据</div>
-          <div className="cat-desc">精选人物档案与史料聚合</div>
-        </Link>
+
         <Link href="/relation" className="card category-card">
           <div className="cat-icon">系</div>
           <div className="cat-name">社会关系溯源</div>
