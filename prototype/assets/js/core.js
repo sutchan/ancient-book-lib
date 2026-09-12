@@ -72,16 +72,18 @@
     });
   };
 
-  /* ---------------- 页脚统计（与线上 Footer 口径一致） ---------------- */
+  /* ---------------- 页脚统计 ----------------
+   * 口径原则（与「网站数据须真实、占位须明确标注」红线一致）：
+   * 真实上游总量（殆知阁 v20 / CBDB）如实呈现，原型自身有限的演示范围
+   * 一律加「本原型示范 / 样例人物」前缀，杜绝 demo 数字与真实数据混排。 */
   AB.renderFooterStats = function () {
     var el = AB.$("#footer-stats");
     if (!el) return;
     el.textContent =
       "馆藏 " + AB.DATA.categories.length + " 类" +
-      " · 精选典籍 " + AB.DATA.books.length + " 部" +
       " · 全馆藏 15,694 部（殆知阁 v20）" +
-      " · 人物 " + AB.DATA.characters.length + " 位" +
-      " · 考据关系 " + AB.DATA.relations.length + " 条";
+      " · 历代人物 661,350 位（CBDB）" +
+      " · 本原型示范 " + AB.DATA.books.length + " 部 / 样例人物 " + AB.DATA.characters.length + " 位";
   };
 
   /* ---------------- 卡片入场动效 ---------------- */
