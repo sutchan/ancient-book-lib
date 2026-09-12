@@ -80,15 +80,16 @@
 - 数据统计页新增「人物籍贯分布」（朝代下拉 + 地区柱状图）与「官职-朝代联动分析」（朝代下拉 + 官职排行）两个面板
 - 帮助页 / 数据来源页同步更新
 
-### [1.7.0] - 2026-09-10
+## [1.7.0] - 2026-09-10
 
-#### 新增（CBDB 生平任职 + 著作-馆藏联动）- 新增 `scripts/build-cbdb-offices.mjs`（npm `build:cbdb-offices`）：提取 POSTED_TO_OFFICE_DATA + OFFICE_CODES + APPOINTMENT_CODES，生成按 personid 值区间分片的任职索引（590,540 条 / 298,954 人 / 11,291 种官职 / 16.7MB，产物 `public/index/cbdb/offices/`，已提交）
+#### 新增（CBDB 生平任职 + 著作-馆藏联动）
+- 新增 `scripts/build-cbdb-offices.mjs`（npm `build:cbdb-offices`）：提取 POSTED_TO_OFFICE_DATA + OFFICE_CODES + APPOINTMENT_CODES，生成按 personid 值区间分片的任职索引（590,540 条 / 298,954 人 / 11,291 种官职 / 16.7MB，产物 `public/index/cbdb/offices/`，已提交）
 - `lib/cbdb.ts`：新增 `loadOfficesMeta` / `getPersonOffices`（官职 + 首末年 + 任命类型：正授/權/守/試/攝等）
 - 人物详情页新增「生平任职」区块（前 60 条官职标签，含任命类型与起止年）；著作列表新增「在馆藏检索」链接（在殆知阁书目中查找同名著作，标注口径）
 - 数据统计页：概览与任职面板接入 59.1 万条任职 / 29.9 万人 / 11,291 种官职 / 任命类型统计
 - CI 重建 workflow 同步重建任职索引；README / 帮助页 / 数据来源页更新
 
-### [1.6.0] - 2026-09-10
+## [1.6.0] - 2026-09-10
 
 #### 新增（CBDB 关系网络：亲属 + 社会关系 + 人物著作）
 - 新增 `scripts/build-cbdb-relations.mjs`（npm `build:cbdb-rel`）：从 CBDB SQLite 提取 KIN_DATA（亲属 561,361 条）、ASSOC_DATA（社会关系 189,938 条）、BIOG_TEXT_DATA（人物-著作 50,783 条），生成按 personid 值区间分片的索引 + 关系人名映射 + 代码表，产物 `public/index/cbdb/rel/`（21.9MB，已提交，覆盖 311,202 人）
@@ -98,7 +99,7 @@
 - `components/StatsClient.tsx`：数据统计页 KPI 与概览接入真实人物/关系数据，新增「CBDB 人物朝代分布（前 10）」柱状图与关系数据面板（亲属/社会/著作/称谓/关系类型计数）
 - 首页「社会关系溯源」卡片、帮助页、数据来源页、README 更新为真实数据口径
 
-### [1.5.0] - 2026-09-10
+## [1.5.0] - 2026-09-10
 
 #### 新增（CBDB 全量人物库）
 - 接入 CBDB（中国历代人物传记资料库）**全量 661,350 位人物**，新建 `scripts/build-cbdb-index.mjs`（npm `build:cbdb`）：读取 CBDB 官方 SQLite（cbdb-project/cbdb_sqlite 2026-09-05 版），提取 BIOG_MAIN 基本信息（姓名/拼音/生卒年/指数年/性别/朝代/籍贯），生成按姓氏分片 + 排序姓名索引，产物 `public/index/cbdb/`（49.8MB，已提交）
@@ -107,6 +108,11 @@
 - 首页 Hero 与「学术工具」新增「人物库」入口；导航栏新增「人物库」；页脚统计口径更新为「人物 661,350 人（CBDB）」
 - 新增 `.github/workflows/rebuild-cbdb.yml`：手动触发重建 CBDB 索引并提交（上游发布新版时使用）
 - `.gitignore` 增加 `/tmp/`，防止 585MB SQLite 临时数据入库
+
+## [1.5.1] - 2026-09-10
+
+### 新增（CBDB 人名补全与简繁搜索修复）
+- 人物搜索新增人名补全（输入任意字补全 CBDB 人名）；修复简繁互查（简体查询命中繁体原名），与后续 v1.9.0 的多级检索同源演进
 
 ## [1.4.6] - 2026-09-12
 
