@@ -1,4 +1,4 @@
-// components/Navbar.tsx v1.4.3
+// components/Navbar.tsx v1.14.1
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,7 +16,6 @@ const MENU: { key: string; href: string; label: string }[] = [
   { key: "catalog", href: "/catalog", label: "全馆藏" },
   { key: "search", href: "/search", label: "检索" },
   { key: "people", href: "/people", label: "人物库" },
-  { key: "character", href: "/character", label: "人物考据" },
   { key: "relation", href: "/relation", label: "社会关系" },
   { key: "help", href: "/help", label: "帮助" },
 ];
