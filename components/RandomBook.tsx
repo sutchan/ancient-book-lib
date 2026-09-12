@@ -56,11 +56,14 @@ export default function RandomBook() {
         <div className="rc-loading">正在翻阅卷库…</div>
       ) : book ? (
         <>
-          <Link href={`/read/remote?id=${encodeURIComponent(book.id)}`} className="rc-title">
-            {book.title}
-          </Link>
-          <div className="rc-meta">
-            <span className="tag">{book.category}</span>
+          {/* key 随抽取变化，重放入场轻弹动画（愉悦体验层 #6） */}
+          <div className="rc-swap" key={idx}>
+            <Link href={`/read/remote?id=${encodeURIComponent(book.id)}`} className="rc-title">
+              {book.title}
+            </Link>
+            <div className="rc-meta">
+              <span className="tag">{book.category}</span>
+            </div>
           </div>
           <div className="rc-actions">
             <Link href={`/read/remote?id=${encodeURIComponent(book.id)}`} className="btn btn-primary btn-sm">

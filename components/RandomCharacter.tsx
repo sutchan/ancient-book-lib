@@ -50,13 +50,16 @@ export default function RandomCharacter() {
         <div className="rc-loading">正在翻阅人物志…</div>
       ) : c ? (
         <>
-          <Link href={`/character#character-${c.id}`} className="rc-title">
-            {c.name}
-            {c.zi && <span className="rc-zi">（字 {c.zi}）</span>}
-          </Link>
-          <div className="rc-meta">
-            {c.dynasty && <span className="tag">{c.dynasty}</span>}
-            {c.books?.length > 0 && <span className="tag">{c.books.length} 部著述</span>}
+          {/* key 随抽取变化，重放入场轻弹动画（愉悦体验层 #6） */}
+          <div className="rc-swap" key={idx}>
+            <Link href={`/character#character-${c.id}`} className="rc-title">
+              {c.name}
+              {c.zi && <span className="rc-zi">（字 {c.zi}）</span>}
+            </Link>
+            <div className="rc-meta">
+              {c.dynasty && <span className="tag">{c.dynasty}</span>}
+              {c.books?.length > 0 && <span className="tag">{c.books.length} 部著述</span>}
+            </div>
           </div>
           <div className="rc-actions">
             <Link href={`/character#character-${c.id}`} className="btn btn-primary btn-sm">

@@ -23,7 +23,7 @@ export default function DisclaimerPage() {
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
         <h3 className="section-title">非商用</h3>
         <p>
-          本站所有古籍与学术资源源自开源/公开仓库，<strong>仅供学术研究与传统文化传播</strong>。禁止商用、二次售卖、禁止篡改后伪造成原创资料库。
+          本站所有古籍与学术资源源自开源与公开数据源，<strong>仅供学术研究与传统文化传播</strong>。禁止商用、二次售卖、禁止篡改后伪造成原创资料库。
         </p>
       </div>
 

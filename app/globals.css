@@ -315,3 +315,57 @@ label.btn-toggle:has(input:focus-visible){outline:2px solid var(--color-primary)
   .hero-title{font-size:27px;letter-spacing:3px;}
   .hero-sub{font-size:14px;}
 }
+
+/* ============================================================
+   愉悦体验层（Delight Layer）· 纸墨雅趣
+   原则：克制而有文气 —— 朱砂点睛、纸墨呼吸、字间生趣；
+   所有动效仅在用户未开启「减弱动态效果」时生效。
+   与 prototype/assets/css/components.css 末段保持同步。
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference){
+  /* 1. 墨韵按钮：主按钮 hover 时水光自左向右扫过 */
+  .btn-primary{position:relative;overflow:hidden;}
+  .btn-primary::before{content:"";position:absolute;top:0;left:-75%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,0.35),transparent);transform:skewX(-18deg);transition:left 0.55s ease;pointer-events:none;}
+  .btn-primary:hover::before{left:135%;}
+
+  /* 2. 朱砂点睛：卡片 hover 时顶缘展开一条朱砂细线 */
+  .card,.character-card{position:relative;}
+  .card::after,.character-card::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--color-primary);transform:scaleX(0);transform-origin:left;transition:transform 0.3s ease;pointer-events:none;}
+  .card:hover::after,.character-card:hover::after{transform:scaleX(1);}
+
+  /* 3. 朱笔眉批：书目行 hover 时行首浮现朱笔标记 */
+  .book-item{position:relative;}
+  .book-item::before{content:"";position:absolute;left:-14px;top:20%;bottom:20%;width:3px;border-radius:2px;background:var(--color-primary);opacity:0;transform:translateX(-6px);transition:opacity 0.25s ease,transform 0.25s ease;}
+  .book-item:hover::before{opacity:1;transform:translateX(0);}
+
+  /* 4. 纸墨呼吸：首页 Hero 背景光晕缓慢漂移 */
+  .home-hero::before{animation:heroDrift 16s ease-in-out infinite alternate;}
+  @keyframes heroDrift{from{transform:translate3d(0,0,0) scale(1);}to{transform:translate3d(-6%,4%,0) scale(1.15);}}
+
+  /* 5. 空态寻书：空态图标轻轻摇头张望，像在书架间寻找 */
+  .empty-state .empty-icon{animation:iconPeek 3.2s ease-in-out infinite;}
+  @keyframes iconPeek{0%,100%{transform:translateX(0) rotate(0deg);}40%{transform:translateX(-7px) rotate(-6deg);}60%{transform:translateX(7px) rotate(6deg);}75%{transform:translateX(0) rotate(0deg);}}
+
+  /* 6. 随机卡重抽：内容切换时轻弹重放 */
+  .rc-swap{animation:rcSwap 0.35s ease both;}
+  @keyframes rcSwap{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+}
+
+/* 7. 卷首进度：阅读页顶部朱砂细条随滚动生长（reduced-motion 下无过渡直接跳变，仍可见） */
+.scroll-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;pointer-events:none;}
+.scroll-progress .sp-fill{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--color-primary),#c25b44);border-radius:0 2px 2px 0;}
+@media (prefers-reduced-motion: no-preference){.scroll-progress .sp-fill{transition:width 0.12s linear;}}
+
+/* 8. 页脚彩蛋：连点页脚统计 → 篆字飞舞 + 雅句 toast（JS 侧同样尊重 reduced-motion） */
+.footer-stats{cursor:pointer;}
+@media (prefers-reduced-motion: no-preference){
+  .eg-float{position:fixed;bottom:24px;z-index:900;pointer-events:none;font-size:22px;color:var(--color-primary);animation:egRise 2.4s ease-out forwards;}
+  @keyframes egRise{0%{transform:translateY(0) rotate(0deg);opacity:0;}15%{opacity:0.9;}100%{transform:translateY(-200px) rotate(var(--eg-rot,20deg));opacity:0;}}
+  .eg-toast{position:fixed;left:50%;bottom:40px;z-index:901;background:var(--color-primary);color:#fff;padding:10px 24px;border-radius:999px;font-size:14px;letter-spacing:3px;box-shadow:0 8px 24px rgba(0,0,0,0.22);white-space:nowrap;animation:egToast 2.8s ease forwards;}
+  @keyframes egToast{0%{opacity:0;transform:translate(-50%,12px);}12%,78%{opacity:1;transform:translate(-50%,0);}100%{opacity:0;transform:translate(-50%,-8px);}}
+}
+
+/* 空态建议词（检索零命中时提供真实可点的示例检索） */
+.empty-suggest{margin-top:12px;font-size:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.empty-suggest a{color:var(--color-primary);border:1px solid var(--color-border);border-radius:999px;padding:3px 14px;transition:all 0.2s ease;}
+.empty-suggest a:hover{border-color:var(--color-primary);background:rgba(140,49,48,0.06);}

@@ -301,8 +301,7 @@ export default function RelationClient() {
       )}
 
       <div className="card" style={{ marginTop: 24, padding: 14, fontSize: 13, color: "var(--color-text-secondary)" }}>
-        <strong>数据说明</strong>：关系数据来自 CBDB（2026-09-05 版）KIN_DATA（亲属）与 ASSOC_DATA（社会关系）
-        表，关系描述为 CBDB 原始口径（如「友」「為Y之門人」等），方向以 CBDB 记录为准；双人溯源为分层广度优先搜索，
+        <strong>数据说明</strong>：关系数据来自 CBDB（2026-09-05 版）的亲属与社会关系，关系描述为 CBDB 原始口径（如「友」「為Y之門人」等），方向以 CBDB 记录为准；双人溯源为分层广度优先搜索，
         支持直接关系与 2-3 级中间关系（每层探索宽度受限，3 级可能较慢且不一定覆盖全部路径）。
       </div>
     </section>

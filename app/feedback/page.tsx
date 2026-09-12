@@ -21,11 +21,11 @@ export default function FeedbackPage() {
       </p>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
-        <h3 className="section-title">GitHub Issues（主渠道）</h3>
+        <h3 className="section-title">在线反馈（主渠道）</h3>
         <p>
-          提交内容勘误（原文、繁简映射、人物考据）、功能建议或使用问题，请使用仓库的 Issue 模板：
+          提交内容勘误（原文、繁简映射、人物考据）、功能建议或使用问题，请通过下方入口提交：
           <Link href="https://github.com/sutchan/ancient-book-lib/issues" target="_blank" rel="noopener noreferrer">
-            github.com/sutchan/ancient-book-lib/issues
+            前往反馈入口
           </Link>
           。勘误请务必<strong>附史料来源</strong>，便于核实与修正。
         </p>

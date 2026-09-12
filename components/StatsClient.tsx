@@ -157,7 +157,7 @@ export default function StatsClient() {
       </div>
 
       <div className="card stat-panel" style={{ marginTop: 20, padding: "16px 20px" }}>
-        <div className="stat-panel-title">全量数据概览（殆知阁 v20 + CBDB · 原始数据上游托管 · 本仓库零复制原文）</div>
+        <div className="stat-panel-title">全量数据概览（殆知阁 v20 + CBDB · 原始数据托管于上游）</div>
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 12 }}>
           <div>
             <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>{total.toLocaleString()}</span>{" "}
@@ -195,7 +195,7 @@ export default function StatsClient() {
         <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-secondary)" }}>
           数据源：
           <a href="https://github.com/garychowcmu/daizhigev20" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>
-            garychowcmu/daizhigev20
+            殆知阁 v20 开源古籍库
           </a>
           {" · "}
           <a href="https://cbdb.hsites.harvard.edu/" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>
@@ -218,13 +218,13 @@ export default function StatsClient() {
               <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
                 {rel.stats.kinTotal.toLocaleString()}
               </span>{" "}
-              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条亲属关系（KIN_DATA）</span>
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条亲属关系</span>
             </div>
             <div>
               <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
                 {rel.stats.assocTotal.toLocaleString()}
               </span>{" "}
-              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条社会关系（ASSOC_DATA）</span>
+              <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>条社会关系</span>
             </div>
             <div>
               <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>
@@ -255,7 +255,7 @@ export default function StatsClient() {
 
       {offices && (
         <div className="card stat-panel" style={{ marginTop: 16 }}>
-          <div className="stat-panel-title">人物任职数据（CBDB POSTED_TO_OFFICE_DATA · 2026-09-05 版）</div>
+          <div className="stat-panel-title">人物任职数据（CBDB · 2026-09-05 版）</div>
           <div style={{ display: "flex", gap: 24, flexWrap: "wrap", padding: "12px 4px" }}>
             <div>
               <span style={{ fontSize: 20, fontWeight: 700, color: "var(--color-primary)" }}>

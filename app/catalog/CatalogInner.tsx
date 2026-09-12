@@ -101,7 +101,7 @@ export default function CatalogInner() {
           className="btn btn-secondary"
           style={{ fontSize: 13, padding: "6px 12px", marginLeft: "auto" }}
           onClick={handleExportBooklist}
-          title="导出当前筛选书单（含书名/馆藏/子类/大小/原文直链），零复制"
+          title="导出当前筛选书单（含书名/馆藏/子类/大小/原文直链）"
         >
           导出书单（含原文直链）
         </button>

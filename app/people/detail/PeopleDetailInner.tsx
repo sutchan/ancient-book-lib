@@ -208,13 +208,13 @@ export default function PeopleDetailInner() {
               ))}
             </div>
             <div style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-secondary)" }}>
-              列出来自 CBDB BIOG_SOURCE_DATA 的主要文献来源（每书为 CBDB 原始书目）。
+              列出来自 CBDB 的主要文献来源（每书为 CBDB 原始书目）。
             </div>
           </div>
         </>
       )}
 
-      {/* 人物关系 */}
+      {/* 生平任职 */}
       <h3 className="section-title" style={{ marginTop: 28 }}>生平任职（CBDB）</h3>
       {!relLoading && !relError && offices && offices.length > 0 && (
         <div className="card" style={{ padding: 16, marginBottom: 20 }}>
@@ -322,10 +322,8 @@ export default function PeopleDetailInner() {
       <div className="card" style={{ marginTop: 24, padding: 16, fontSize: 13, color: "var(--color-text-secondary)" }}>
         <strong>数据说明</strong>：本页数据来自 {meta?.source.name || "CBDB 中国历代人物传记资料库"}（{meta?.source.release_date || ""} 版，
         {meta?.source.license || ""}），字段含姓名、拼音、生卒年、指数年（CBDB 推算的基准年）、性别、朝代、籍贯/主要活动地。
-        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。字/號/別名（163,634 条）、科舉/入仕（26.5 万条，
-        登科方式如「進士」「鄉貢舉人」及制舉科目）、史料來源（主要来源书目）、亲属/社会关系、任职与著作分别来自 CBDB 的
-        ALTNAME_DATA、ENTRY_DATA、BIOG_SOURCE_DATA、KIN_DATA、ASSOC_DATA、POSTED_TO_OFFICE_DATA、BIOG_TEXT_DATA
-        表，均为 CBDB 原始口径；「在馆藏检索」仅在本站古籍书目中查找同名著作，不代表 CBDB 确认两者为同一版本。
+        指数年为 CBDB 依据人物生平信息推算的编年基准，并非真实出生年。        字/號/別名（163,634 条）、科舉/入仕（26.5 万条，
+        登科方式如「進士」「鄉貢舉人」及制舉科目）、史料來源（主要来源书目）、亲属/社会关系、任职与著作等维度均来自 CBDB 原始数据；「在馆藏检索」仅在本站古籍书目中查找同名著作，不代表 CBDB 确认两者为同一版本。
       </div>
     </section>
   );

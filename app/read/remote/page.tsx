@@ -13,7 +13,7 @@ function RemoteReaderInner() {
 
 export default function RemoteReadPage() {
   return (
-    <Suspense fallback={<div style={{ padding: 60, textAlign: "center" }}>加载中...</div>}>
+    <Suspense fallback={<div className="empty-state">卷帙浩繁，正在展开…</div>}>
       <RemoteReaderInner />
     </Suspense>
   );

@@ -17,17 +17,13 @@ export default function DataSourcePage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>数据来源</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        本站采用「零复制」架构：仅存储书目索引，古籍原文与考据数据阅读时按需从上游权威源加载。各数据源均可溯源。
+        本站古籍原文与考据数据均来自下列权威数据源，阅读时按需加载，各数据源均可溯源。
       </p>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
         <h3 className="section-title">古籍书目与原文（殆知阁 v20）</h3>
         <p>
-          全馆藏 15,694 部古籍书目与原文来自开源仓库{" "}
-          <code style={{ background: "var(--color-highlight)", padding: "1px 6px", borderRadius: 4 }}>
-            garychowcmu/daizhigev20
-          </code>
-          （殆知阁 v20，原始数据约 4.9 GB）。本仓库不复制原文，阅读时按字节区间（HTTP Range）向上游按需拉取，保障原文保真。
+          全馆藏 15,694 部古籍书目与原文来自殆知阁 v20（原始数据约 4.9 GB），阅读时按需拉取，保障原文保真。
         </p>
       </div>
 
@@ -44,15 +40,8 @@ export default function DataSourcePage() {
         <h3 className="section-title">人物库与关系网络（CBDB 全量）</h3>
         <p>
           人物库 <Link href="/people">661,350 位历代人物</Link>（姓名、拼音、生卒年、指数年、性别、朝代、籍贯）来自
-          CBDB 官方 SQLite 数据包（<code>cbdb-project/cbdb_sqlite</code>，2026-09-05 版，SHA-256{" "}
-          <code style={{ fontSize: 13, wordBreak: "break-all" }}>437a253a8e49cb24d2d5209234781d03fcbcc04476aafc3cf9d68453cea7e980</code>），
-          遵循 CBDB 授权条款。关系网络（亲属 56.1 万条、社会关系 19 万条、人物-著作 5.1 万条，覆盖 31.1 万人）来自
-          CBDB 的 KIN_DATA / ASSOC_DATA / BIOG_TEXT_DATA 表；生平任职（59.1 万条、11,291 种官职）来自
-          POSTED_TO_OFFICE_DATA 表；籍贯分布与官职-朝代联动由 BIOG_ADDR_DATA / ADDR_BELONGS_DATA /
-          BIOG_MAIN 等表聚合（378,745 位有籍贯可归省人物）；字/號/別名（163,634 条）来自 ALTNAME_DATA 表；
-          科舉/入仕（26.5 万条，含進士/鄉貢舉人等登科方式与名次）来自 ENTRY_DATA 表；史料來源（50.5 万条主要来源）
-          来自 BIOG_SOURCE_DATA 表。本地仅保存提取索引（人物 49.8MB + 关系 21.9MB + 任职 16.7MB +
-          分析 0.1MB + 别名 7.8MB + 科举 5.6MB + 来源 5.8MB），新增版本可经 GitHub Actions 手动重建。
+          CBDB 官方数据包（2026-09-05 版），
+          遵循 CBDB 授权条款。          关系网络（亲属 56.1 万条、社会关系 19 万条、人物-著作 5.1 万条，覆盖 31.1 万人）、生平任职（59.1 万条、11,291 种官职）、籍贯分布与官职-朝代联动、字/號/別名（163,634 条）、科舉/入仕（26.5 万条）与史料來源（50.5 万条）等维度，均由 CBDB 提供并经提取索引后随站加载，可溯源、不臆断。
         </p>
       </div>
 

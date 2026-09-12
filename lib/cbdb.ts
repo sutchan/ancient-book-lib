@@ -103,7 +103,12 @@ export async function loadSurnamePersons(
   return (await resp.json()) as CbdbPerson[];
 }
 
-/** 人名搜索（前缀匹配，繁简双向兼容；姓名无果时补充别名字号匹配，返回前 limit 条） */
+/**
+ * 人名搜索（繁简双向兼容）
+ * 命中优先级：① 姓名前缀 > ② 姓名中任意字（子串）> ③ 别名字号前缀 > ④ 别名字号子串
+ * 前一级不足 limit 时才由后一级补充，保证「苏轼」优先于「苏」开头的同名杂项、
+ * 且搜「軾」这类中间字也能命中「蘇軾」。
+ */
 export async function searchPersons(
   query: string,
   limit = 20
@@ -111,40 +116,61 @@ export async function searchPersons(
   const q = query.trim();
   if (!q) return [];
   const qNorm = toSimplified(q);
+  type Hit = { id: number; name: string; matched: "name" | "alias"; alias?: string };
   const [index, normIndex] = await Promise.all([
     loadSearchIndex(),
     loadNormSearchIndex(),
   ]);
-  const results: { id: number; name: string; matched?: "name" | "alias"; alias?: string }[] = [];
+  const prefix: Hit[] = [];
+  const substr: Hit[] = [];
   const seen = new Set<number>();
+
+  // 单次扫描同时收集前缀命中与子串命中（两者都满 limit 即提前退出）
   for (let i = 0; i < index.length; i++) {
+    if (prefix.length >= limit && substr.length >= limit) break;
     const [name, id] = index[i];
-    // 原名前缀命中（繁体查询）或简体归一化后前缀命中（简体查询）
-    if (name.startsWith(q) || (qNorm !== q && normIndex[i][0].startsWith(qNorm))) {
-      if (!seen.has(id)) {
-        seen.add(id);
-        results.push({ id, name, matched: "name" });
-        if (results.length >= limit) break;
-      }
+    if (seen.has(id)) continue;
+    const norm = normIndex[i][0];
+    // 原名与简体归一化副本都要比：查询本身是简体时（qNorm === q）原名多为繁体，
+    // 只有归一化副本能命中——不能加 qNorm !== q 守卫，否则简体查询永远打不中繁体人名。
+    const isPrefix = name.startsWith(q) || norm.startsWith(qNorm);
+    const isSubstr = !isPrefix && (name.includes(q) || norm.includes(qNorm));
+    if (!isPrefix && !isSubstr) continue;
+    seen.add(id);
+    const hit: Hit = { id, name, matched: "name" };
+    if (isPrefix) {
+      if (prefix.length < limit) prefix.push(hit);
+    } else if (substr.length < limit) {
+      substr.push(hit);
     }
   }
-  // 姓名匹配不足时，用别名字号补充（如「东坡」→蘇軾）
+
+  const results: Hit[] = [...prefix, ...substr].slice(0, limit);
+
+  // 姓名命中不足时，用别名字号补充（如「东坡」→蘇軾、「居士」→蘇軾）
   if (results.length < limit) {
     try {
       const [altIndex, persons] = await Promise.all([loadAltnameSearch(), loadAltnamePersons()]);
-      const qAlias = qNorm;
+      const remain = limit - results.length;
+      const altPrefix: Hit[] = [];
+      const altSubstr: Hit[] = [];
       for (let i = 0; i < altIndex.length; i++) {
+        if (altPrefix.length >= remain && altSubstr.length >= remain) break;
         const [alias, id] = altIndex[i];
+        if (seen.has(id)) continue;
         const aliasNorm = toSimplified(alias);
-        if (aliasNorm.startsWith(qAlias)) {
-          if (!seen.has(id)) {
-            seen.add(id);
-            const name = persons.get(id) || `人物 ${id}`;
-            results.push({ id, name, matched: "alias", alias });
-            if (results.length >= limit) break;
-          }
+        const isPrefix = alias.startsWith(q) || aliasNorm.startsWith(qNorm);
+        const isSubstr = !isPrefix && (alias.includes(q) || aliasNorm.includes(qNorm));
+        if (!isPrefix && !isSubstr) continue;
+        seen.add(id);
+        const hit: Hit = { id, name: persons.get(id) || `人物 ${id}`, matched: "alias", alias };
+        if (isPrefix) {
+          if (altPrefix.length < remain) altPrefix.push(hit);
+        } else if (altSubstr.length < remain) {
+          altSubstr.push(hit);
         }
       }
+      results.push(...[...altPrefix, ...altSubstr].slice(0, remain));
     } catch {
       // 别名索引不可用时静默降级为纯姓名搜索
     }

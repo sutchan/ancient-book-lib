@@ -13,6 +13,7 @@ import {
 } from "@/lib/cbdb";
 
 const PAGE_SIZE = 50;
+const SEARCH_LIMIT = 100; // 人名搜索单次取数上限，超出时提示细化关键词
 
 export default function PeopleInner() {
   const params = useSearchParams();
@@ -23,7 +24,7 @@ export default function PeopleInner() {
   const [inputKw, setInputKw] = useState(params.get("q") || "");
   const [kw, setKw] = useState(params.get("q") || "");
   const [persons, setPersons] = useState<CbdbPerson[]>([]);
-  const [searchResults, setSearchResults] = useState<{ id: number; name: string }[] | null>(null);
+  const [searchResults, setSearchResults] = useState<{ id: number; name: string; matched?: "name" | "alias"; alias?: string }[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -44,7 +45,7 @@ export default function PeopleInner() {
       return;
     }
     let cancelled = false;
-    searchPersons(kw.trim(), 100).then((r) => {
+    searchPersons(kw.trim(), SEARCH_LIMIT).then((r) => {
       if (!cancelled) {
         setSearchResults(r);
         setPage(1);
@@ -119,15 +120,18 @@ export default function PeopleInner() {
         )}
       </div>
 
-      {/* 朝代筛选 */}
+      {/* 朝代筛选（仅浏览模式生效：搜索结果来自人名索引，不携带朝代字段） */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 8 }}>
-          按朝代筛选（前 12 个朝代 · 共 {meta.dynasty.length} 个）
+          {kw
+            ? "搜索结果不支持朝代筛选（结果来自人名索引，不含朝代字段）；清除关键词后可按朝代浏览"
+            : `按朝代筛选（前 12 个朝代 · 共 ${meta.dynasty.length} 个）`}
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, opacity: kw ? 0.5 : 1 }}>
           <button
             className={`btn ${!dynasty ? "btn-primary" : "btn-secondary"}`}
             style={{ fontSize: 13, padding: "4px 10px" }}
+            disabled={!!kw}
             onClick={() => setDynasty("")}
           >全部</button>
           {topDynasties.map((d) => (
@@ -135,6 +139,7 @@ export default function PeopleInner() {
               key={d.dynasty}
               className={`btn ${dynasty === d.dynasty ? "btn-primary" : "btn-secondary"}`}
               style={{ fontSize: 13, padding: "4px 10px" }}
+              disabled={!!kw}
               onClick={() => { setDynasty(d.dynasty); setSurname(params.get("surname") || surname); }}
             >
               {d.dynasty}（{d.count.toLocaleString()}）
@@ -167,7 +172,11 @@ export default function PeopleInner() {
       {/* 结果统计 */}
       <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 12 }}>
         {kw
-          ? `“${kw}” 共匹配 ${searchResults ? searchResults.length : "..."} 位人物`
+          ? `“${kw}” 共匹配 ${searchResults ? searchResults.length : "..."} 位人物${
+              searchResults && searchResults.length >= SEARCH_LIMIT
+                ? `（仅显示前 ${SEARCH_LIMIT} 位，请细化关键词）`
+                : ""
+            }`
           : surname
             ? `${surname}姓${dynasty ? `（${dynasty}）` : ""}共 ${persons.length.toLocaleString()} 位人物`
             : "请选择姓氏或输入人名搜索"}
@@ -202,7 +211,21 @@ export default function PeopleInner() {
                     color: "inherit",
                   }}
                 >
-                  <span style={{ fontWeight: 600, width: 80, fontSize: 15 }}>{name}</span>
+                  <span style={{ fontWeight: 600, width: 132, fontSize: 15 }}>
+                    {name}
+                    {(item as any).matched === "alias" && (item as any).alias && (
+                      <span
+                        style={{
+                          fontWeight: 400,
+                          fontSize: 12,
+                          color: "var(--color-text-secondary)",
+                          marginLeft: 4,
+                        }}
+                      >
+                        （{(item as any).alias}）
+                      </span>
+                    )}
+                  </span>
                   {person && (
                     <>
                       <span className="tag">{person[7] || "朝代未詳"}</span>

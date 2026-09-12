@@ -7,7 +7,7 @@ import Analytics from "@/components/Analytics";
 
 const SITE_TITLE = "古籍通 AncientBook｜开源古籍文献检索阅读平台";
 const SITE_DESC =
-  "古籍通 AncientBook：开源公益古籍检索阅读与考据平台。殆知阁 v20 全量 15,694 部古籍在线（原始数据 4.9GB 托管于上游，本仓库零复制，阅读按需加载），繁简保真阅读，毫秒级检索，CBDB 人文考据。";
+  "古籍通 AncientBook：开源公益古籍检索阅读与考据平台。殆知阁 v20 全量 15,694 部古籍在线（原始数据托管于上游，阅读按需加载），繁简保真阅读，毫秒级检索，CBDB 人文考据。";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://guji.ewuse.com"),

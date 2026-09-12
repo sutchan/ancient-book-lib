@@ -133,6 +133,7 @@
     }
     AB.bindFadeIn(main);
     highlightNav();
+    if (AB.refreshScrollProgress) AB.refreshScrollProgress();
     window.scrollTo(0, 0);
   }
 
@@ -154,12 +155,15 @@
     if (!container || !PAGE_RENDERERS[page]) return;
     PAGE_RENDERERS[page](container);
     AB.bindFadeIn(container);
+    if (AB.refreshScrollProgress) AB.refreshScrollProgress();
   }
 
   function boot() {
     initGlobal();
     AB.renderPrototypeNotice();
     AB.renderFooterStats();
+    AB.bindScrollProgress();
+    AB.bindEasterEgg();
     var main = AB.$("#main-view");
     if (main) {
       window.addEventListener("hashchange", function () { renderRoute(main); });

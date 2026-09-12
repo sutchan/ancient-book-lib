@@ -16,6 +16,7 @@ import {
   type ChapterRange,
 } from "@/lib/remoteBook";
 import ReaderToc from "./ReaderToc";
+import ScrollProgress from "./ScrollProgress";
 import ReaderToolbar from "./ReaderToolbar";
 
 const PAGE_SIZE = 8;
@@ -282,9 +283,9 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
 
   if (loading) return (
     <div style={{ padding: 60, textAlign: "center" }}>
-      <div style={{ fontSize: 16, marginBottom: 16 }}>
-        {loadingFromCache ? "从本地缓存加载..." : "正在从殆知阁加载原文..."}
-      </div>
+        <div style={{ fontSize: 16, marginBottom: 16 }}>
+          {loadingFromCache ? "从本地书箧取书…" : "正在向殆知阁取卷…"}
+        </div>
       {!loadingFromCache && loadingProgress > 0 && (
         <div style={{ maxWidth: 400, margin: "0 auto" }}>
           <div style={{ background: "var(--color-border,#eee)", borderRadius: 4, height: 8, overflow: "hidden" }}>
@@ -343,6 +344,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
 
   return (
     <div className="reader-wrap">
+      <ScrollProgress />
       <div className="reader-title">{book.title}</div>
       <div className="reader-sub">
         {book.category} › {book.subcategories.join(" › ")} · {formatSize(book.size)} · {navItems.length} 章

@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "开源协议｜古籍通 AncientBook",
-  description: "古籍通 AncientBook 开源协议说明：项目代码 MIT 协议、古籍原文公有领域与上游授权、非商用公益定位。",
+  description: "古籍通 AncientBook 开源协议说明：古籍原文公有领域与上游授权、非商用公益定位。",
 };
 
 export default function LicensePage() {
@@ -23,11 +23,7 @@ export default function LicensePage() {
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
         <h3 className="section-title">项目代码</h3>
         <p>
-          本项目源代码以 <strong>MIT 协议</strong> 开源（详见仓库根目录{" "}
-          <code style={{ background: "var(--color-highlight)", padding: "1px 6px", borderRadius: 4 }}>
-            LICENSE
-          </code>{" "}
-          文件），允许在遵守协议的前提下自由使用、修改与再分发。
+          本项目代码以 <strong>MIT 协议</strong> 开源，允许在遵守协议的前提下自由使用、修改与再分发。
         </p>
       </div>
 

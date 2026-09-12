@@ -127,7 +127,7 @@ export default function SearchClient() {
 
       {mode === "full" && indexReady === false && (
         <div className="search-stat" style={{ color: "var(--color-text-secondary)" }}>
-          全文索引尚未生成，已回退为标题检索（运行 <code>npm run build:fulltext</code> 开启真正全文检索）
+          全文索引尚未生成，已回退为标题检索
         </div>
       )}
       {error && (
@@ -146,8 +146,16 @@ export default function SearchClient() {
       {results.length === 0 ? (
         <div className="empty-state">
           <div className="empty-icon">🔍</div>
-          <div className="empty-title">未找到相关内容</div>
-          <div>请尝试更换关键词或减少筛选条件</div>
+          <div className="empty-title">未寻得此卷</div>
+          <div>书海无涯——换个关键词，或减少筛选条件再试试</div>
+          <div className="empty-suggest">
+            试试：
+            {["仁", "君子", "天下"].map((w) => (
+              <Link key={w} href={`/search?q=${encodeURIComponent(w)}&mode=full`}>
+                {w}
+              </Link>
+            ))}
+          </div>
         </div>
       ) : (
         results.map((r) => (
