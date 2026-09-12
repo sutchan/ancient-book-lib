@@ -41,3 +41,7 @@ next-env.d.ts
 # 构建期生成的全文索引与章节分片清单（体积大，由 build:fulltext 在 CI/部署时生成，不入库）
 /public/index/fulltext-index.json
 /public/index/chapters.json
+
+# 本地开发记忆（.workbuddy 为真实目录，.codebuddy 为其 junction，均不入库）
+.codebuddy
+.workbuddy

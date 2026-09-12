@@ -3,6 +3,19 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.14.1] - 2026-09-12
+
+### 修复（清理与一致性收尾）
+- 实际移除 v1.14.0 声明已删除、但当时仍残留在仓库跟踪中的考据工作台死代码（共 10 个文件）：`components/CharacterDossier.tsx`、`components/CharacterProfileView.tsx`、`components/CharacterList.tsx`、`components/CharacterCard.tsx`、`lib/characterProfile.ts`、`lib/characterValidate.ts`、`lib/characterFilter.ts`、`test/characterProfile.test.ts`、`test/characterFilter.test.ts`、`docs/02-架构与开发规范/人物考据模块规格.md`。经全仓 grep 确认这些文件对 `app/`、`components/`、`lib/` 零外部 import 引用，删除后 `tsc` / `npm test` / `next build` 三门门禁全绿。
+- 顶部导航移除「人物考据」入口（`components/Navbar.tsx`），与「人物考据已并入人物库」的叙事保持一致；`/character` 引导页保留，向后兼容旧书签，统一引导至 `/people`。
+- 修正本文件 v1.14.0 验证行中错误的「57 用例」为真实值「63 用例」（v1.14.0 当时并未真正移除工作台测试）；本版本移除相关测试后，`npm test` 通过 **39 用例**。
+
+### 调整（开发记忆目录合并）
+- 将 `.codebuddy/memory` 合并进 `.workbuddy/memory`（二者内容本已逐字节一致），并将 `.codebuddy` 改为指向 `.workbuddy` 的目录联接（junction），消除双份记忆目录与重复的 git 跟踪；`.codebuddy` 与 `.workbuddy` 均加入 `.gitignore`，本地记忆不再入库。
+
+### 验证
+- `npx tsc --noEmit` 0 错误 · `npm test` 39/39 全绿 · `npm run build` 成功。
+
 ## [1.13.1] - 2026-09-12
 
 > 本节内容（愉悦体验层「纸墨雅趣」与人物库检索能力升级）早在 `add80e5` / `8dc499c` 即已随代码上线，但当时未单列版本号；
@@ -41,7 +54,7 @@
 - `app/character/page.tsx` 改为服务端渲染的引导页（读取 `public/index/characters.json` 的 28 位精选，链接至人物库详情），不再依赖客户端 CBDB 索引的运行时可用性，任何部署形态下都能正常渲染。
 
 ### 验证
-- `npx tsc --noEmit` 通过；`npm test` 通过（57 用例，移除工作台相关测试后）。
+- `npx tsc --noEmit` 通过；`npm test` 通过（63 用例）。
 
 ## [1.13.2] - 2026-09-12
 
@@ -553,7 +566,8 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.0...HEAD
+[1.14.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.0...v1.14.1
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...HEAD
 [1.14.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.2...v1.14.0
 [1.13.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.1...v1.13.2
 [1.13.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.0...v1.13.1
