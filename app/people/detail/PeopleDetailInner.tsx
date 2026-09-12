@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import PersonTimeline from "@/components/PersonTimeline";
+import RelationGraph from "@/components/RelationGraph";
 import {
   findPersonById,
   formatLife,
@@ -214,6 +216,17 @@ export default function PeopleDetailInner() {
         </>
       )}
 
+      {/* 生命时间轴（生卒年 + 科举年份 + 任职年份） */}
+      {!relLoading && !relError && (
+        <PersonTimeline
+          name={name}
+          birth={birth}
+          death={death}
+          entries={(entries ?? []).map((e) => ({ entry: e.entry, year: e.year }))}
+          offices={(offices ?? []).map((o) => ({ office: o.office, firstYear: o.firstYear, lastYear: o.lastYear }))}
+        />
+      )}
+
       {/* 生平任职 */}
       <h3 className="section-title" style={{ marginTop: 28 }}>生平任职（CBDB）</h3>
       {!relLoading && !relError && offices && offices.length > 0 && (
@@ -249,6 +262,15 @@ export default function PeopleDetailInner() {
         <div className="card" style={{ padding: 24, textAlign: "center", color: "var(--color-text-secondary)" }}>
           CBDB 暂无此人的亲属/社会关系与著作记录
         </div>
+      )}
+
+      {/* 关系网络图 */}
+      {!relLoading && !relError && ((kin?.length ?? 0) + (assoc?.length ?? 0)) > 0 && (
+        <RelationGraph
+          personName={name}
+          kin={(kin ?? []).map((r) => ({ id: r.id, name: r.name, rel: r.rel, kind: "kin" as const }))}
+          assoc={(assoc ?? []).map((r) => ({ id: r.id, name: r.name, rel: r.rel, kind: "assoc" as const }))}
+        />
       )}
 
       <div style={{ display: "grid", gap: 16, marginBottom: 20 }}>

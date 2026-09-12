@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   loadCbdbMeta,
   loadSurnamePersons,
@@ -17,11 +17,12 @@ const SEARCH_LIMIT = 100; // 人名搜索单次取数上限，超出时提示细
 
 export default function PeopleInner() {
   const params = useSearchParams();
+  const router = useRouter();
   const [meta, setMeta] = useState<CbdbMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [surname, setSurname] = useState(params.get("surname") || "");
   const [dynasty, setDynasty] = useState(params.get("dynasty") || "");
-  const [femaleOnly, setFemaleOnly] = useState(false);
+  const [femaleOnly, setFemaleOnly] = useState(params.get("female") === "1");
   const [surnameKw, setSurnameKw] = useState("");
   const [showAllSurnames, setShowAllSurnames] = useState(false);
   const [inputKw, setInputKw] = useState(params.get("q") || "");
@@ -29,11 +30,44 @@ export default function PeopleInner() {
   const [persons, setPersons] = useState<CbdbPerson[]>([]);
   const [searchResults, setSearchResults] = useState<{ id: number; name: string; matched?: "name" | "alias"; alias?: string }[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => {
+    const p = Number(params.get("page"));
+    return Number.isFinite(p) && p >= 1 ? Math.floor(p) : 1;
+  });
 
   useEffect(() => {
     loadCbdbMeta().then(setMeta).catch((e) => setError(String(e)));
   }, []);
+
+  // 浏览器前进/后退时：URL → state 同步（与上面的 state → URL 互相幂等，不会循环）
+  useEffect(() => {
+    const s = params.get("surname") || "";
+    const d = params.get("dynasty") || "";
+    const f = params.get("female") === "1";
+    const q = params.get("q") || "";
+    const p = Math.max(1, Math.floor(Number(params.get("page")) || 1));
+    if (s !== surname) setSurname(s);
+    if (d !== dynasty) setDynasty(d);
+    if (f !== femaleOnly) setFemaleOnly(f);
+    if (q !== kw) {
+      setInputKw(q);
+      setKw(q);
+    }
+    if (p !== page) setPage(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
+  // 浏览/搜索状态同步到 URL（支持分享链接与浏览器前进后退）
+  useEffect(() => {
+    const qs = new URLSearchParams();
+    if (surname) qs.set("surname", surname);
+    if (dynasty) qs.set("dynasty", dynasty);
+    if (femaleOnly) qs.set("female", "1");
+    if (kw) qs.set("q", kw);
+    if (page > 1) qs.set("page", String(page));
+    const s = qs.toString();
+    router.replace(s ? `/people?${s}` : "/people", { scroll: false });
+  }, [surname, dynasty, femaleOnly, kw, page, router]);
 
   // 搜索防抖
   useEffect(() => {
