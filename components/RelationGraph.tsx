@@ -9,7 +9,7 @@ export interface GraphNode {
   kind: "kin" | "assoc";
 }
 
-const MAX_NODES = 28; // 单侧各取前 N，避免拥挤
+const MAX_NODES = 12; // 单侧各取前 N，避免节点重叠
 const COLORS = { kin: "#3E8FA8", assoc: "#C97B3E" };
 const KIN_LABEL = "亲属";
 const ASSOC_LABEL = "社会关系";
