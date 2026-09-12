@@ -3,6 +3,11 @@ name: Build & Deploy
 # 生产站点：https://guji.ewuse.com/（腾讯云 EdgeOne Pages，由其自行拉取仓库构建）
 # Pages 部署为可选：仅当仓库变量 ENABLE_PAGES = true 时启用
 # （Settings → Secrets and variables → Actions → Variables）
+#
+# 流水线分两段：
+#   - check：push / PR 均运行，仅做类型检查 + 单元测试（秒级~分钟级，快速反馈门禁）
+#   - build：check 之后，仅 main 推送 / 手动触发时重建重型索引（catalog 1.5 万册 + fulltext 4.9GB）
+#            并执行 next build + 部署；PR 仅做 next build 编译校验，跳过重型索引重建以节省资源
 
 on:
   push:
@@ -11,19 +16,19 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# 权限：允许部署到 GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 部署任务不允许被取消，否则会出现「部署进行中被取消 / 404」
+# 同一分支并发取消旧运行：PR 取消进行中的校验，main 顺序执行以保证部署不被打断
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build:
+  # 快速校验门禁：所有事件运行，不重建数据索引
+  check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,28 +43,44 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npm test
+
+  # 完整构建 + 部署：main 推送 / 手动触发；PR 仅编译校验
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # 重型索引重建仅在 main 推送 / 手动触发时执行（PR 跳过，使用已提交数据编译校验）
       - name: Build daizhige catalog index (15,694 books from upstream repo)
+        if: github.event_name != 'pull_request'
         run: npm run build:catalog
 
-      - name: Build fulltext index + chapter manifests (4.9GB upstream TXT, 生成全文检索与 Range 分片所需产物)
+      - name: Build fulltext index + chapter manifests (4.9GB upstream TXT)
+        if: github.event_name != 'pull_request'
         run: npm run build:fulltext
 
-      - name: Lint & Type check (via build)
+      - name: Build (next build -> out/)
         env:
           # 配置自定义域名时 basePath 为空；默认 GitHub Pages 子路径为 /ancient-book-lib
           NEXT_PUBLIC_BASE_PATH: ${{ vars.PAGES_CUSTOM_DOMAIN == '' && '/ancient-book-lib' || '' }}
         run: npm run build
-
-      - name: Run unit tests
-        run: npm test
-
-      # 自定义域名：仓库变量 PAGES_CUSTOM_DOMAIN
-      # 未配置则不写入 CNAME，站点使用默认域名
-      - name: Write CNAME (custom domain, optional)
-        if: vars.PAGES_CUSTOM_DOMAIN != ''
-        env:
-          DOMAIN: ${{ vars.PAGES_CUSTOM_DOMAIN }}
-        run: printf '%s\n' "$DOMAIN" > out/CNAME
 
       - name: Upload build output (out/)
         if: github.event_name != 'pull_request'
@@ -68,6 +89,12 @@ jobs:
           name: out-${{ github.sha }}
           path: ./out
           retention-days: 7
+
+      # 自定义域名：仓库变量 PAGES_CUSTOM_DOMAIN
+      # 未配置则不写入 CNAME，站点使用默认域名
+      - name: Write CNAME (custom domain, optional)
+        if: vars.PAGES_CUSTOM_DOMAIN != ''
+        run: printf '%s\n' "${{ vars.PAGES_CUSTOM_DOMAIN }}" > out/CNAME
 
       # 仅开启 Pages 时才上传 Pages 产物（PR 不上传）
       - name: Upload static artifact (out/)

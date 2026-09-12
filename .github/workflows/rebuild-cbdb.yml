@@ -15,17 +15,26 @@ on:
 permissions:
   contents: write
 
+# 防止并发重建互相 push 冲突（保留进行中的运行）
+concurrency:
+  group: rebuild-cbdb
+  cancel-in-progress: false
+
 jobs:
   rebuild:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
+      # fetch-depth: 0 确保完整历史，避免 git push 因非快进而被拒
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
