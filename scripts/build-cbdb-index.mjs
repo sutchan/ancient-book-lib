@@ -129,9 +129,10 @@ const others = [];
 for (const { surname, count } of surnameList) {
   const list = bySurname.get(surname);
   if (count >= THRESHOLD) {
-    const file = `surnames/${encodeURIComponent(surname)}.json`;
-    writeFileSync(join(OUT_DIR, file), JSON.stringify(list), "utf8");
-    surnameMeta.push({ surname, count, file, standalone: true });
+    // 磁盘文件名用真实中文（与 fetch 时服务器对 %XX 解码后的结果一致，避免 404）；
+    // meta.file 仍存 URL 安全路径（encodeURIComponent），前端 fetch 由服务器解码回真实名
+    writeFileSync(join(OUT_DIR, `surnames/${surname}.json`), JSON.stringify(list), "utf8");
+    surnameMeta.push({ surname, count, file: `surnames/${encodeURIComponent(surname)}.json`, standalone: true });
   } else {
     others.push(...list.map((p) => [surname, ...p]));
     surnameMeta.push({ surname, count, standalone: false });
