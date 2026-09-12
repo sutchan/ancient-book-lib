@@ -32,6 +32,26 @@
 - `app/people/detail/PeopleDetailInner.tsx`：修正「生平任职」区块注释误写为「人物关系」
 - 新增 `test/cbdb-search.test.ts`（10 用例）：锁死繁简双向、前缀/子串、别名前缀/子串、姓名命中优先于别名、limit 生效
 
+## [1.13.2] - 2026-09-12
+
+### 新增（人物考据工作台）
+- 新增 `lib/characterProfile.ts`：人物考据**数据契约层**。把 CBDB 紧凑元组归一化为结构化 `CharacterProfile`，并引入分面（facet）三态——`ok`（有数据）/ `empty`（CBDB 确无记录）/ `error`（本次加载失败）。区分 `empty` 与 `error` 是本次的核心约束：**加载失败不得粉饰成"暂无记录"**，否则用户会把取数故障误读成史料失载
+- 新增 `lib/characterValidate.ts`：史料一致性校验层。13 个固定 issue code（`NAME_MISSING` / `BIRTH_DEATH_INVERTED` / `ENTRY_AFTER_DEATH` / `OFFICE_YEAR_OUT_OF_LIFE` / `INDEX_YEAR_OUT_OF_LIFE` / `FACET_FAILED` 等）分 error/warn/info 三级；11 个加权维度算 0–100 完整度评分与 AAA~C 分级，`life` 维支持半量折算
+- 新增 `components/CharacterDossier.tsx`：考据工作台。检索（300ms 防抖 + 双重竞态守卫）→ 重名候选消歧 → 单份档案；`?q=&id=` 同步到 URL 且双向幂等；CBDB 索引不可用时整页降级到 28 位精选人物，保证任何部署形态下都有内容
+- 新增 `components/CharacterProfileView.tsx`：考据档案视图。完整度评分环（SVG 自绘）+ 可折叠校验明细按严重度分组渲染；亲属/社会关系可点跳 `/people/detail`；著作标题可跳馆藏检索；CBDB 官方档案外链与 CC BY-NC-SA 4.0 署名
+- 改造 `app/character/page.tsx`：接入工作台并以 `<Suspense>` 包裹（`useSearchParams` 在静态导出下的硬要求）
+- 新增 `docs/02-架构与开发规范/人物考据模块规格.md`：现状盘点、功能范围、数据契约、交互与降级边界、13 条边界情况清单
+
+### 优化
+- 明确「人物库 `/people`」与「人物考据 `/character`」的职责边界：前者是全量浏览索引入口，后者是研判工作台（二者共用同一份 CBDB 索引，不另建数据源）
+- `searchPersons` 候选补充朝代/指数年/籍贯后按 `pickDistinguishers` 计算区分维度，指数年按 50 年分桶、空值不参与多样性判定，避免"有/无"造成伪区分
+
+### 修复
+- 完整度评分权重原合计 110，会导致满档档案打出超过上限的分数；已调平到 100 并对 score 加 `0–100` 防御性夹取，另补"权重求和恒为 100""score 不溢出"两条防回归断言
+
+### 验证
+- `npx tsc --noEmit` 0 错误 · `npm test` 63/63 全绿（新增 18 用例）· `npm run build` 成功（`/character` 预渲染为静态页，未因 Suspense 退化为客户端渲染）
+
 ## [1.13.0] - 2026-09-12
 
 ### 新增（人物详情可视化 + 人物库 URL 状态同步）
