@@ -28,8 +28,19 @@ function shortLabel(s: string, max = 8): string {
   return clean.length > max ? `${clean.slice(0, max)}…` : clean;
 }
 
-export default function PersonTimeline({ name, birth, death, entries, offices }: TimelineInput) {
-  // 聚合同年事件
+/** 聚合生命事件为「年份 → 事件」映射（纯函数，可测试） */
+export interface TimelineEvent {
+  year: number;
+  type: "birth" | "entry" | "office" | "death";
+  label: string;
+}
+
+export function aggregateTimelineEvents(input: {
+  birth?: number;
+  death?: number;
+  entries: { entry: string; year: number }[];
+  offices: { office: string; firstYear?: number; lastYear?: number }[];
+}): TimelineEvent[] {
   const byYear = new Map<number, MergedEvent[]>();
   const add = (year: number, ev: MergedEvent) => {
     if (!year || year <= 0 || year >= 2200) return; // 过滤缺失与异常
@@ -37,18 +48,33 @@ export default function PersonTimeline({ name, birth, death, entries, offices }:
     list.push(ev);
     byYear.set(year, list);
   };
+  const { birth, death, entries, offices } = input;
   if (birth && birth > 0 && birth < 2200) add(birth, { type: "birth", label: "生" });
   if (death && death > 0 && death < 2200) add(death, { type: "death", label: "卒" });
   for (const e of entries) add(e.year, { type: "entry", label: shortLabel(e.entry) });
   for (const o of offices) {
     add(o.firstYear || 0, { type: "office", label: shortLabel(o.office) });
   }
+  return Array.from(byYear.keys())
+    .sort((a, b) => a - b)
+    .map((year) => {
+      const list = byYear.get(year)!;
+      list.sort((a, b) => TYPE_ORDER[a.type] - TYPE_ORDER[b.type]);
+      const main = list[0];
+      const label =
+        list.length > 1
+          ? `${main.label}、${list[1].label}${list.length > 2 ? ` 等${list.length}项` : ""}`
+          : main.label;
+      return { year, type: main.type, label };
+    });
+}
 
-  const years = Array.from(byYear.keys()).sort((a, b) => a - b);
-  if (years.length === 0) return null;
+export default function PersonTimeline({ name, birth, death, entries, offices }: TimelineInput) {
+  const events = aggregateTimelineEvents({ birth, death, entries, offices });
+  if (events.length === 0) return null;
 
-  const yMin = years[0];
-  const yMax = years[years.length - 1];
+  const yMin = events[0].year;
+  const yMax = events[events.length - 1].year;
   const pad = Math.max(2, Math.round((yMax - yMin) * 0.06) || 1);
   const from = yMin - pad;
   const to = yMax + pad;
@@ -62,19 +88,6 @@ export default function PersonTimeline({ name, birth, death, entries, offices }:
   const x = (year: number) => X0 + ((year - from) / (to - from || 1)) * (X1 - X0);
 
   // 事件渲染：同侧标签防重叠——按年份交替上下
-  const events = years
-    .map((year) => {
-      const list = byYear.get(year)!;
-      list.sort((a, b) => TYPE_ORDER[a.type] - TYPE_ORDER[b.type]);
-      const main = list[0];
-      const label =
-        list.length > 1
-          ? `${main.label}、${list[1].label}${list.length > 2 ? ` 等${list.length}项` : ""}`
-          : main.label;
-      return { year, type: main.type, label };
-    })
-    .sort((a, b) => a.year - b.year);
-
   const labelLines = events.map((ev, i) => {
     const up = i % 2 === 0; // 上/下交替
     return {
