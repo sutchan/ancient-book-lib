@@ -1,4 +1,4 @@
-// components/RandomCharacter.tsx v1.4.3
+// components/RandomCharacter.tsx v1.15.6
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import type { Character } from "@/lib/types";
 /**
  * 首页「随机一人」趣味模块。
  * 从 public/index/characters.json（CBDB 导入的 28 位历史名人）中随机取一位，
- * 点击「换一位」可重新抽取（不重复上一条）。跳转至人物考据页对应锚点。
+ * 点击「换一位」可重新抽取（不重复上一条）。跳转至人物库详情页（/people/detail）。
  */
 export default function RandomCharacter() {
   const [chars, setChars] = useState<Character[]>([]);
@@ -39,6 +39,7 @@ export default function RandomCharacter() {
   };
 
   const c = chars[idx];
+  const pid = c ? c.id.replace(/^cbdb-/, "") : "";
 
   return (
     <div className="card random-card" id="random-character">
@@ -52,7 +53,7 @@ export default function RandomCharacter() {
         <>
           {/* key 随抽取变化，重放入场轻弹动画（愉悦体验层 #6） */}
           <div className="rc-swap" key={idx}>
-            <Link href={`/character#character-${c.id}`} className="rc-title">
+            <Link href={`/people/detail?id=${pid}`} className="rc-title">
               {c.name}
               {c.zi && <span className="rc-zi">（字 {c.zi}）</span>}
             </Link>
@@ -62,7 +63,7 @@ export default function RandomCharacter() {
             </div>
           </div>
           <div className="rc-actions">
-            <Link href={`/character#character-${c.id}`} className="btn btn-primary btn-sm">
+            <Link href={`/people/detail?id=${pid}`} className="btn btn-primary btn-sm">
               看考据
             </Link>
             <button id="random-character-refresh" className="btn btn-secondary btn-sm" onClick={pick}>

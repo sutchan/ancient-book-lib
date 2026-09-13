@@ -3,6 +3,13 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.6] - 2026-09-13
+
+### 修复
+- `components/RandomCharacter.tsx`：首页「随机一人」的标题与「看考据」按钮原链接 `/character#character-{id}`，但 `/character` 自 v1.14.0 起已是引导页、无此锚点（点击只落在引导页顶部，无法直达人物）。改为跳转人物库详情 `/people/detail?id={id 去 cbdb- 前缀}`，与 `app/character/page.tsx` 的精选人物跳转一致
+- 全代码库排查同类失效 `/character#...` 锚点链接：生产代码中仅此一处，已修复
+- 验证：`tsc --noEmit` 0 错误 · `npm test` 66/66 全绿
+
 ## [1.15.5] - 2026-09-13
 
 ### 修复（bug 专项审查确认的缺陷）

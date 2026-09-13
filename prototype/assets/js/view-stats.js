@@ -1,5 +1,5 @@
 /**
- * 原型数据统计视图 v2.2
+ * 原型数据统计视图 v2.3
  * 职责：馆藏/朝代/身份/关系统计图表与数据洞察，全部由数据源实时计算
  */
 (function (AB) {
@@ -55,7 +55,7 @@
           '<div class="stat-kpi fade-in"><div class="kpi-num">' + totalChapters + '</div><div class="kpi-label">' +
             AB.toSimplified('章节/卷次') + '</div></div>' +
           '<div class="stat-kpi fade-in"><div class="kpi-num">' + chars.length + '</div><div class="kpi-label">' +
-            AB.toSimplified('考据人物') + '</div></div>' +
+            AB.toSimplified('人物库') + '</div></div>' +
           '<div class="stat-kpi fade-in"><div class="kpi-num">' + rels.length + '</div><div class="kpi-label">' +
             AB.toSimplified('社会关系') + '</div></div>' +
           '<div class="stat-kpi fade-in"><div class="kpi-num">' + mappingCount + '</div><div class="kpi-label">' +
@@ -83,7 +83,7 @@
             (dynArr[0] ? dynArr[0].name : '—') + '、' + (dynArr[1] ? dynArr[1].name : '—') +
             ' 著述较丰，折射不同时期的思想与文化繁荣') + '</div>' +
           '<div class="info-row">· ' + AB.toSimplified('学术价值：' + chars.length +
-            ' 位考据人物均由馆藏典籍作者自动派生，以人物为轴串联经典与著述') + '</div>' +
+            ' 位样例人物（正式站接入 CBDB 全量 661,350 人），以人物为轴串联经典与著述') + '</div>' +
           '<div class="info-row">· ' + AB.toSimplified('关系密度：' + rels.length +
             ' 条社会关系以「思想传承」为核心脉络，支撑双人溯源与谱系考据') + '</div>' +
           '<div class="info-row">· ' + AB.toSimplified('检索基建：内置 ' + mappingCount +
