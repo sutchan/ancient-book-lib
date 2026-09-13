@@ -3,6 +3,11 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.3] - 2026-09-13
+
+### 调整（原型页脚补充信息）
+- **原型页脚补充信息**：在 6 个页脚链接下新增一句话项目介绍「古籍通 AncientBook · 开源公益古籍阅读与考据平台」与版本/更新日期「v1.15.3 · 更新于 2026-09-13」（`footer-intro` / `footer-meta`，样式见 `prototype/assets/css/base.css`）；并将页脚「人物库」链接替换为「更新日志」，指向仓库根 `CHANGELOG.md`（`prototype/` 无独立更新日志页）；导航「人物库」入口保持不变。
+
 ## [1.15.2] - 2026-09-13
 
 ### 文档（GitHub Actions 构建加速）
@@ -657,7 +662,9 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.1...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.3...HEAD
+[1.15.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.2...v1.15.3
+[1.15.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.1...v1.15.2
 [1.15.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.3...v1.15.0
 [1.14.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...v1.14.3
@@ -702,7 +709,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.2
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）
