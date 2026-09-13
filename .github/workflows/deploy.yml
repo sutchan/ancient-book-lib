@@ -71,13 +71,24 @@ jobs:
 
       # 重型索引重建仅在 main 推送 / 手动触发时执行（PR 跳过，使用已提交数据编译校验）
       - name: Build daizhige catalog index (15,694 books from upstream repo)
+        id: catalog
         if: github.event_name != 'pull_request'
         timeout-minutes: 15
-        run: npm run build:catalog
+        run: |
+          npm run build:catalog
+          # 上游根 tree 的 SHA：git 对象内容寻址，仅上游真正变更时才改变。
+          TREE_SHA="$(node -p "require('./public/index/catalog-fingerprint.json').treeSha || ''")"
+          if [ -z "$TREE_SHA" ]; then
+            echo "::error::未取到上游 tree SHA，拒绝使用会退化为「永久命中」的缓存键"
+            exit 1
+          fi
+          echo "tree_sha=$TREE_SHA" >> "$GITHUB_OUTPUT"
 
-      # 重型索引产物缓存：fulltext-index.json 与 chapters.json 完全由「书目索引 + 上游 TXT」
-      # 决定，故以 daizhige-catalog.json 的内容哈希为键。命中时跳过 4.9GB 重下载与全量分词，
-      # 主线构建从「每次必然重跑数十分钟」降为秒级复用。
+      # 重型索引产物缓存：fulltext-index.json 与 chapters.json 完全由上游 TXT 内容决定。
+      # 缓存键必须取自**确定性**指纹（catalog-fingerprint.json），不能直接哈希
+      # daizhige-catalog.json——它的 generatedAt 每轮都是新时间戳，会让键每轮都变，
+      # 缓存永久 miss，于是 4.9GB 重下载 + 全量分词在每次 main 推送完整重跑：
+      # 这正是 build 作业撞上 60 分钟超时的根因。
       - name: Restore heavy index cache (fulltext + chapters)
         id: index-cache
         if: github.event_name != 'pull_request'
@@ -86,7 +97,7 @@ jobs:
           path: |
             public/index/fulltext-index.json
             public/index/chapters.json
-          key: fulltext-${{ hashFiles('public/index/daizhige-catalog.json') }}
+          key: fulltext-${{ steps.catalog.outputs.tree_sha }}
 
       - name: Build fulltext index + chapter manifests (4.9GB upstream TXT)
         if: github.event_name != 'pull_request' && steps.index-cache.outputs.cache-hit != 'true'

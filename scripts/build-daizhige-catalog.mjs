@@ -78,6 +78,23 @@ const catalog = {
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify(catalog), "utf8");
 
+// 缓存键指纹：供 CI 判断 public/index/fulltext-index.json 与 chapters.json 是否可复用
+// （见 .github/workflows/deploy.yml 的 heavy index cache 步骤）。
+// 关键：指纹必须**不含 generatedAt 等时间戳**。catalog 本身每次运行都会写入新的
+// generatedAt，若直接拿 catalog 文件做缓存键，键值每轮都变，缓存将永久 miss，
+// 导致 4.9GB 重下载 + 全量分词在每次 main 推送时完整重跑（这正是构建超时的原因）。
+// treeSha 是上游根 tree 的 SHA（git 对象内容寻址），仅当殆知阁上游真正变更时才改变。
+const FINGERPRINT = resolve(ROOT, "public/index/catalog-fingerprint.json");
+writeFileSync(
+  FINGERPRINT,
+  JSON.stringify(
+    { treeSha: data.sha ?? null, total: books.length, totalSizeBytes: totalSize },
+    null,
+    2
+  ),
+  "utf8"
+);
+
 console.log(`[3/3] 索引已写入: ${OUT}`);
 console.log(`  书目总数: ${books.length}`);
 console.log(`  总数据量: ${(totalSize / 1024 / 1024).toFixed(1)} MB（上游原始 TXT，本仓库不复制）`);

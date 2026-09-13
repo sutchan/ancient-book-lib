@@ -90,3 +90,5 @@ body[data-device="mobile"] .main-content{max-width:375px;}
 .footer-inner{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:6px;}
 .footer .foot-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
 .footer .foot-links a:hover{color:var(--color-primary);}
+.footer-intro{margin:0;font-size:13px;}
+.footer-meta{margin:0;font-size:12px;opacity:.72;}

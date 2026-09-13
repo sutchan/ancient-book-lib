@@ -3,11 +3,20 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.2] - 2026-09-13
+
+### 文档（GitHub Actions 构建加速）
+- 新增 `docs/06-部署与迭代/GitHub-Actions构建加速任务清单.md`：基于 `.github/workflows/*` 与构建脚本实测，给出 **C1–C12** 加速任务（现状耗时构成、根因、预期收益、风险与验收标准）
+- **定位 P0 缺陷**：`deploy.yml` 全文索引缓存键为 `hashFiles('public/index/daizhige-catalog.json')`，而该产物由 `scripts/build-daizhige-catalog.mjs:71` 写入**每次构建都会变化**的 `generatedAt` 时间戳 → 缓存**永不命中**，`build:fulltext`（4.9GB 下载 + 全量分词）每次 main 推送都完整重跑（工作流注释所称「秒级复用」从未生效）
+- `docs/06-部署与迭代/项目部署上线规范.md` §5 新增「5.2 构建加速（专项）」并指向专项清单（文档版本 V1.3 → V1.4）
+- `docs/04-开发任务清单/剩余开发任务清单.md` 新增「CI/CD · 构建加速（专项 C1–C12）」小节，并在「建议下一版本范围」「任务统计」中登记
+
 ## [1.15.1] - 2026-09-13
 
 ### 优化（全站页面文案精简）
 - **去除非必要/失效文案**：首页删除与副标题重复的说明句；页脚移除已废弃的「统一解压密码 / 备用网盘公示」表述（现行方案为上游直链 + 免责声明，并无网盘环节）
 - **原型页脚精简**：`prototype/prototype.html` 与 `prototype/pages/*.html`（共 16 个）移除页脚「统计摘要」行（`footer-stats`：馆藏 10 类 / 15,694 部 / 661,350 人 + 「本原型示范 45 部 / 样例人物 38 位」）与品牌描述行，仅保留 6 个页脚链接（开源协议 / 数据来源 / 免责声明 / 反馈渠道 / 数据统计 / 人物库）；统计信息已由独立 `stats.html` 承载，与正式 `Footer.tsx` 精简意图一致
+- **原型页脚补充信息**：在 6 个页脚链接下新增一句话项目介绍「古籍通 AncientBook · 开源公益古籍阅读与考据平台」与版本/更新日期「v1.15.1 · 更新于 2026-09-13」（`footer-intro` / `footer-meta`，样式见 `prototype/assets/css/base.css`）；并将页脚「人物库」链接替换为「更新日志」，指向仓库根 `CHANGELOG.md`（`prototype/` 无独立更新日志页）；导航「人物库」入口保持不变。
 - **精简冗余表述**：`app/data-source`（去重「可溯源、不臆断」、压缩字段细目与排版空隙）、`app/disclaimer`（去引导赘句）、`app/feedback`（去客套语与重复措辞）、`app/license`（去元叙述句）、`app/character`（去与按钮重复的引导句）、`app/category`、`app/book-list`、`app/bookmarks`
 - 保留全部法律声明、数据溯源与授权信息等实质内容，仅删重复与虚词；被改文件头注释统一升 `v1.15.1`
 - 涉及文件：`app/page.tsx`、`components/Footer.tsx`、`app/{category,book-list,character,data-source,disclaimer,feedback,license,bookmarks}/page.tsx`、`prototype/prototype.html`、`prototype/pages/*.html`（共 16 个）
@@ -649,7 +658,8 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.0...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.1...HEAD
+[1.15.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.0...v1.15.1
 [1.15.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.3...v1.15.0
 [1.14.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...v1.14.3
 [1.14.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.0...v1.14.1
@@ -693,7 +703,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.1
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.2
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）
