@@ -42,12 +42,26 @@ const STOP = new Set([
   "下", "中", "大", "小", "天", "地", "日", "月", "年", "時", "生", "死", "名",
 ]);
 
+// 标点/空白/数字裁剪正则提升到模块级：normalize 每部书都会调用，
+// 写在函数体内会随每次调用重新构造正则对象。
+const NOISE_RE = /[「」『』“”‘’《》〈〉：；，。！？、·\s\d]/g;
+
+/**
+ * 繁→简归一化 + 去噪。
+ * 原实现 `.split("").map().join()` 会为每部书额外分配「单字符数组 + 映射结果数组」
+ * 两个 n 长度的临时数组（n 为正文长度；全量 5.14GB 文本下等同于数十亿次装箱与
+ * 随之而来的 GC 压力）。改为单次遍历 + 单个结果数组，结果逐字符等价。
+ * 注：`text[i]` 对非 BMP 字符返回半个代理对，但写回时两半原样拼接，与 split("") 行为一致。
+ */
 function normalize(text) {
-  return text
-    .split("")
-    .map((c) => T2S_MAP[c] || c)
-    .join("")
-    .replace(/[「」『』“”‘’《》〈〉：；，。！？、·\s\d]/g, "");
+  const out = new Array(text.length);
+  let n = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    out[n++] = T2S_MAP[c] || c;
+  }
+  out.length = n;
+  return out.join("").replace(NOISE_RE, "");
 }
 
 function tokenize(text) {
@@ -66,7 +80,12 @@ const chaptersMap = {}; // { [bookId]: [{title, start, end}] } 章节字节偏�
 let done = 0;
 // 注意：CONCURRENCY 只重叠网络 I/O；JS 是单线程，分词与章节解析仍是串行 CPU 工作，
 // 因此本步骤的墙钟时间 ≈ 下载时间 + 全部文本的 CPU 处理时间，两者不可互相掩盖。
-const CONCURRENCY = 8;
+// 【C8】默认 12（原 8）：上游是 CDN/raw，适度提高并发可压缩纯 I/O 段；
+// 上限 32 以避免触发上游限流（限流会让重试次数上升，反而更慢）。
+const CONCURRENCY = (() => {
+  const v = parseInt(process.env.FULLTEXT_CONCURRENCY || "", 10);
+  return Number.isFinite(v) && v > 0 ? Math.min(v, 32) : 12;
+})();
 const startedAt = Date.now();
 
 // 单本 TXT 下载：超时 + 重试 + 镜像降级。
@@ -76,8 +95,13 @@ const startedAt = Date.now();
 const FETCH_TIMEOUT = 120000;
 const FETCH_RETRIES = 2;
 
+// 【C8】可选：优先走 CDN 镜像（jsDelivr / statically）。默认仍以 raw 主源优先
+// （行为最可预期），需要 CDN 优先时在 CI 设 FULLTEXT_MIRROR_FIRST=1。
+const MIRROR_FIRST = process.env.FULLTEXT_MIRROR_FIRST === "1";
+
 async function fetchBookText(b) {
-  const urls = [b.rawUrl, ...(b.mirrors || [])];
+  const mirrors = b.mirrors || [];
+  const urls = MIRROR_FIRST ? [...mirrors, b.rawUrl] : [b.rawUrl, ...mirrors];
   let lastError = null;
   for (let attempt = 0; attempt <= FETCH_RETRIES; attempt++) {
     const url = urls[attempt % urls.length];

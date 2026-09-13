@@ -1,20 +1,42 @@
 name: Build & Deploy
 
 # 生产站点：https://guji.ewuse.com/（腾讯云 EdgeOne Pages，由其自行拉取仓库构建）
-# Pages 部署为可选：仅当仓库变量 ENABLE_PAGES = true 时启用
+# GitHub Pages 为可选备用链路：仅当仓库变量 ENABLE_PAGES = true 时启用
 # （Settings → Secrets and variables → Actions → Variables）
 #
 # 流水线分两段：
-#   - check：push / PR 均运行，仅做类型检查 + 单元测试（秒级~分钟级，快速反馈门禁）
-#   - build：check 之后，仅 main 推送 / 手动触发时重建重型索引（catalog 1.5 万册 + fulltext 4.9GB）
-#            并执行 next build + 部署；PR 仅做 next build 编译校验，跳过重型索引重建以节省资源
+#   - check：仅做类型检查 + 单元测试（快速反馈门禁）
+#   - build：PR 只做 next build 编译校验；push / 手动触发时才可能重建重型索引
+#
+# 【C6】重型索引的取舍
+#   生产由 EdgeOne 自行构建，GH Actions 的重型产物（catalog + fulltext/chapters）
+#   只在 ENABLE_PAGES=true（喂给 Pages）或手动 dispatch 勾选 force_heavy_indexes 时才有用途。
+#   因此默认**不再**在每次 main 推送重跑 5.14GB 上游下载；需要刷新产物时手动触发。
+#
+# 【C1】缓存键的硬性要求
+#   必须取自**确定性**指纹。此前用 hashFiles('public/index/daizhige-catalog.json') 作键，
+#   而该产物含每轮都变的 generatedAt 时间戳 → 键每轮都变 → 缓存永久 miss →
+#   build:fulltext 每次推送整跑，直接把 build 作业顶到 60 分钟上限。
+#   现统一改用上游根 tree SHA（scripts/resolve-upstream-sha.mjs）。
 
 on:
   push:
     branches: [main]
+    # 【C4】纯文档 / 原型 / 许可证变更不进入产物，故不触发构建。
+    # 只加在 push 上：PR 若被 paths-ignore 跳过，分支保护要求的状态检查会永远 pending。
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "prototype/**"
+      - "LICENSE"
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      force_heavy_indexes:
+        description: "强制重建重型索引（上游 5.14GB TXT，冷启动数十分钟）"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -27,9 +49,10 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # 快速校验门禁：所有事件运行，不重建数据索引
+  # 快速校验门禁：push / PR 均运行，不重建数据索引
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -40,11 +63,14 @@ jobs:
           node-version: 22
           cache: npm
 
+      # 【C5/C11】setup-node 的 cache: npm 已缓存 ~/.npm 下载缓存；
+      # --prefer-offline 让命中缓存的包不再做网络校验，--no-audit/--no-fund 免去额外往返。
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --no-fund
 
+      # 【C11】走本地二进制，避免 npx 的包解析与网络探测
       - name: Type check
-        run: npx tsc --noEmit
+        run: node node_modules/typescript/bin/tsc --noEmit
 
       - name: Unit tests
         run: npm test
@@ -53,8 +79,8 @@ jobs:
   build:
     needs: check
     runs-on: ubuntu-latest
-    # 冷启动（缓存未命中）时 fulltext 步骤本身即需数十分钟，故作业上限高于各步骤预算之和；
-    # 真正的卡死由各步骤的 timeout-minutes 定位并快速失败（报错会带步骤名）。
+    # 冷启动（缓存未命中 + 强制重建）时 fulltext 步骤本身即需数十分钟，
+    # 故作业上限高于各步骤预算之和；真正的卡死由各步骤 timeout-minutes 定位（报错带步骤名）。
     timeout-minutes: 90
     steps:
       - name: Checkout
@@ -67,52 +93,115 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --no-fund
 
-      # 重型索引重建仅在 main 推送 / 手动触发时执行（PR 跳过，使用已提交数据编译校验）
-      - name: Build daizhige catalog index (15,694 books from upstream repo)
-        id: catalog
+      # 【C2】记录起点，供「Report index cache status and sizes」汇总作业总耗时
+      - name: Record start time
+        run: echo "START_EPOCH=$(date +%s)" >> "$GITHUB_ENV"
+
+      # 【C9】next build 编译缓存。key 带 sha 保证新提交写入新条目，
+      # restore-keys 退回 lockfile 维度，使新提交仍能复用上一次的编译缓存。
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: nextjs-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            nextjs-${{ hashFiles('package-lock.json') }}-
+
+      # ---- 上游指纹：所有重型缓存键的唯一来源（必须在任何产物生成之前解析）----
+      - name: Resolve upstream tree SHA
+        id: upstream
         if: github.event_name != 'pull_request'
-        timeout-minutes: 15
+        timeout-minutes: 5
         run: |
-          npm run build:catalog
-          # 上游根 tree 的 SHA：git 对象内容寻址，仅上游真正变更时才改变。
-          TREE_SHA="$(node -p "require('./public/index/catalog-fingerprint.json').treeSha || ''")"
+          TREE_SHA="$(node scripts/resolve-upstream-sha.mjs)"
           if [ -z "$TREE_SHA" ]; then
             echo "::error::未取到上游 tree SHA，拒绝使用会退化为「永久命中」的缓存键"
             exit 1
           fi
           echo "tree_sha=$TREE_SHA" >> "$GITHUB_OUTPUT"
+          echo "TREE_SHA=$TREE_SHA" >> "$GITHUB_ENV"
 
-      # 重型索引产物缓存：fulltext-index.json 与 chapters.json 完全由上游 TXT 内容决定。
-      # 缓存键必须取自**确定性**指纹（catalog-fingerprint.json），不能直接哈希
-      # daizhige-catalog.json——它的 generatedAt 每轮都是新时间戳，会让键每轮都变，
-      # 缓存永久 miss，于是 4.9GB 重下载 + 全量分词在每次 main 推送完整重跑：
-      # 这正是 build 作业撞上 60 分钟超时的根因。
-      - name: Restore heavy index cache (fulltext + chapters)
+      # ---- 重型索引（C6 条件在下面 4 处重复出现；GitHub Actions 的 if 不读 job 级 env，
+      #      故只能内联重复。改动触发条件时务必同步这 4 处）----
+      # 【C3】catalog 本身也按上游 SHA 缓存：命中则省掉一次全量 Trees 调用 + 11MB 写盘
+      - name: Restore catalog cache (15,694 books)
+        id: catalog-cache
+        if: github.event_name != 'pull_request' && (vars.ENABLE_PAGES == 'true' || inputs.force_heavy_indexes == true)
+        uses: actions/cache@v4
+        with:
+          path: public/index/daizhige-catalog.json
+          key: catalog-${{ steps.upstream.outputs.tree_sha }}
+
+      - name: Build daizhige catalog index (15,694 books from upstream repo)
+        id: catalog-build
+        if: github.event_name != 'pull_request' && (vars.ENABLE_PAGES == 'true' || inputs.force_heavy_indexes == true) && steps.catalog-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 15
+        run: |
+          SECONDS=0
+          npm run build:catalog
+          echo "| \`build:catalog\` | ${SECONDS}s | 冷启动（缓存未命中） |" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Restore fulltext/chapters cache
         id: index-cache
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && (vars.ENABLE_PAGES == 'true' || inputs.force_heavy_indexes == true)
         uses: actions/cache@v4
         with:
           path: |
             public/index/fulltext-index.json
             public/index/chapters.json
-          key: fulltext-${{ steps.catalog.outputs.tree_sha }}
+          key: fulltext-${{ steps.upstream.outputs.tree_sha }}
 
-      - name: Build fulltext index + chapter manifests (4.9GB upstream TXT)
-        if: github.event_name != 'pull_request' && steps.index-cache.outputs.cache-hit != 'true'
+      - name: Build fulltext index + chapter manifests (5.14GB upstream TXT)
+        if: github.event_name != 'pull_request' && (vars.ENABLE_PAGES == 'true' || inputs.force_heavy_indexes == true) && steps.index-cache.outputs.cache-hit != 'true'
         timeout-minutes: 60
         env:
-          # 4.9GB 文本的分词/章节解析为纯 CPU 工作，放宽堆上限避免 GC 抖动拖慢构建
+          # 5.14GB 文本的分词/章节解析为纯 CPU 工作，放宽堆上限避免 GC 抖动拖慢构建
           NODE_OPTIONS: --max-old-space-size=8192
-        run: npm run build:fulltext
+          # 【C8】网络并发（默认 12）；仅重叠 I/O，CPU 仍单线程，不宜无限调高以免上游限流
+          FULLTEXT_CONCURRENCY: "12"
+        run: |
+          SECONDS=0
+          npm run build:fulltext
+          echo "| \`build:fulltext\` | ${SECONDS}s | 冷启动（缓存未命中） |" >> "$GITHUB_STEP_SUMMARY"
+
+      # 【C2 + C10】耗时与产物体积基线：缓存命中时也执行，便于验证复用效果、评估缓存体积配额
+      - name: Report index cache status and sizes
+        if: always() && github.event_name != 'pull_request'
+        env:
+          TREE_SHA: ${{ steps.upstream.outputs.tree_sha }}
+          CATALOG_HIT: ${{ steps.catalog-cache.outputs.cache-hit }}
+          FULLTEXT_HIT: ${{ steps.index-cache.outputs.cache-hit }}
+        run: |
+          if [ -z "${START_EPOCH:-}" ]; then START_EPOCH=$(date +%s); fi
+          # 缓存命中输出为字符串 "true"，空串表示该步骤未执行（PR 或 C6 条件未满足）
+          hit() { if [ "$1" = "true" ]; then echo "命中"; else echo "未命中/未执行"; fi; }
+          {
+            echo "## 索引缓存与产物体积基线"
+            echo ""
+            echo "| 项 | 值 |"
+            echo "|---|---|"
+            echo "| 上游 tree SHA | ${TREE_SHA:-未解析} |"
+            echo "| catalog 缓存 | $(hit "${CATALOG_HIT:-}") |"
+            echo "| fulltext 缓存 | $(hit "${FULLTEXT_HIT:-}") |"
+            for f in public/index/fulltext-index.json public/index/chapters.json public/index/daizhige-catalog.json; do
+              if [ -f "$f" ]; then
+                echo "| \`$f\` | $(du -m "$f" | cut -f1) MB |"
+              fi
+            done
+            echo "| 作业总耗时（至此） | $(( $(date +%s) - START_EPOCH ))s |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build (next build -> out/)
         timeout-minutes: 25
         env:
           # 配置自定义域名时 basePath 为空；默认 GitHub Pages 子路径为 /ancient-book-lib
           NEXT_PUBLIC_BASE_PATH: ${{ vars.PAGES_CUSTOM_DOMAIN == '' && '/ancient-book-lib' || '' }}
-        run: npm run build
+        run: |
+          SECONDS=0
+          npm run build
+          echo "| \`next build\` | ${SECONDS}s | |" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload build output (out/)
         if: github.event_name != 'pull_request'

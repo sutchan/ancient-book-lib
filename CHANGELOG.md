@@ -3,6 +3,30 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.4] - 2026-09-13
+
+### 修复（CI 构建超时：全文索引缓存键永不命中）
+- **根因**：`deploy.yml` 全文索引缓存键为 `hashFiles('public/index/daizhige-catalog.json')`，而该产物由 `scripts/build-daizhige-catalog.mjs` 每轮写入**新的 `generatedAt` 时间戳** → 键每轮都变 → `actions/cache` **永久 miss** → `build:fulltext`（上游 15,694 个 TXT，合计 5,140,888,047 B ≈ 5.14GB）在每次 main 推送完整重跑，`build` 作业（`timeout-minutes: 60`）报 `The job has exceeded the maximum execution time of 1h0m0s`
+- **修复**：新增 `scripts/resolve-upstream-sha.mjs`，取上游**根 tree SHA**（git 对象内容寻址，仅殆知阁上游真正变更时才变）作为重型缓存的唯一键源；缓存键改为 `fulltext-<tree_sha>`，取不到 SHA 时以 `::error::` 硬失败，避免退化成常量键造成「永久命中」错误数据
+- `scripts/build-fulltext-index.mjs`：章节字节偏移由「每个章节边界各做一次 `Buffer.byteLength(text.slice(0, charStart))`」（单本 O(章节数 × 正文长度)，byteLength 必须逐字符扫描且前缀不可复用）改为**游标累计单遍 O(正文长度)**；下载改为 `AbortSignal.timeout` + 重试 + 镜像轮转（原为裸 `fetch`，挂起 socket 会永久阻塞 worker，且失败书目被静默丢弃）
+
+### 优化（GitHub Actions 构建加速 C2–C12）
+- **C2/C10 耗时与体积基线**：`build:catalog` / `build:fulltext` / `next build` 各自写入 `$GITHUB_STEP_SUMMARY`；新增汇总步骤输出上游 SHA、两级缓存命中状态、各产物 MB 数与作业总耗时
+- **C3 缓存 catalog 本身**：键 `catalog-<tree_sha>`，命中则跳过全量 Trees 调用 + 11MB 写盘
+- **C4 路径过滤**：`push.paths-ignore` 忽略 `**.md` / `docs/**` / `prototype/**` / `LICENSE`；该过滤只加在 push 上，避免 PR 因跳过而让分支保护要求的状态检查永远 pending
+- **C6 重型索引条件触发**：仅 `ENABLE_PAGES=true` 或手动 `workflow_dispatch` 勾选 `force_heavy_indexes` 时重建。生产由 EdgeOne 自行构建，纯 main 推送不再付 5.14GB 成本（**注意**：Pages 未启用时 `out-<sha>` artifact 不含全文索引）
+- **C8 下载策略**：网络并发 8 → 12（`FULLTEXT_CONCURRENCY`，上限 32 以免上游限流反噬）；新增 `FULLTEXT_MIRROR_FIRST=1` 可切换为 CDN 镜像优先
+- **C9 缓存 `.next/cache`**：`key: nextjs-<lockfile hash>-<sha>` + `restore-keys` 退回 lockfile 维度，使新提交仍能复用编译缓存
+- **C5/C11 安装成本**：`npm ci --prefer-offline --no-audit --no-fund`；类型检查改走 `node node_modules/typescript/bin/tsc`，不经 `npx`
+- **C7 分词优化（部分落地）**：`normalize()` 由 `.split("").map().join()`（每部书额外分配两个正文长度的临时数组）改为单次遍历 + 单数组，标点正则提升到模块级；`worker_threads` 按核并行暂缓（需处理 postings 跨线程回传的内存带宽与结果确定性，宜单独立版本）
+- 各级 `timeout-minutes` 收敛为可归属的步骤预算（作业 90 / fulltext 60 / catalog 15 / build 25），并补 CI 步骤预算表（C12）
+
+### 文档
+- `docs/06-部署与迭代/GitHub-Actions构建加速任务清单.md`：C1–C12 全部回写执行状态，补「CI 步骤预算表（C12）」、热/冷路径收益对照与风险注意
+- `docs/06-部署与迭代/项目部署上线规范.md` §5.2 更新为现行缓存与触发策略（文档版本 V1.4 → V1.5，适配 v1.15.4）
+- `docs/04-开发任务清单/剩余开发任务清单.md`：CI 专项标记完成并逐项登记落地要点
+- 验证：`npm run build:fulltext -- --limit 12` 实跑输出 **80,454 词条 / 2.2MB / 章节清单 3 部**，与重构前完全一致（证明 `normalize` 改写与章节偏移算法等价）；`tsc --noEmit` 0 错误 · `npm test` 53/53 全绿
+
 ## [1.15.3] - 2026-09-13
 
 ### 调整（原型页脚补充信息）
@@ -709,7 +733,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.4
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）
