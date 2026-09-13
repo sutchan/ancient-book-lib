@@ -405,6 +405,40 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         )}
       </div>
 
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12 }}>
+        <button className="btn btn-secondary" id="reader-bookmark-toggle" onClick={toggleBmReader} aria-pressed={bookmarked} style={{ fontSize: 13, padding: "6px 12px" }}>
+          {bookmarked ? "★ 已收藏" : "☆ 收藏"}
+        </button>
+        <button className="btn btn-secondary" id="reader-save-pos" onClick={saveReadPos} style={{ fontSize: 13, padding: "6px 12px" }}>
+          保存当前位置
+        </button>
+        <button className="btn btn-secondary" id="reader-pos-toggle" onClick={() => setShowPos(!showPos)} style={{ fontSize: 13, padding: "6px 12px" }}>
+          阅读书签{readPosList.length > 0 ? ` (${readPosList.length})` : ""}
+        </button>
+      </div>
+
+      {showPos && (
+        <div className="card" style={{ padding: 14, marginBottom: 12 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+            <strong>阅读位置书签</strong>
+            <button className="btn btn-secondary" style={{ fontSize: 12, padding: "2px 8px" }} onClick={() => setShowPos(false)}>收起</button>
+          </div>
+          {readPosList.length === 0 ? (
+            <div style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>暂无保存的阅读位置，点击「保存当前位置」记录本章页码。</div>
+          ) : (
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+              {readPosList.map((p) => (
+                <li key={p.createdAt} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 14 }}>
+                  <button className="btn btn-primary" style={{ fontSize: 12, padding: "4px 10px" }} onClick={() => gotoReadPos(p)}>跳转</button>
+                  <span style={{ flex: 1 }}>{p.label}</span>
+                  <button className="btn btn-secondary" style={{ fontSize: 12, padding: "2px 8px" }} onClick={() => deleteReadPos(p.createdAt)}>删除</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       <ReaderToolbar
         fontSize={fontSize}
         lineHeight={lineHeight}

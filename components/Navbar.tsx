@@ -76,8 +76,16 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
           </Link>
           <nav className="nav-menu">
             {MENU.map((m) => (
-              <Link key={m.key} href={m.href} className={current === m.key ? "active" : ""}>
+              <Link
+                key={m.key}
+                href={m.href}
+                id={m.key === "bookmarks" ? "nav-bookmarks" : undefined}
+                className={current === m.key ? "active" : ""}
+              >
                 {simplified ? toSimplified(m.label) : m.label}
+                {m.key === "bookmarks" && bookmarkCount > 0 && (
+                  <span className="nav-badge" aria-label={`${bookmarkCount} 个书签`} style={{ marginLeft: 4, fontSize: 11, background: "var(--color-primary, #8C3130)", color: "#fff", borderRadius: 10, padding: "0 6px", verticalAlign: "middle" }}>{bookmarkCount}</span>
+                )}
               </Link>
             ))}
           </nav>
@@ -98,6 +106,9 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
         {MENU.map((m) => (
           <Link key={m.key} href={m.href} className={current === m.key ? "active" : ""} onClick={() => setMenuOpen(false)}>
             {simplified ? toSimplified(m.label) : m.label}
+            {m.key === "bookmarks" && bookmarkCount > 0 && (
+              <span className="nav-badge" style={{ marginLeft: 4, fontSize: 11, background: "var(--color-primary, #8C3130)", color: "#fff", borderRadius: 10, padding: "0 6px" }}>{bookmarkCount}</span>
+            )}
           </Link>
         ))}
       </nav>

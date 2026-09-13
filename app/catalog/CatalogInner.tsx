@@ -174,6 +174,16 @@ export default function CatalogInner() {
               </div>
             </div>
             <div style={{ display: "flex", gap: 6 }}>
+              <button
+                className="btn btn-secondary"
+                id={`bookmark-toggle-${b.id}`}
+                aria-label={bmSet.has(b.id) ? "移除书签" : "加入书签"}
+                title={bmSet.has(b.id) ? "移除书签" : "加入书签"}
+                onClick={() => toggleBm(b)}
+                style={{ fontSize: 16, padding: "6px 10px", lineHeight: 1 }}
+              >
+                {bmSet.has(b.id) ? "★" : "☆"}
+              </button>
               <Link
                 href={`/catalog/book?id=${b.id}`}
                 className="btn btn-secondary"

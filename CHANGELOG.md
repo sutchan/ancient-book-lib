@@ -15,6 +15,17 @@
 - **规范文档同步**：更新 `docs/05-设计规范与原型/UI与UX全局设计规范.md` 与 `Figma极简原型建模页面清单.md` 中导航（6 项）、人物考据（已并入人物库，仅保留引导页）、学术工具（人物库/社会关系溯源/数据统计）等陈旧描述，使原型、应用代码、规范文档三方一致
 - `prototype/assets/js/view-home.js` 头注释 v2.2 → v2.3
 
+### 新增（书签功能实现）
+- 新增 `lib/bookmarks.ts`：封装书籍收藏 `getBookmarks / addBookmark / removeBookmark / isBookmarked / toggleBookmark / clearBookmarks / importBookmarks` 与阅读位置书签 `getReadPos / addReadPos / removeReadPos / clearReadPos`，含 `typeof window` 守卫、`try/catch` 容错与极简 `subscribe/notify` pub/sub（零后端、仅 localStorage）
+- 新增 `lib/useBookmarks.ts`（`"use client"` hook）：订阅 pub/sub 并监听 `storage` 事件，实现跨标签页实时同步
+- `components/Navbar.tsx`：`MENU` 追加「书签」入口（`/bookmarks`），桌面与移动菜单同步显示收藏数角标（`id="nav-bookmarks"`）
+- 新增 `app/bookmarks/page.tsx`（客户端页面，卡片网格复用 `RecentBooks` 布局）：支持打开 / 移除 / 清空，含空态提示（`id="bookmarks-main"`）与「导出 / 导入书签 JSON」跨设备同步（纯文件，无服务器）
+- `app/catalog/CatalogInner.tsx`：书目卡片加「星标」按钮（`id="bookmark-toggle-${id}"`）
+- `app/catalog/book/CatalogBookInner.tsx`：详情页 `book-actions` 区加「加入 / 移除书签」按钮
+- `components/RemoteReader.tsx`：阅读工具栏加收藏切换（复用 `book` 状态），并新增阅读位置书签（「保存当前位置」+ 书签列表面板，点击 `goChapter` 恢复章节与页码）
+- 新增 `test/bookmarks.test.ts`：覆盖增删 / 查重 / 序列化容错 / 导入合并 / 阅读位置书签
+- 验证：`npx tsc --noEmit` 0 错误 · `npm test` 全绿（含新增书签用例）
+
 ## [1.14.2] - 2026-09-13
 
 ### 文档（目录结构规范校正）
