@@ -28,6 +28,20 @@
     var funChar = '<div class="card category-card fade-in" onclick="location.hash=\'#page-people\'">' +
       '<div class="cat-icon">🧑</div><div class="cat-name">' + AB.toSimplified(rc.name) + (rc.zi ? ' 字' + AB.toSimplified(rc.zi) : '') + '</div>' +
       '<div class="cat-desc">' + AB.toSimplified((rc.dynasty || '') + ' · ' + AB.toSimplified('点击进入人物库')) + '</div></div>';
+    /* 最近阅读（对齐 components/RecentBooks.tsx：空记录时整段不渲染，与正式一致） */
+    var recent = [];
+    try { recent = JSON.parse(AB.lsGet("ab-recent", "[]")) || []; if (!Array.isArray(recent)) recent = []; } catch (e) {}
+    var recentHtml = "";
+    if (recent.length) {
+      var recCards = recent.map(function (b) {
+        return '<div class="card fade-in" style="padding:12px 14px;cursor:pointer;" onclick="AB.openBook(\'' + AB.esc(b.id) + '\')">' +
+          '<div style="font-weight:600;font-size:14px;margin-bottom:4px;">' + AB.toSimplified(b.title) + '</div>' +
+          '<div style="font-size:12px;color:var(--color-text-secondary);">' + AB.toSimplified(b.category) + ' · ' + fmtRecentTime(b.time) + '</div>' +
+          '</div>';
+      }).join("");
+      recentHtml = '<h2 class="section-title">' + AB.toSimplified('最近阅读') + '</h2>' +
+        '<div style="display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:8px;">' + recCards + '</div>';
+    }
     main.innerHTML =
       '<section>' +
         '<div class="home-hero fade-in">' +
@@ -48,6 +62,7 @@
             '<a class="btn btn-secondary" style="font-size:14px;" href="#page-people">🧑 ' + AB.toSimplified('人物库（661,350 人）') + '</a>' +
           '</div>' +
         '</div>' +
+        recentHtml +
         '<h2 class="section-title">' + AB.toSimplified('趣味探索') + '</h2>' +
         '<p style="font-size:14px;color:var(--color-text-secondary);margin-top:-8px;margin-bottom:16px;">' + AB.toSimplified('不知道读什么？随手翻开一卷，遇见一位古人。') + '</p>' +
         '<div class="category-grid">' + funBook + funChar + '</div>' +
