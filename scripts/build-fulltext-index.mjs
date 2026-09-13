@@ -64,18 +64,72 @@ const books = catalog.books.slice(0, Math.min(catalog.books.length, isFinite(LIM
 const index = {};
 const chaptersMap = {}; // { [bookId]: [{title, start, end}] } 章节字节偏移清单（单文件，便于入库与部署）
 let done = 0;
+// 注意：CONCURRENCY 只重叠网络 I/O；JS 是单线程，分词与章节解析仍是串行 CPU 工作，
+// 因此本步骤的墙钟时间 ≈ 下载时间 + 全部文本的 CPU 处理时间，两者不可互相掩盖。
 const CONCURRENCY = 8;
+const startedAt = Date.now();
+
+// 单本 TXT 下载：超时 + 重试 + 镜像降级。
+// 原实现直接 `await fetch(b.rawUrl)`，无超时、无重试、无镜像回退：
+// 一个挂起的 socket 会让该 worker 永久阻塞；下载失败的书目被静默 `continue` 丢弃，
+// 结果是索引悄悄缺书而不是构建失败。
+const FETCH_TIMEOUT = 120000;
+const FETCH_RETRIES = 2;
+
+async function fetchBookText(b) {
+  const urls = [b.rawUrl, ...(b.mirrors || [])];
+  let lastError = null;
+  for (let attempt = 0; attempt <= FETCH_RETRIES; attempt++) {
+    const url = urls[attempt % urls.length];
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.text();
+    } catch (e) {
+      lastError = e;
+    }
+  }
+  console.warn(`⚠️ 放弃 ${b.id}（已尝试 ${urls.length} 个源）: ${lastError?.message}`);
+  return null;
+}
+
+/**
+ * 章节字节偏移清单（供阅读页 Range 分片懒加载）。
+ *
+ * 原实现对每个章节边界都执行 Buffer.byteLength(text.slice(0, charStart))：
+ * byteLength 必须逐字符扫描字符串，前缀结果无法复用，故单本成本为
+ * O(章节数 × 正文长度)。古籍常含数百「卷/品」，在 15,694 部规模下会累积成
+ * 数十亿次字符扫描，是本步骤耗时的主要来源之一。
+ *
+ * 章节边界单调递增，改用游标累计即可得到与原来完全相同的 start/end，
+ * 总成本降为 O(正文长度)。
+ */
+function buildChapterManifest(text, bounds) {
+  const totalBytes = Buffer.byteLength(text, "utf8");
+  const manifest = [];
+  let cursor = 0; // 已计入字节数的字符位置
+  let bytes = 0; // cursor 之前的 UTF-8 字节数
+  for (const bd of bounds) {
+    if (bd.charStart > cursor) {
+      bytes += Buffer.byteLength(text.slice(cursor, bd.charStart), "utf8");
+      cursor = bd.charStart;
+    }
+    const start = bytes;
+    if (bd.charEnd > cursor) {
+      bytes += Buffer.byteLength(text.slice(cursor, bd.charEnd), "utf8");
+      cursor = bd.charEnd;
+    }
+    manifest.push({ title: bd.title, start, end: bytes || totalBytes });
+  }
+  return manifest;
+}
 
 async function worker(queue) {
   while (queue.length) {
     const b = queue.shift();
     try {
-      const res = await fetch(b.rawUrl);
-      if (!res.ok) {
-        console.warn(`⚠️ 跳过 ${b.id} (HTTP ${res.status})`);
-        continue;
-      }
-      const text = await res.text();
+      const text = await fetchBookText(b);
+      if (text === null) continue;
       for (const term of tokenize(text)) {
         if (term.length === 1 && STOP.has(term)) continue;
         (index[term] ||= []).push(b.id);
@@ -83,15 +137,7 @@ async function worker(queue) {
       // 章节字节偏移清单（供阅读页 Range 分片懒加载，复用本次下载）
       try {
         const bounds = chapterBoundaries(text);
-        if (bounds.length > 0) {
-          const totalBytes = Buffer.byteLength(text, "utf8");
-          const manifest = bounds.map((bd) => ({
-            title: bd.title,
-            start: Buffer.byteLength(text.slice(0, bd.charStart), "utf8"),
-            end: Buffer.byteLength(text.slice(0, bd.charEnd), "utf8") || totalBytes,
-          }));
-          chaptersMap[b.id] = manifest;
-        }
+        if (bounds.length > 0) chaptersMap[b.id] = buildChapterManifest(text, bounds);
       } catch (e) {
         console.warn(`⚠️ 章节清单生成失败 ${b.id}: ${e.message}`);
       }
@@ -99,7 +145,13 @@ async function worker(queue) {
       console.warn(`⚠️ 失败 ${b.id}: ${e.message}`);
     } finally {
       done++;
-      if (done % 200 === 0) console.log(`进度 ${done}/${books.length}`);
+      if (done % 200 === 0) {
+        const pct = ((done / books.length) * 100).toFixed(1);
+        const heapMB = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+        console.log(
+          `进度 ${done}/${books.length} (${pct}%) · 已用 ${Math.round((Date.now() - startedAt) / 1000)}s · heap ${heapMB}MB`
+        );
+      }
     }
   }
 }

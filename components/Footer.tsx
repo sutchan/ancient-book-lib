@@ -1,4 +1,4 @@
-// components/Footer.tsx v1.4.4
+// components/Footer.tsx v1.15.1
 import Link from "next/link";
 import EasterEgg from "@/components/EasterEgg";
 
@@ -20,9 +20,6 @@ export default function Footer() {
           <Link href="/stats">数据统计</Link>
           <Link href="/people">人物库</Link>
         </div>
-        <p>
-          资源下载公示：全站古籍均可在书籍页/馆藏页按章、按本、按馆藏下载；统一解压密码与备用网盘链接将于全量数据发布时公示。
-        </p>
         <p>古籍通 AncientBook · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
         <p
           className="footer-stats"

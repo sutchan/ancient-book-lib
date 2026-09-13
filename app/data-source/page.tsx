@@ -1,4 +1,4 @@
-// app/data-source/page.tsx v1.4.3
+// app/data-source/page.tsx v1.15.1
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ export default function DataSourcePage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>数据来源</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        本站古籍原文与考据数据均来自下列权威数据源，阅读时按需加载，各数据源均可溯源。
+        本站古籍原文与考据数据均来自下列权威数据源，阅读时按需加载。
       </p>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
@@ -30,9 +30,9 @@ export default function DataSourcePage() {
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
         <h3 className="section-title">人物考据（已并入人物库 · 哈佛 CBDB）</h3>
         <p>
-          人物考据档案（姓名、字、号、籍贯、生卒、官职、著作）来自哈佛 CBDB（Chinese Biographical Database），遵循{" "}
-          <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。人物考据现已并入人物库（CBDB 全量 661,350 位历代人物），详见{" "}
-          <Link href="/people">人物库</Link>。
+          人物考据档案来自哈佛 CBDB（Chinese Biographical Database），遵循{" "}
+          <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。人物考据已并入{" "}
+          <Link href="/people">人物库</Link>（CBDB 全量 661,350 位）。
         </p>
       </div>
 
@@ -40,14 +40,13 @@ export default function DataSourcePage() {
         <h3 className="section-title">人物库与关系网络（CBDB 全量）</h3>
         <p>
           人物库 <Link href="/people">661,350 位历代人物</Link>（姓名、拼音、生卒年、指数年、性别、朝代、籍贯）来自
-          CBDB 官方数据包（2026-09-05 版），
-          遵循 CBDB 授权条款。          关系网络（亲属 56.1 万条、社会关系 19 万条、人物-著作 5.1 万条，覆盖 31.1 万人）、生平任职（59.1 万条、11,291 种官职）、籍贯分布与官职-朝代联动、字/號/別名（163,634 条）、科舉/入仕（26.5 万条）、史料來源（50.5 万条）与人物时间分布（30.8 万有效指数年）等维度，均由 CBDB 提供并经提取索引后随站加载，可溯源、不臆断。
+          CBDB 官方数据包（2026-09-05 版），遵循 CBDB 授权条款。亲属与社会关系、生平任职、籍贯分布、字/號/別名、科舉/入仕、史料來源与人物时间分布等维度，均由 CBDB 提供并经提取索引后随站加载。
         </p>
       </div>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
         <h3 className="section-title">学术数据集</h3>
-        <p>学术人物与关系数据同时参考中研院史语所、北京大学等公开学术数据集规范，确保史料严谨、可溯源、不臆断。</p>
+        <p>学术人物与关系数据同时参考中研院史语所、北京大学等公开学术数据集规范，确保史料严谨。</p>
       </div>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>

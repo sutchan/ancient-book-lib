@@ -1,4 +1,4 @@
-// app/character/page.tsx v1.14.0
+// app/character/page.tsx v1.15.1
 // 「人物考据」已并入人物库（CBDB 全量 661,350 位）。本路由改为引导页：
 // 说明合并去向，并提供 28 位精选人物的直达链接（仍指向人物库详情页，单一数据源）。
 import type { Metadata } from "next";
@@ -42,7 +42,7 @@ export default function CharacterPage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>人物考据已并入人物库</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        本站的人物考据能力现已统一接入 CBDB 全量人物索引（661,350 位历代人物）。姓名/别名检索、重名消歧、生卒与任职校验、亲属社会关系与馆藏典籍联动，均可在「人物库」中完成。点击下方进入人物库。
+        人物考据已统一接入 CBDB 全量人物索引（661,350 位历代人物）：姓名/别名检索、重名消歧、生卒与任职、亲属社会关系与典籍联动，均可在「人物库」完成。
       </p>
       <div style={{ marginBottom: 28 }}>
         <Link href="/people" className="btn btn-primary">
@@ -54,7 +54,7 @@ export default function CharacterPage() {
         <>
           <h3 className="section-title">精选人物</h3>
           <p style={{ fontSize: 14, color: "var(--color-text-secondary)", marginBottom: 12 }}>
-            28 位历史名人精选档案，点击直达其考据详情。
+            28 位历史名人精选。
           </p>
           <div className="character-grid">
             {featured.map((c) => {

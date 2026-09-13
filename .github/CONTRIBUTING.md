@@ -117,12 +117,11 @@ type 取值：`feat` / `fix` / `style` / `docs` / `refactor` / `perf` / `build` 
 
 ## 七、代码规范要点
 
-- 文件与目录 `kebab-case`；组件 `PascalCase`；变量函数 `camelCase`；常量 `UPPER_SNAKE_CASE`
-- 颜色一律使用 CSS 变量，禁止写死色值
-- 三套主题（日间 / 护眼 / 深色）必须同时兼容
-- 移动端点击区域 ≥ 44px；`hover` / `active` / `disabled` 状态必须完整
-- 组件优先复用 `components/` 全局组件，禁止重复造样式
-- 禁止遗留 `console.log` 调试代码，禁止提交密钥、Token
+> 完整规范以 [`docs/02-架构与开发规范/代码开发规范.md`](../docs/02-架构与开发规范/代码开发规范.md) 为唯一来源（命名、强制约束、组件规范、质量要求）。此处仅保留提交前必查三条：
+>
+> - 颜色使用 CSS 变量，禁止写死色值
+> - 三套主题（日间 / 护眼 / 深色）与移动端点击区域（≥ 44px）必须兼容
+> - 禁止遗留 `console.log`、密钥与 Token
 
 ---
 

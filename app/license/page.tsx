@@ -1,4 +1,4 @@
-// app/license/page.tsx v1.4.3
+// app/license/page.tsx v1.15.1
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ export default function LicensePage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>开源协议</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        古籍通 AncientBook 是公益免费、开源共享、非商用的传统文化传播工具。下方说明项目代码、古籍资源与学术数据的授权方式。
+        古籍通 AncientBook 是公益免费、开源共享、非商用的传统文化传播工具。
       </p>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
@@ -45,7 +45,7 @@ export default function LicensePage() {
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
         <h3 className="section-title">非商用定位</h3>
         <p>
-          全站无广告、无弹窗、无付费功能、无商业变现模块；全功能零注册、零登录、零门槛开放。详见{" "}
+          全站无广告、无付费功能；零注册、零登录开放。详见{" "}
           <Link href="/disclaimer">免责声明</Link> 与 <Link href="/data-source">数据来源</Link>。
         </p>
       </div>

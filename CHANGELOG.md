@@ -3,6 +3,24 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.1] - 2026-09-13
+
+### 优化（全站页面文案精简）
+- **去除非必要/失效文案**：首页删除与副标题重复的说明句；页脚移除已废弃的「统一解压密码 / 备用网盘公示」表述（现行方案为上游直链 + 免责声明，并无网盘环节）
+- **原型页脚精简**：`prototype/prototype.html` 与 `prototype/pages/*.html`（共 16 个）移除页脚「统计摘要」行（`footer-stats`：馆藏 10 类 / 15,694 部 / 661,350 人 + 「本原型示范 45 部 / 样例人物 38 位」）与品牌描述行，仅保留 6 个页脚链接（开源协议 / 数据来源 / 免责声明 / 反馈渠道 / 数据统计 / 人物库）；统计信息已由独立 `stats.html` 承载，与正式 `Footer.tsx` 精简意图一致
+- **精简冗余表述**：`app/data-source`（去重「可溯源、不臆断」、压缩字段细目与排版空隙）、`app/disclaimer`（去引导赘句）、`app/feedback`（去客套语与重复措辞）、`app/license`（去元叙述句）、`app/character`（去与按钮重复的引导句）、`app/category`、`app/book-list`、`app/bookmarks`
+- 保留全部法律声明、数据溯源与授权信息等实质内容，仅删重复与虚词；被改文件头注释统一升 `v1.15.1`
+- 涉及文件：`app/page.tsx`、`components/Footer.tsx`、`app/{category,book-list,character,data-source,disclaimer,feedback,license,bookmarks}/page.tsx`、`prototype/prototype.html`、`prototype/pages/*.html`（共 16 个）
+- 验证：`tsc --noEmit` 0 错误 · `npm test` 53/53 全绿
+
+### 文档（去除冗余重复）
+- **项目简介三件套去重**：`docs/01-项目基础说明/README-项目简介.md` 的「核心特性」与「快速部署」与根 `README.md` 重复，改为指向根 README 的单一来源（避免双份维护）
+- **代码规范去重**：`.github/CONTRIBUTING.md`「七、代码规范要点」与 `docs/02-架构与开发规范/代码开发规范.md` 重复，改为指向该规范 + 仅保留提交前必查三条
+- **版本日志去重**：`docs/06-部署与迭代/版本迭代管理规范.md` §4 的 CHANGELOG 模板改为指向根 `CHANGELOG.md`
+- **任务清单去重**：`docs/04-开发任务清单/剩余开发任务清单.md` 删除与《开发进度清单》重复的「当前进度核实」状态表与「已完成能力概览」，改为单一来源指引，章节编号顺延；P0 标注已全部完成，统计表增列状态
+- **《开发进度清单》刷新至 v1.15.0**：测试 47 → **53**（9 个测试文件，实跑 53/53）；阅读章节补充 R1–R4（页内搜索 / 引用复制 / 检索定位 / 移动端优化）；原型章节更新为 7 项导航 + `pages/bookmarks.html` 已补；遗留项「原型未同步书签」标记为已完成
+- **历史文档归档标注**：`docs/08-技术方案研究/PRD缺陷分析与优化方案.md`、`docs/05-设计规范与原型/原型检查报告与改进建议.md` 增加「归档状态」说明，明确不再作为现行来源，消除与现行 PRD / 审查报告 / 设计规范的重复竞争
+
 ## [1.15.0] - 2026-09-13
 
 ### 新增（阅读体验补强，对应剩余任务 R1–R4）
@@ -631,7 +649,8 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.3...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.3...v1.15.0
 [1.14.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...v1.14.3
 [1.14.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.2...v1.14.0
@@ -674,7 +693,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.1
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）

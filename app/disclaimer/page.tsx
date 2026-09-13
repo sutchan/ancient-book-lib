@@ -1,4 +1,4 @@
-// app/disclaimer/page.tsx v1.4.3
+// app/disclaimer/page.tsx v1.15.1
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ export default function DisclaimerPage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>免责声明</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        请在使用本站前阅读以下声明。使用本平台即表示你理解并同意下述条款。
+        使用本平台即表示你理解并同意以下条款。
       </p>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
@@ -42,8 +42,7 @@ export default function DisclaimerPage() {
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
         <h3 className="section-title">下载附言</h3>
         <p>
-          本站提供的单本下载与书单导出均附「仅供学术研究与个人学习、禁止商用」声明。更多授权细节见 <Link href="/license">开源协议</Link>
-          ，数据溯源见 <Link href="/data-source">数据来源</Link>。
+          下载与导出内容均附「仅供学术研究与个人学习、禁止商用」声明。授权细节见 <Link href="/license">开源协议</Link>，数据溯源见 <Link href="/data-source">数据来源</Link>。
         </p>
       </div>
     </section>

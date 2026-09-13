@@ -43,5 +43,5 @@ next-env.d.ts
 /public/index/chapters.json
 
 # 本地开发记忆（.workbuddy 为真实目录，.codebuddy 为其 junction，均不入库）
-.codebuddy
 .workbuddy
+*.cjs

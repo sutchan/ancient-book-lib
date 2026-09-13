@@ -1,4 +1,4 @@
-// app/feedback/page.tsx v1.4.3
+// app/feedback/page.tsx v1.15.1
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -23,11 +23,11 @@ export default function FeedbackPage() {
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
         <h3 className="section-title">在线反馈（主渠道）</h3>
         <p>
-          提交内容勘误（原文、繁简映射、人物考据）、功能建议或使用问题，请通过下方入口提交：
+          内容勘误（原文、繁简映射、人物考据）、功能建议与使用问题，请通过{" "}
           <Link href="https://github.com/sutchan/ancient-book-lib/issues" target="_blank" rel="noopener noreferrer">
-            前往反馈入口
+            Issue 入口
           </Link>
-          。勘误请务必<strong>附史料来源</strong>，便于核实与修正。
+          {" "}提交。勘误请务必<strong>附史料来源</strong>。
         </p>
       </div>
 
@@ -41,7 +41,7 @@ export default function FeedbackPage() {
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
         <h3 className="section-title">说明</h3>
         <p>
-          作为公益开源项目，我们暂无专职客服，但会定期审阅 Issue 并逐步改进。你的每一条反馈都是项目成长的动力，感谢参与共建。
+          公益开源项目暂无专职客服，会定期审阅 Issue 并逐步改进。
         </p>
       </div>
     </section>

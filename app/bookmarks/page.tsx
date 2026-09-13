@@ -1,4 +1,4 @@
-// app/bookmarks/page.tsx v1.14.3
+// app/bookmarks/page.tsx v1.15.1
 "use client";
 import { useState, type ChangeEvent } from "react";
 import Link from "next/link";
@@ -74,7 +74,7 @@ export default function BookmarksPage() {
       </div>
       <h2 style={{ marginBottom: 4 }}>我的书架</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 16, fontSize: 14 }}>
-        你收藏的古籍会保存在本机浏览器（按书籍记录），跨会话长期保留，不与服务器同步。
+        收藏保存在本机浏览器，跨会话保留，不与服务器同步。
       </p>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
