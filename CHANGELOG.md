@@ -16,7 +16,6 @@
 ### 优化（全站页面文案精简）
 - **去除非必要/失效文案**：首页删除与副标题重复的说明句；页脚移除已废弃的「统一解压密码 / 备用网盘公示」表述（现行方案为上游直链 + 免责声明，并无网盘环节）
 - **原型页脚精简**：`prototype/prototype.html` 与 `prototype/pages/*.html`（共 16 个）移除页脚「统计摘要」行（`footer-stats`：馆藏 10 类 / 15,694 部 / 661,350 人 + 「本原型示范 45 部 / 样例人物 38 位」）与品牌描述行，仅保留 6 个页脚链接（开源协议 / 数据来源 / 免责声明 / 反馈渠道 / 数据统计 / 人物库）；统计信息已由独立 `stats.html` 承载，与正式 `Footer.tsx` 精简意图一致
-- **原型页脚补充信息**：在 6 个页脚链接下新增一句话项目介绍「古籍通 AncientBook · 开源公益古籍阅读与考据平台」与版本/更新日期「v1.15.1 · 更新于 2026-09-13」（`footer-intro` / `footer-meta`，样式见 `prototype/assets/css/base.css`）；并将页脚「人物库」链接替换为「更新日志」，指向仓库根 `CHANGELOG.md`（`prototype/` 无独立更新日志页）；导航「人物库」入口保持不变。
 - **精简冗余表述**：`app/data-source`（去重「可溯源、不臆断」、压缩字段细目与排版空隙）、`app/disclaimer`（去引导赘句）、`app/feedback`（去客套语与重复措辞）、`app/license`（去元叙述句）、`app/character`（去与按钮重复的引导句）、`app/category`、`app/book-list`、`app/bookmarks`
 - 保留全部法律声明、数据溯源与授权信息等实质内容，仅删重复与虚词；被改文件头注释统一升 `v1.15.1`
 - 涉及文件：`app/page.tsx`、`components/Footer.tsx`、`app/{category,book-list,character,data-source,disclaimer,feedback,license,bookmarks}/page.tsx`、`prototype/prototype.html`、`prototype/pages/*.html`（共 16 个）
