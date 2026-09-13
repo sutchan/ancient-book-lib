@@ -1,8 +1,16 @@
 /**
- * 原型首页 / 馆藏分类 / 书单视图 v2.3
+ * 原型首页 / 馆藏分类 / 书单视图 v2.4
  */
 (function (AB) {
   "use strict";
+
+  function fmtRecentTime(ts) {
+    var diff = Date.now() - (ts || 0);
+    if (diff < 60000) return "刚刚";
+    if (diff < 3600000) return Math.floor(diff / 60000) + " 分钟前";
+    if (diff < 86400000) return Math.floor(diff / 3600000) + " 小时前";
+    return Math.floor(diff / 86400000) + " 天前";
+  }
 
   function renderHome(main) {
     var cats = AB.DATA.categories.map(function (c) {

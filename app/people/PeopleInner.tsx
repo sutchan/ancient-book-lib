@@ -129,7 +129,7 @@ export default function PeopleInner() {
   const topDynasties = meta.dynasty.slice(0, 12);
 
   return (
-    <section>
+    <section id="people-main">
       <div className="breadcrumb">
         <Link href="/">首页</Link><span className="sep">/</span><span>人物库</span>
       </div>

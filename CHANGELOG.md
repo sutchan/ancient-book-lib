@@ -3,6 +3,19 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.7] - 2026-09-13
+
+### 修复 / 重构 / 规范
+- **新增路由级错误边界**：`app/error.tsx`（页面渲染/数据加载出错不再整站白屏，可重试、保留导航）+ `app/global-error.tsx`（根布局崩溃兜底），提升阅读/检索流程鲁棒性。
+- **canonical 绝对地址**（`app/layout.tsx`）：`alternates.canonical` 与 `openGraph.url` 由相对 `"/"` 改为 `https://guji.ewuse.com/`（相对地址在部分爬虫/社会化分享下会解析为当前页 URL，导致 canonical 失效）。
+- **`.gitignore`**：新增 `/_push.log`，推送日志不再被误入库。
+- **`lib/cbdb.ts` 拆分（818 行 → 9 子模块 + 桶）**：按数据域拆为 `meta / search / altnames / entries / sources / person-years / rel / relation-path / offices / geo`，`lib/cbdb/index.ts` 桶文件保持 `@/lib/cbdb` 公开 API 完全一致（所有导入方零改动）。`tsc` 0 错误 · `npm test` 66/66 全绿。
+- **语义化 id**：`app/people/PeopleInner.tsx`、`app/people/detail/PeopleDetailInner.tsx`、`components/StatsClient.tsx`、`app/catalog/CatalogInner.tsx` 根容器补 `id="people-main"` / `people-detail-main` / `stats-main` / `catalog-main`，便于调试定位与测试。
+- 头注释版本号同步至 v1.15.7（layout / StatsClient / CatalogInner / 各 cbdb 子模块）。
+
+### 待续（未在本轮完成）
+- 其余 12 个 >200 行源文件（如 `components/RemoteReader.tsx` 643 行、各页组件、`scripts/build-*.mjs`、原型 `view-read.js`/`core.js`、`lib/t2s.ts` 数据表）按「单文件 >200 行须拆分」规范拆分，计划在后续轮次完成。
+
 ## [1.15.6] - 2026-09-13
 
 ### 修复
@@ -718,7 +731,9 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.4...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.6...HEAD
+[1.15.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.5...v1.15.6
+[1.15.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.4...v1.15.5
 [1.15.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.3...v1.15.4
 [1.15.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.2...v1.15.3
 [1.15.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.1...v1.15.2
@@ -766,7 +781,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.5
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.7
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）

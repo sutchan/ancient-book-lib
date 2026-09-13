@@ -111,7 +111,7 @@ export default function PeopleDetailInner() {
   const relLoading = kin === null && assoc === null && !relError;
 
   return (
-    <section>
+    <section id="people-detail-main">
       <div className="breadcrumb">
         <Link href="/">首页</Link><span className="sep">/</span>
         <Link href="/people">人物库</Link><span className="sep">/</span>

@@ -1,5 +1,5 @@
 /**
- * 原型核心模块 v2.2
+ * 原型核心模块 v2.3
  * 职责：全局状态、DOM/文本工具、主题与品牌联动、页脚统计、入场动效
  */
 (function (AB) {
@@ -123,6 +123,18 @@
     AB.state.chapterIdx = 0;
     lsSet("ab-book", id);
     lsSet("ab-chapter", "0");
+    /* 记录最近阅读（对齐 components/RecentBooks.tsx：存 ab-recent，最近 10 本、按 id 去重） */
+    try {
+      var bk = AB.DATA.books.filter(function (b) { return b.id === id; })[0];
+      if (bk) {
+        var rec = JSON.parse(lsGet("ab-recent", "[]") || "[]");
+        if (!Array.isArray(rec)) rec = [];
+        rec = rec.filter(function (r) { return r.id !== id; });
+        rec.unshift({ id: id, title: bk.title, category: bk.category, time: Date.now() });
+        if (rec.length > 10) rec = rec.slice(0, 10);
+        lsSet("ab-recent", JSON.stringify(rec));
+      }
+    } catch (e) { /* 忽略：存储不可用时功能降级 */ }
     if (AB.$("#main-view")) { location.hash = "#read/" + id; return; }
     var main = AB.$("#page-body");
     if (main && AB.renderReader) AB.renderReader(main, id);

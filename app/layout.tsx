@@ -1,4 +1,4 @@
-// app/layout.tsx v1.4.3
+// app/layout.tsx v1.15.7
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -16,7 +16,8 @@ export const metadata: Metadata = {
   keywords: ["古籍", "古文", "国学", "四库全书", "繁体字", "古籍检索", "AncientBook", "殆知阁"],
   applicationName: "古籍通 AncientBook",
   manifest: "/site.webmanifest",
-  alternates: { canonical: "/" },
+  // 绝对地址：相对 "/" 在部分爬虫/社会化分享下会解析为当前页 URL，导致 canonical 失效
+  alternates: { canonical: "https://guji.ewuse.com/" },
   appleWebApp: {
     capable: true,
     title: "古籍通",
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: "/",
+    url: "https://guji.ewuse.com/",
     locale: "zh-CN",
     siteName: "古籍通 AncientBook",
     title: SITE_TITLE,

@@ -1,4 +1,4 @@
-// components/StatsClient.tsx v1.5.0
+// components/StatsClient.tsx v1.15.7
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -125,7 +125,7 @@ export default function StatsClient() {
   const relTotal = rel ? rel.stats.kinTotal + rel.stats.assocTotal : null;
 
   return (
-    <section>
+    <section id="stats-main">
       <div className="breadcrumb">
         <Link href="/">首页</Link>
         <span className="sep">/</span>

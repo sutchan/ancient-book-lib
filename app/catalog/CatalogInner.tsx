@@ -1,4 +1,4 @@
-// app/catalog/CatalogInner.tsx v1.14.3
+// app/catalog/CatalogInner.tsx v1.15.7
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -85,7 +85,7 @@ export default function CatalogInner() {
   if (!catalog) return <div style={{ padding: 40 }}>正在加载 15,694 部古籍书目索引...</div>;
 
   return (
-    <section>
+    <section id="catalog-main">
       <div className="breadcrumb">
         <Link href="/">首页</Link><span className="sep">/</span><span>全馆藏书目</span>
       </div>
