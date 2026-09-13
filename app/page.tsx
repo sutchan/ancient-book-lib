@@ -1,4 +1,4 @@
-// app/page.tsx v1.15.1
+// app/page.tsx v1.15.8
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
 import { toSimplified } from "@/lib/t2s";

@@ -1,4 +1,4 @@
-// app/people/usePeopleUrlSync.ts 1.15.8 —— 人物库 URL 与状态双向同步（从 PeopleInner 拆出）
+// app/people/usePeopleUrlSync.ts v1.15.8 —— 人物库 URL 与状态双向同步（从 PeopleInner 拆出）
 "use client";
 
 import { useEffect } from "react";

@@ -1,4 +1,4 @@
-// components/ReaderToolbar.tsx v1.4.3
+// components/ReaderToolbar.tsx v1.15.8
 "use client";
 
 interface ReaderToolbarProps {

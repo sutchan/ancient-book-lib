@@ -1,4 +1,4 @@
-// lib/t2s-map-e.ts 1.15.8 —— 繁简映射表分段（由 scripts/tmp/split-t2s.mjs 生成，请勿手改）
+// lib/t2s-map-e.ts v1.15.8 —— 繁简映射表分段（自动生成，请勿手改）
 export const T2S_MAP_E: Record<string, string> = {
   "謝": "谢",
   "謬": "谬",

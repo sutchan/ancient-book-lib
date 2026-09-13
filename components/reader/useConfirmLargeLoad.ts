@@ -1,4 +1,4 @@
-// components/reader/useConfirmLargeLoad.ts 1.15.8 —— 大文件警告确认后加载（从 useReaderData 拆出）
+// components/reader/useConfirmLargeLoad.ts v1.15.8 —— 大文件警告确认后加载（从 useReaderData 拆出）
 "use client";
 
 import { useCallback } from "react";

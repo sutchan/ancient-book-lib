@@ -1,5 +1,5 @@
 /**
- * 构建 CBDB（中国历代人物传记资料库）精简人物索引
+ * 构建 CBDB（中国历代人物传记资料库）精简人物索引 —— 编排层
  *
  * 上游数据：cbdb-project/cbdb_sqlite（HuggingFace 发布），2026-09-05 版
  * 产物：public/index/cbdb/
@@ -10,11 +10,20 @@
  * 用法：
  *   node scripts/build-cbdb-index.mjs [sqlite路径]
  * 默认读取 tmp/cbdb/cbdb_20260905.sqlite3
+ *
+ * 纯逻辑（清洗/分片/索引/meta）见 scripts/lib/cbdbIndexParts.mjs。
  */
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import Database from "better-sqlite3";
+import {
+  SURNAME_THRESHOLD,
+  extractPersons,
+  shardBySurname,
+  buildSearchIndex,
+  buildMeta,
+} from "./lib/cbdbIndexParts.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -23,17 +32,6 @@ const sqlitePath =
   process.argv[2] || join(ROOT, "tmp", "cbdb", "cbdb_20260905.sqlite3");
 const OUT_DIR = join(ROOT, "public", "index", "cbdb");
 const SURNAME_DIR = join(OUT_DIR, "surnames");
-
-// 数据源信息（真实，来自 CBDB 官方发布）
-const SOURCE = {
-  name: "CBDB 中国历代人物传记资料库",
-  url: "https://cbdb.hsites.harvard.edu/",
-  sqlite_repo: "https://github.com/cbdb-project/cbdb_sqlite",
-  release_file: "cbdb_20260905.sqlite3",
-  release_date: "2026-09-05",
-  sha256: "437a253a8e49cb24d2d5209234781d03fcbcc04476aafc3cf9d68453cea7e980",
-  license: "CC BY-NC-SA 4.0（署名-非商业性使用-相同方式共享）",
-};
 
 if (!existsSync(sqlitePath)) {
   console.error(`SQLite 文件不存在: ${sqlitePath}`);
@@ -79,56 +77,19 @@ db.close();
 
 console.log(`提取 ${rows.length.toLocaleString()} 位人物`);
 
-// 3. 清洗：过滤占位籍贯/姓名
-const PLACE_BLACKLIST = ["[信息缺乏]", "[未詳]", "[Unknown]", "[Missing Data]"];
-const persons = rows
-  .map((r) => {
-    const name = (r.name || "").trim();
-    if (!name) return null;
-    const place = PLACE_BLACKLIST.includes((r.place || "").trim())
-      ? ""
-      : (r.place || "").trim();
-    const dynasty = r.dynasty || "";
-    return [
-      r.id,
-      name,
-      r.pinyin || "",
-      r.birth || 0,
-      r.death || 0,
-      r.indexYear || 0,
-      r.female ? 1 : 0,
-      dynasty,
-      place,
-    ];
-  })
-  .filter(Boolean);
-
+// 3. 清洗 + 4. 按姓氏分片
+const persons = extractPersons(rows);
 console.log(`清洗后 ${persons.length.toLocaleString()} 人`);
+const { bySurname, surnameList } = shardBySurname(persons);
 
-// 4. 按姓氏分片
-const bySurname = new Map();
-for (const p of persons) {
-  const surname = p[1].charAt(0);
-  if (!bySurname.has(surname)) bySurname.set(surname, []);
-  bySurname.get(surname).push(p);
-}
-
-// 姓氏列表：人数降序
-const surnameList = [...bySurname.entries()]
-  .map(([surname, list]) => ({ surname, count: list.length }))
-  .sort((a, b) => b.count - a.count);
-
-// 5. 输出
+// 5. 输出：大姓氏单独成片（≥阈值），小姓氏合并到 others.json
 mkdirSync(SURNAME_DIR, { recursive: true });
-
-// 大姓氏单独成片（≥50 人），小姓氏合并到 others.json
-const THRESHOLD = 50;
 const surnameMeta = [];
 const others = [];
 
 for (const { surname, count } of surnameList) {
   const list = bySurname.get(surname);
-  if (count >= THRESHOLD) {
+  if (count >= SURNAME_THRESHOLD) {
     // 磁盘文件名用真实中文（与 fetch 时服务器对 %XX 解码后的结果一致，避免 404）；
     // meta.file 仍存 URL 安全路径（encodeURIComponent），前端 fetch 由服务器解码回真实名
     writeFileSync(join(OUT_DIR, `surnames/${surname}.json`), JSON.stringify(list), "utf8");
@@ -146,37 +107,11 @@ if (others.length > 0) {
 
 // 6. 姓名搜索索引（按姓名排序，前端可二分/前缀匹配）
 console.log("生成姓名搜索索引...");
-const searchIndex = persons.map((p) => [p[1], p[0]]).sort((a, b) => a[0].localeCompare(b[0], "zh"));
+const searchIndex = buildSearchIndex(persons);
 writeFileSync(join(OUT_DIR, "search.json"), JSON.stringify(searchIndex), "utf8");
 
 // 7. meta.json
-const dynastyCount = {};
-for (const p of persons) {
-  const d = p[7] || "未詳";
-  dynastyCount[d] = (dynastyCount[d] || 0) + 1;
-}
-const dynastyList = Object.entries(dynastyCount)
-  .map(([dynasty, count]) => ({ dynasty, count }))
-  .sort((a, b) => b.count - a.count);
-
-const femaleCount = persons.filter((p) => p[6] === 1).length;
-
-const meta = {
-  total: persons.length,
-  female: femaleCount,
-  source: SOURCE,
-  generatedAt: new Date().toISOString().slice(0, 10),
-  dynasty: dynastyList,
-  // 必须收录**全部**姓氏条目：分片循环对所有 count ≥ THRESHOLD(50) 的姓氏都写了独立文件，
-  // 一旦在此截断，落在 200 名之后、人数却 ≥50 的姓氏就会「分片存在但 meta 查不到」，
-  // 前端只能回退 _others.json，而这些人并不在那里 → 人物不可达（详情页报「未找到」）。
-  // 曾用 slice(0, 200)，实测造成 281 个姓氏 / 39,850 位人物丢失（约占全库 6%）。
-  surnames: surnameMeta,
-  surnameTotal: surnameList.length,
-  surnameTotal: surnameList.length,
-  searchIndexSize: searchIndex.length,
-  note: "人物数据字段: [id, 姓名, 拼音, 生年, 卒年, 指数年, 性别(1女), 朝代, 籍贯]",
-};
+const meta = buildMeta({ persons, surnameMeta, surnameList, searchIndexSize: searchIndex.length });
 
 // 防回归断言：meta.surnames 必须与姓氏总数一致。
 // 二者不一致即意味着有姓氏「分片已写盘但 meta 查不到」→ 前端回退 _others.json 也找不到

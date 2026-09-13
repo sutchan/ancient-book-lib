@@ -6,7 +6,24 @@
 ## [1.15.8] - 2026-09-13
 
 ### 修复 / 重构 / 规范
+- **bug 专项修复（3 项）**
+  - `lib/search.ts` `searchFulltext`：全文索引中出现书目里不存在的 id 时安全跳过，不再抛错中断整站检索。
+  - `lib/download.ts`：新增并导出 `escapeCsvCell`，对以 `= + - @` 开头的单元格前置单引号，防御 CSV 公式注入（Excel / Google Sheets）。
+  - `lib/readerSearch.ts`：简体对照模式下命中摘要改为**居中命中词**（此前只截取段首 40 字，命中词落在 40 字之外时摘要丢失上下文）。
+- **拆分 >200 行源文件（对齐「单文件 ≤200 行」规范）**
+  - `lib/t2s.ts`（831 行）→ 合并入口 `lib/t2s-map.ts` + 分段数据 `lib/t2s-map-a..e.ts`（公开导出 `T2S_MAP` / `toSimplified` 不变）。
+  - `components/RemoteReader.tsx`（643 行）→ 拆分至 `components/reader/*`（`useReaderData` / `useReaderNavigation` / `useReaderSearch` / `useReaderSelection` / `useReaderBookmarks` / `useConfirmLargeLoad`）。
+  - `app/catalog/CatalogInner.tsx` → 拆出 `app/catalog/CatalogBookRow.tsx`；`app/people/PeopleInner.tsx` → 拆出 `app/people/usePeopleUrlSync.ts`。
+  - `app/help/page.tsx`（185 行）→ 拆出内容数据 `app/help/helpContent.tsx`；`components/RelationClient.tsx` → 拆出 `components/relation/useRelationInitialPerson.ts`。
+  - `scripts/build-cbdb-index.mjs`（213 行）→ 拆出纯逻辑 `scripts/lib/cbdbIndexParts.mjs`（并修正 `meta` 中重复的 `surnameTotal` 键）。
+  - `scripts/build-fulltext-index.mjs`（209 行）→ 拆出 `scripts/lib/fulltextParts.mjs`（归一化 / 分词 / 章节清单 / 下载 / 裁剪）。
+  - 原型 `prototype/assets/js/core.js`（231 行）→ 拆出 `core-delight.js`；`view-read.js`（276 行）→ 拆出 `view-read-content.js`、`view-read-actions.js`（16 个原型页同步新增 script 引用）。
+- **新增复用模块**：`lib/recentBooks.ts`（最近阅读 localStorage 读写）、`lib/chapterCache.ts`（章节文本内存缓存 + LRU 淘汰）。
+- **语义化 id**：`components/Navbar.tsx`、`components/ReaderToolbar.tsx`、`components/RelationGraph.tsx`、`app/page.tsx`、`app/category/page.tsx`、`app/catalog/*`、`app/people/*`、`app/help/*` 等主要容器与交互元素补齐 `id`，便于调试定位、无障碍锚点与测试选择器。
 - **页脚区 `.footer-stats` 改为版本号与构建更新日期**：`components/Footer.tsx` 由馆藏/人物统计改为 `v{APP_VERSION} · 更新于 {BUILD_DATE}`，版本号构建时由 `package.json` 注入（单一来源），构建日期随发版同步。
+- **测试**：`test/search.test.ts` / `test/download.test.ts` / `test/reader-tools.test.ts` 补回归用例（+3）→ **69 用例 / 69 通过 / 0 失败**；`tsc --noEmit` 0 错误。
+- **文档**：`开发进度清单.md` / `剩余开发任务清单.md` 同步至 v1.15.8；原型 16 个页面页脚版本号同步 v1.15.8。
+- 头注释版本号同步至 v1.15.8（本轮改动的源文件）。
 
 ## [1.15.7] - 2026-09-13
 
@@ -18,8 +35,8 @@
 - **语义化 id**：`app/people/PeopleInner.tsx`、`app/people/detail/PeopleDetailInner.tsx`、`components/StatsClient.tsx`、`app/catalog/CatalogInner.tsx` 根容器补 `id="people-main"` / `people-detail-main` / `stats-main` / `catalog-main`，便于调试定位与测试。
 - 头注释版本号同步至 v1.15.7（layout / StatsClient / CatalogInner / 各 cbdb 子模块）。
 
-### 待续（未在本轮完成）
-- 其余 12 个 >200 行源文件（如 `components/RemoteReader.tsx` 643 行、各页组件、`scripts/build-*.mjs`、原型 `view-read.js`/`core.js`、`lib/t2s.ts` 数据表）按「单文件 >200 行须拆分」规范拆分，计划在后续轮次完成。
+### 待续（已于 v1.15.8 完成）
+- 其余 >200 行源文件（`components/RemoteReader.tsx`、各页组件、`scripts/build-*.mjs`、原型 `view-read.js` / `core.js`、`lib/t2s.ts` 数据表）已于 v1.15.8 全部拆分；经全仓扫描，代码文件当前均 ≤200 行。
 
 ## [1.15.6] - 2026-09-13
 

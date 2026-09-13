@@ -1,4 +1,4 @@
-// components/RelationGraph.tsx —— 人物关系网络图（确定性放射状布局，SVG 自绘，零依赖）
+// components/RelationGraph.tsx v1.15.8 —— 人物关系网络图（确定性放射状布局，SVG 自绘，零依赖）
 // 中心 = 当前人物；第一环 = 亲属（青）+ 社会关系（橙）节点；点击节点跳转详情
 "use client";
 

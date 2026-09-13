@@ -1,4 +1,4 @@
-// components/relation/useRelationInitialPerson.ts 1.15.8 —— 关系页初始人物加载（从 RelationClient 拆出）
+// components/relation/useRelationInitialPerson.ts v1.15.8 —— 关系页初始人物加载（从 RelationClient 拆出）
 "use client";
 
 import { useEffect } from "react";

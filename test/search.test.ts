@@ -1,3 +1,4 @@
+// test/search.test.ts v1.15.8
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { searchByTitle, searchFulltext, type SearchResult } from "../lib/search";

@@ -1,4 +1,4 @@
-// lib/recentBooks.ts 1.15.8 —— 最近阅读记录的 localStorage 读写（被 useReaderData 与 RecentBooks 复用）
+// lib/recentBooks.ts v1.15.8 —— 最近阅读记录的 localStorage 读写（被 useReaderData 与 RecentBooks 复用）
 import type { CatalogEntry } from "./types";
 
 const KEY = "ab-recent";

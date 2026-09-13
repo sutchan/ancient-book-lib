@@ -1,4 +1,4 @@
-// components/SearchClient.tsx 1.15.8
+// components/SearchClient.tsx v1.15.8
 "use client";
 
 import { useEffect, useMemo, useState } from "react";

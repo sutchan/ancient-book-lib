@@ -1,4 +1,4 @@
-// lib/chapterCache.ts 1.15.8 —— 阅读器章节文本内存缓存（带 LRU 淘汰，从 useReaderData 拆出）
+// lib/chapterCache.ts v1.15.8 —— 阅读器章节文本内存缓存（带 LRU 淘汰，从 useReaderData 拆出）
 export interface ChapterCache {
   get(key: string): string | undefined;
   set(key: string, value: string): void;

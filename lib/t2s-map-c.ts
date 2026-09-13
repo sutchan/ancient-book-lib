@@ -1,4 +1,4 @@
-// lib/t2s-map-c.ts 1.15.8 —— 繁简映射表分段（由 scripts/tmp/split-t2s.mjs 生成，请勿手改）
+// lib/t2s-map-c.ts v1.15.8 —— 繁简映射表分段（自动生成，请勿手改）
 export const T2S_MAP_C: Record<string, string> = {
   "適": "适",
   "還": "还",

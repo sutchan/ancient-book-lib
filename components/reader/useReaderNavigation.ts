@@ -1,4 +1,4 @@
-// components/reader/useReaderNavigation.ts 1.15.8 —— 阅读器目录/分页/翻页导航（从 RemoteReader 拆出）
+// components/reader/useReaderNavigation.ts v1.15.8 —— 阅读器目录/分页/翻页导航（从 RemoteReader 拆出）
 "use client";
 
 import { useCallback, useMemo, useRef } from "react";

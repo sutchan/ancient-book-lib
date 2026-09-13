@@ -1,4 +1,4 @@
-// app/help/helpContent.tsx 1.15.8 —— 帮助页内容（从 help/page.tsx 拆出，内容数据与渲染分离）
+// app/help/helpContent.tsx v1.15.8 —— 帮助页内容（从 help/page.tsx 拆出，内容数据与渲染分离）
 import type { ReactNode } from "react";
 import Link from "next/link";
 

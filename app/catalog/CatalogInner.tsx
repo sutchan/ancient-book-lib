@@ -1,4 +1,4 @@
-// app/catalog/CatalogInner.tsx 1.15.8
+// app/catalog/CatalogInner.tsx v1.15.8
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";

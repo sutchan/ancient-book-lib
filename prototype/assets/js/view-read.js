@@ -1,76 +1,11 @@
 /**
- * 原型阅读视图 v2.3
- * 职责：章节正文渲染、生僻字释义弹层、字号/行距/章节/影像对照控制
- * 收藏与阅读位置书签对齐正式站 components/RemoteReader.tsx（v1.14.3）：
- * 收藏存 localStorage「ab-bookmarks」，阅读位置书签存「ab-pos-<id>」
+ * 原型阅读视图 v2.3 —— 渲染编排层
+ * 职责：阅读视图整体渲染（章节正文 / 影像对照 / 工具栏 / 章节导航）与字号、行距、章节、影像开关绑定
+ * 拆出模块：view-read-content.js（样张正文 + 释义弹层）、view-read-actions.js（收藏与阅读位置书签）
+ * 键名对齐正式站 components/RemoteReader.tsx（v1.15.8）：收藏 ab-bookmarks，位置 ab-pos-<id>
  */
 (function (AB) {
   "use strict";
-
-  /* 仅这两部有贴合原书的样张，其余书目复用通用样本 —— 需显式提示，避免被误认为真实原文 */
-  var REAL_SAMPLE_TITLES = ["论语", "心经"];
-  AB.isSampleText = function (book) { return REAL_SAMPLE_TITLES.indexOf(book.title) < 0; };
-
-  /* 章节文本（模拟真实内容 + 生僻字标注），全文检索复用同一函数保证口径一致 */
-  function getChapterText(book, idx) {
-    var sample = {
-      "论语": ['子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？人不知而不慍，不亦君子乎？」', '有子曰：「其為人也孝弟，而好犯上者，鮮矣；不好犯上，而好作亂者，未之有也。君子務本，本立而道生。孝弟也者，其為仁之本與！」', '子曰：「巧言令色，鮮矣仁！」', '曾子曰：「吾日三省吾身：為人謀而不忠乎？與朋友交而不信乎？傳不習乎？」', '子曰：「道千乘之國，敬事而信，節用而愛人，使民以時。」', '子曰：「弟子入則孝，出則弟，謹而信，汎愛眾，而親仁。行有餘力，則以學文。」'],
-      "心经": ['觀自在菩薩，行深般若波羅蜜多時，照見五蘊皆空，度一切苦厄。', '舍利子，色不異空，空不異色，色即是空，空即是色，受想行識，亦復如是。', '舍利子，是諸法空相，不生不滅，不垢不淨，不增不減。', '是故空中無色，無受想行識，無眼耳鼻舌身意，無色聲香味觸法。', '無眼界，乃至無意識界，無無明，亦無無明盡，乃至無老死，亦無老死盡。', '無苦集滅道，無智亦無得。以無所得故，菩提薩埵，依般若波羅蜜多故，心無罣礙。']
-    }[book.title] || [
-      '古之學者必有師。師者，所以傳道、受業、解惑也。人非生而知之者，孰能無惑？惑而不從師，其為惑也，終不解矣。',
-      '生乎吾前，其聞道也固先乎吾，吾從而師之；生乎吾後，其聞道也亦先乎吾，吾從而師之。',
-      '吾師道也，夫庸知其年之先後生於吾乎？是故無貴無賤，無長無少，道之所存，師之所存也。'
-    ];
-    return sample.map(function (p) {
-      var out = AB.esc(p);
-      AB.DATA.glossary.forEach(function (g) {
-        if (out.indexOf(g.char) > -1) {
-          out = out.split(g.char).join('<span class="guji-char" tabindex="0" role="button" aria-label="' +
-            AB.esc(g.char + ' 释义') + '" data-char="' + AB.esc(g.char) + '" title="' + AB.esc(g.meaning) + '">' + g.char + '</span>');
-        }
-      });
-      return '<p>' + out + '</p>';
-    }).join("");
-  }
-
-  /* 划词 / 生僻字释义弹层 */
-  function bindGlossary(main) {
-    AB.$$(".guji-char", main).forEach(function (el) {
-      function open() {
-        var g = AB.DATA.glossary.filter(function (x) { return x.char === el.getAttribute("data-char"); })[0];
-        if (!g) return;
-        var pop = AB.$("#glossary-pop");
-        if (!pop) {
-          pop = document.createElement("div");
-          pop.id = "glossary-pop";
-          pop.className = "glossary-pop";
-          document.body.appendChild(pop);
-        }
-        pop.innerHTML = '<div class="gp-char">' + AB.esc(g.char) + '</div>' +
-          '<div class="gp-pinyin">' + AB.toSimplified(g.pinyin) + '</div>' +
-          '<div>' + AB.toSimplified(g.meaning) + '</div>' +
-          '<div class="gp-usage">' + AB.toSimplified('例句：') + AB.esc(g.usage) + '</div>';
-        var r = el.getBoundingClientRect();
-        pop.style.display = "block";
-        var left = r.left + window.scrollX;
-        var top = r.bottom + window.scrollY + 8;
-        if (left + 300 > window.innerWidth) left = Math.max(0, window.innerWidth - 310);
-        pop.style.left = left + "px";
-        pop.style.top = top + "px";
-      }
-      el.addEventListener("click", function (e) { e.stopPropagation(); open(); });
-      el.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); open(); } });
-    });
-    document.addEventListener("click", function (e) {
-      var pop = AB.$("#glossary-pop");
-      if (pop && !e.target.closest(".guji-char") && !e.target.closest("#glossary-pop")) pop.style.display = "none";
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key !== "Escape") return;
-      var pop = AB.$("#glossary-pop");
-      if (pop) pop.style.display = "none";
-    });
-  }
 
   function renderReader(main, bookId) {
     var book = AB.DATA.books.filter(function (b) { return b.id === bookId; })[0] || AB.DATA.books[0];
@@ -83,13 +18,9 @@
     var idx = Math.min(Math.max(AB.state.chapterIdx, 0), Math.max(chapters.length - 1, 0));
     var chapterTitle = chapters[idx] || "正文";
     var showImage = AB.state.showImage === true;
-    var bmKey = "ab-bookmarks", posKey = "ab-pos-" + book.id;
-    function getBm() { try { return JSON.parse(AB.lsGet(bmKey, "[]")) || []; } catch (e) { return []; } }
-    function getPos() { try { return JSON.parse(AB.lsGet(posKey, "[]")) || []; } catch (e) { return []; } }
-    var bookmarked = getBm().some(function (x) { return x.id === book.id; });
-    var posList0 = getPos();
+    var bmState = AB.readerBookmarkState(book);
     var bodyStyle = 'style="--reader-fs:' + AB.state.fontSize + 'px;--reader-lh:' + AB.state.lineHeight + ';"';
-    var text = getChapterText(book, idx);
+    var text = AB.getChapterText(book, idx);
     var bodyHtml = '<div class="reader-body" id="reader-body" ' + bodyStyle + '>' + text + '</div>';
     var imagePanel = showImage
       ? '<div class="image-compare fade-in">' +
@@ -133,11 +64,11 @@
               AB.toSimplified('影像对照') + '</button></div>' +
           '</div>' +
           '<div class="reader-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">' +
-            '<button class="btn btn-secondary" id="reader-bm-toggle" aria-pressed="' + bookmarked + '">' +
-              (bookmarked ? '★ ' + AB.toSimplified('已收藏') : '☆ ' + AB.toSimplified('收藏')) + '</button>' +
+            '<button class="btn btn-secondary" id="reader-bm-toggle" aria-pressed="' + bmState.bookmarked + '">' +
+              (bmState.bookmarked ? '★ ' + AB.toSimplified('已收藏') : '☆ ' + AB.toSimplified('收藏')) + '</button>' +
             '<button class="btn btn-secondary" id="reader-save-pos">' + AB.toSimplified('保存当前位置') + '</button>' +
             '<button class="btn btn-secondary" id="reader-pos-toggle">' + AB.toSimplified('阅读书签') +
-              (posList0.length ? ' (' + posList0.length + ')' : '') + '</button>' +
+              (bmState.posCount ? ' (' + bmState.posCount + ')' : '') + '</button>' +
           '</div>' +
           '<div id="read-pos-panel" style="display:none;"></div>' +
           imagePanel +
@@ -191,85 +122,14 @@
       renderReader(AB.getMain(), AB.state.currentBookId);
     });
 
-    /* 阅读位置书签面板渲染 */
-    function renderPosPanel() {
-      var panel = AB.$("#read-pos-panel", main);
-      if (!panel) return;
-      var pos = getPos();
-      if (!pos.length) {
-        panel.innerHTML = '<div class="card" style="padding:12px;font-size:13px;color:var(--color-text-secondary);">' +
-          AB.toSimplified('暂无保存的阅读位置，点击「保存当前位置」记录本章。') + '</div>';
-        return;
-      }
-      panel.innerHTML = '<div class="card" style="padding:12px;margin-top:4px;">' +
-        '<strong>' + AB.toSimplified('阅读位置书签') + '</strong>' +
-        pos.map(function (p, k) {
-          return '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:14px;">' +
-            '<button class="btn btn-primary" style="font-size:12px;padding:4px 10px;" data-go="' + k + '">' + AB.toSimplified('跳转') + '</button>' +
-            '<span style="flex:1;">' + AB.esc(p.label || '') + '</span>' +
-            '<button class="btn btn-secondary" style="font-size:12px;padding:2px 8px;" data-del="' + k + '">' + AB.toSimplified('删除') + '</button>' +
-            '</div>';
-        }).join("") + '</div>';
-      AB.$$("[data-go]", panel).forEach(function (b) {
-        b.addEventListener("click", function () {
-          var p = getPos()[parseInt(b.getAttribute("data-go"), 10)];
-          if (!p) return;
-          AB.state.chapterIdx = p.chapterIdx || 0;
-          AB.lsSet("ab-chapter", AB.state.chapterIdx);
-          renderReader(AB.getMain(), AB.state.currentBookId);
-        });
-      });
-      AB.$$("[data-del]", panel).forEach(function (b) {
-        b.addEventListener("click", function () {
-          var arr = getPos();
-          arr.splice(parseInt(b.getAttribute("data-del"), 10), 1);
-          AB.lsSet(posKey, JSON.stringify(arr));
-          renderPosPanel();
-          var pt = AB.$("#reader-pos-toggle", main);
-          if (pt) pt.textContent = AB.toSimplified('阅读书签') + (arr.length ? ' (' + arr.length + ')' : '');
-        });
-      });
-    }
-
-    /* 收藏切换（对齐 Navbar「书签」第 7 项 / RemoteReader #reader-bookmark-toggle） */
-    var bmBtn = AB.$("#reader-bm-toggle", main);
-    if (bmBtn) bmBtn.addEventListener("click", function () {
-      var list = getBm();
-      var hit = -1;
-      for (var bi = 0; bi < list.length; bi++) { if (list[bi].id === book.id) { hit = bi; break; } }
-      if (hit >= 0) list.splice(hit, 1);
-      else list.push({ id: book.id, title: book.title, category: book.category });
-      AB.lsSet(bmKey, JSON.stringify(list));
-      var on = list.some(function (x) { return x.id === book.id; });
-      bmBtn.setAttribute("aria-pressed", String(on));
-      bmBtn.textContent = on ? '★ ' + AB.toSimplified('已收藏') : '☆ ' + AB.toSimplified('收藏');
+    /* 收藏与阅读位置书签交互（见 view-read-actions.js） */
+    AB.bindReaderActions({
+      main: main, book: book, chapterIdx: idx, chapterTitle: chapterTitle,
+      rerender: function () { renderReader(AB.getMain(), AB.state.currentBookId); }
     });
 
-    /* 保存当前阅读位置 */
-    var savePosBtn = AB.$("#reader-save-pos", main);
-    if (savePosBtn) savePosBtn.addEventListener("click", function () {
-      var pos = getPos();
-      var label = chapterTitle ? (chapterTitle + ' · 第 1 页') : ('第 ' + (idx + 1) + ' 章');
-      pos.push({ chapterIdx: idx, pageIdx: 0, label: label, createdAt: Date.now() });
-      AB.lsSet(posKey, JSON.stringify(pos));
-      renderPosPanel();
-      var pt = AB.$("#reader-pos-toggle", main);
-      if (pt) pt.textContent = AB.toSimplified('阅读书签') + ' (' + pos.length + ')';
-    });
-
-    /* 阅读书签面板开关 */
-    var posToggle = AB.$("#reader-pos-toggle", main);
-    if (posToggle) posToggle.addEventListener("click", function () {
-      var panel = AB.$("#read-pos-panel", main);
-      if (!panel) return;
-      var show = panel.style.display === "none";
-      panel.style.display = show ? "block" : "none";
-      if (show) renderPosPanel();
-    });
-
-    bindGlossary(main);
+    AB.bindGlossary(main);
   }
 
-  AB.getChapterText = getChapterText;
   AB.renderReader = renderReader;
 })(window.AB = window.AB || {});

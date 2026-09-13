@@ -1,4 +1,4 @@
-// lib/t2s-map.ts 1.15.8 —— 繁简映射表合并入口（由分段文件合并，单一导出 T2S_MAP）
+// lib/t2s-map.ts v1.15.8 —— 繁简映射表合并入口（由分段文件合并，单一导出 T2S_MAP）
 import { T2S_MAP_A } from "./t2s-map-a";
 import { T2S_MAP_B } from "./t2s-map-b";
 import { T2S_MAP_C } from "./t2s-map-c";

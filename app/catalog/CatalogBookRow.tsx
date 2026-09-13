@@ -1,4 +1,4 @@
-// app/catalog/CatalogBookRow.tsx 1.15.8 —— 全馆藏书目列表单行（从 CatalogInner 拆出）
+// app/catalog/CatalogBookRow.tsx v1.15.8 —— 全馆藏书目列表单行（从 CatalogInner 拆出）
 import Link from "next/link";
 import { formatSize } from "@/lib/catalog";
 

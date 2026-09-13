@@ -1,3 +1,4 @@
+// test/reader-tools.test.ts v1.15.8
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { buildReaderMatches, splitHighlight } from "../lib/readerSearch";
