@@ -1,5 +1,10 @@
+// app/people/PeopleInner.tsx v1.15.8
 "use client";
 
+/**
+ * 人物库（编排层）：状态、URL 同步与数据加载在此，
+ * 筛选区/结果区拆分于 peopleFilters.tsx 与 peopleList.tsx。行为与拆分前一致。
+ */
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,10 +12,21 @@ import {
   loadCbdbMeta,
   loadSurnamePersons,
   searchPersons,
-  formatLife,
   type CbdbMeta,
   type CbdbPerson,
 } from "@/lib/cbdb";
+import {
+  PeopleSearchBox,
+  DynastyFilter,
+  GenderFilter,
+  SurnameFilter,
+} from "./peopleFilters";
+import {
+  PeopleResultSummary,
+  PersonList,
+  PeoplePagination,
+  type PersonListItem,
+} from "./peopleList";
 
 const PAGE_SIZE = 50;
 const SEARCH_LIMIT = 100; // 人名搜索单次取数上限，超出时提示细化关键词
@@ -28,7 +44,7 @@ export default function PeopleInner() {
   const [inputKw, setInputKw] = useState(params.get("q") || "");
   const [kw, setKw] = useState(params.get("q") || "");
   const [persons, setPersons] = useState<CbdbPerson[]>([]);
-  const [searchResults, setSearchResults] = useState<{ id: number; name: string; matched?: "name" | "alias"; alias?: string }[] | null>(null);
+  const [searchResults, setSearchResults] = useState<PersonListItem[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(() => {
     const p = Number(params.get("page"));
@@ -39,7 +55,7 @@ export default function PeopleInner() {
     loadCbdbMeta().then(setMeta).catch((e) => setError(String(e)));
   }, []);
 
-  // 浏览器前进/后退时：URL → state 同步（与上面的 state → URL 互相幂等，不会循环）
+  // 浏览器前进/后退时：URL → state 同步（与下面的 state → URL 互相幂等，不会循环）
   useEffect(() => {
     const s = params.get("surname") || "";
     const d = params.get("dynasty") || "";
@@ -113,12 +129,10 @@ export default function PeopleInner() {
     return () => { cancelled = true; };
   }, [meta, surname, dynasty, femaleOnly, kw]);
 
-  const paged = useMemo(() => {
-    const list = searchResults
-      ? searchResults
-      : persons.map((p) => ({ id: p[0], name: p[1], person: p }));
-    return list;
-  }, [searchResults, persons]);
+  const paged = useMemo<PersonListItem[]>(
+    () => (searchResults ? searchResults : persons.map((p) => ({ id: p[0], name: p[1], person: p }))),
+    [searchResults, persons]
+  );
 
   const totalPages = Math.ceil(paged.length / PAGE_SIZE);
   const pageItems = paged.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -126,7 +140,15 @@ export default function PeopleInner() {
   if (error) return <div style={{ padding: 40, color: "#c00" }}>加载失败：{error}</div>;
   if (!meta) return <div style={{ padding: 60, textAlign: "center" }}>正在加载 661,350 位人物索引...</div>;
 
-  const topDynasties = meta.dynasty.slice(0, 12);
+  const summaryText = kw
+    ? `“${kw}” 共匹配 ${searchResults ? searchResults.length : "..."} 位人物${
+        searchResults && searchResults.length >= SEARCH_LIMIT
+          ? `（仅显示前 ${SEARCH_LIMIT} 位，请细化关键词）`
+          : ""
+      }`
+    : surname
+      ? `${surname}姓${dynasty ? `（${dynasty}）` : ""}共 ${persons.length.toLocaleString()} 位人物`
+      : "请选择姓氏或输入人名搜索";
 
   return (
     <section id="people-main">
@@ -142,129 +164,42 @@ export default function PeopleInner() {
         （{meta.source.release_date} 版）· {meta.source.license}
       </p>
 
-      {/* 搜索框 */}
-      <div style={{ marginBottom: 20, display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <input
-          className="input-text"
-          value={inputKw}
-          onChange={(e) => setInputKw(e.target.value)}
-          placeholder="搜索人名，如：苏轼、李白、朱熹"
-          style={{ maxWidth: 360 }}
-        />
-        {kw && (
-          <button className="btn btn-secondary" onClick={() => { setInputKw(""); setKw(""); }}>
-            清除
-          </button>
-        )}
-      </div>
+      <PeopleSearchBox
+        value={inputKw}
+        active={!!kw}
+        onChange={setInputKw}
+        onClear={() => { setInputKw(""); setKw(""); }}
+      />
 
       {/* 朝代筛选（仅浏览模式生效：搜索结果来自人名索引，不携带朝代字段） */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 8 }}>
-          {kw
-            ? "搜索结果不支持朝代筛选（结果来自人名索引，不含朝代字段）；清除关键词后可按朝代浏览"
-            : `按朝代筛选（前 12 个朝代 · 共 ${meta.dynasty.length} 个）`}
-        </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, opacity: kw ? 0.5 : 1 }}>
-          <button
-            className={`btn ${!dynasty ? "btn-primary" : "btn-secondary"}`}
-            style={{ fontSize: 13, padding: "4px 10px" }}
-            disabled={!!kw}
-            onClick={() => setDynasty("")}
-          >全部</button>
-          {topDynasties.map((d) => (
-            <button
-              key={d.dynasty}
-              className={`btn ${dynasty === d.dynasty ? "btn-primary" : "btn-secondary"}`}
-              style={{ fontSize: 13, padding: "4px 10px" }}
-              disabled={!!kw}
-              onClick={() => { setDynasty(d.dynasty); setSurname(params.get("surname") || surname); }}
-            >
-              {d.dynasty}（{d.count.toLocaleString()}）
-            </button>
-          ))}
-        </div>
-      </div>
+      <DynastyFilter
+        dynasties={meta.dynasty.slice(0, 12)}
+        value={dynasty}
+        totalCount={meta.dynasty.length}
+        active={!!kw}
+        onSelect={(d) => { setDynasty(d); setSurname(params.get("surname") || surname); }}
+      />
 
       {/* 性别筛选（仅浏览模式） */}
       {!kw && (
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 14, cursor: "pointer" }}>
-            <input type="checkbox" checked={femaleOnly} onChange={(e) => setFemaleOnly(e.target.checked)} />
-            仅看女性人物
-          </label>
-          <span style={{ fontSize: 12, color: "var(--color-text-secondary)", marginLeft: 12 }}>
-            CBDB 共收录女性 {meta.female.toLocaleString()} 位
-          </span>
-        </div>
+        <GenderFilter checked={femaleOnly} onChange={setFemaleOnly} femaleTotal={meta.female} />
       )}
 
       {/* 姓氏选择（仅浏览模式） */}
       {!kw && (
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 8 }}>
-            按姓氏浏览{showAllSurnames ? `（全部 ${meta.surnameTotal} 个）` : `（前 60 个 · 共 ${meta.surnameTotal} 个）`}
-          </div>
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            <input
-              className="input-text"
-              value={surnameKw}
-              onChange={(e) => setSurnameKw(e.target.value)}
-              placeholder="输入姓氏精确筛选，如：欧阳、司马、慕容"
-              style={{ maxWidth: 260 }}
-            />
-            <button className="btn btn-secondary" style={{ fontSize: 13 }} onClick={() => setSurnameKw("")}>
-              清除
-            </button>
-          </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {(surnameKw
-              ? meta.surnames.filter((s) => s.surname.startsWith(surnameKw)).slice(0, 80)
-              : showAllSurnames
-                ? meta.surnames
-                : meta.surnames.slice(0, 60)
-            ).map((s) => (
-              <button
-                key={s.surname}
-                className={`btn ${surname === s.surname ? "btn-primary" : "btn-secondary"}`}
-                style={{ fontSize: 13, padding: "4px 10px" }}
-                onClick={() => { setSurname(s.surname); }}
-              >
-                {s.surname}（{s.count.toLocaleString()}）
-              </button>
-            ))}
-            {surnameKw && meta.surnames.filter((s) => s.surname.startsWith(surnameKw)).length === 0 && (
-              <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
-                姓氏库中无「{surnameKw}」开头的姓氏；小姓人物可通过上方搜索框按姓名查找
-              </span>
-            )}
-          </div>
-          {!surnameKw && (
-            <button
-              className="btn btn-secondary"
-              style={{ fontSize: 13, marginTop: 8 }}
-              onClick={() => setShowAllSurnames(!showAllSurnames)}
-            >
-              {showAllSurnames ? "收起（回到前 60）" : `展开全部姓氏（${meta.surnameTotal} 个）`}
-            </button>
-          )}
-        </div>
+        <SurnameFilter
+          meta={meta}
+          surname={surname}
+          onSurname={setSurname}
+          surnameKw={surnameKw}
+          onSurnameKw={setSurnameKw}
+          showAll={showAllSurnames}
+          onToggleShowAll={() => setShowAllSurnames(!showAllSurnames)}
+        />
       )}
 
-      {/* 结果统计 */}
-      <div style={{ fontSize: 13, color: "var(--color-text-secondary)", marginBottom: 12 }}>
-        {kw
-          ? `“${kw}” 共匹配 ${searchResults ? searchResults.length : "..."} 位人物${
-              searchResults && searchResults.length >= SEARCH_LIMIT
-                ? `（仅显示前 ${SEARCH_LIMIT} 位，请细化关键词）`
-                : ""
-            }`
-          : surname
-            ? `${surname}姓${dynasty ? `（${dynasty}）` : ""}共 ${persons.length.toLocaleString()} 位人物`
-            : "请选择姓氏或输入人名搜索"}
-      </div>
+      <PeopleResultSummary text={summaryText} />
 
-      {/* 人物列表 */}
       {loading && <div style={{ padding: 40, textAlign: "center" }}>加载中...</div>}
       {!loading && pageItems.length === 0 && (
         <div style={{ padding: 40, textAlign: "center", color: "var(--color-text-secondary)" }}>
@@ -274,65 +209,8 @@ export default function PeopleInner() {
 
       {!loading && pageItems.length > 0 && (
         <>
-          <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-            {pageItems.map((item, i) => {
-              const person = (item as any).person as CbdbPerson | undefined;
-              const id = item.id;
-              const name = item.name;
-              return (
-                <Link
-                  key={id}
-                  href={`/people/detail?id=${id}`}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "10px 16px",
-                    borderBottom: i < pageItems.length - 1 ? "1px solid var(--color-border)" : "none",
-                    textDecoration: "none",
-                    color: "inherit",
-                  }}
-                >
-                  <span style={{ fontWeight: 600, width: 132, fontSize: 15 }}>
-                    {name}
-                    {(item as any).matched === "alias" && (item as any).alias && (
-                      <span
-                        style={{
-                          fontWeight: 400,
-                          fontSize: 12,
-                          color: "var(--color-text-secondary)",
-                          marginLeft: 4,
-                        }}
-                      >
-                        （{(item as any).alias}）
-                      </span>
-                    )}
-                  </span>
-                  {person && (
-                    <>
-                      <span className="tag">{person[7] || "朝代未詳"}</span>
-                      {person[6] === 1 && <span className="tag">女</span>}
-                      <span style={{ flex: 1, fontSize: 13, color: "var(--color-text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {person[8] ? `籍贯：${person[8]}` : ""}
-                      </span>
-                      <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
-                        {person[3] || person[4] ? formatLife(person[3], person[4]) : person[5] ? `指数年 ${person[5]}` : ""}
-                      </span>
-                    </>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* 分页 */}
-          {totalPages > 1 && (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 20 }}>
-              <button className="btn btn-secondary" disabled={page === 1} onClick={() => setPage(page - 1)} style={{ fontSize: 13 }}>上一页</button>
-              <span style={{ fontSize: 13 }}>第 {page} / {totalPages} 页</span>
-              <button className="btn btn-secondary" disabled={page >= totalPages} onClick={() => setPage(page + 1)} style={{ fontSize: 13 }}>下一页</button>
-            </div>
-          )}
+          <PersonList items={pageItems} />
+          <PeoplePagination page={page} totalPages={totalPages} onPage={setPage} />
         </>
       )}
     </section>
