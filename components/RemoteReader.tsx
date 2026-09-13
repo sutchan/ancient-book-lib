@@ -1,4 +1,4 @@
-// components/RemoteReader.tsx v1.4.3
+// components/RemoteReader.tsx v1.14.3
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
@@ -18,6 +18,15 @@ import {
 import ReaderToc from "./ReaderToc";
 import ScrollProgress from "./ScrollProgress";
 import ReaderToolbar from "./ReaderToolbar";
+import { useBookmarks } from "@/lib/useBookmarks";
+import {
+  addBookmark,
+  removeBookmark,
+  getReadPos,
+  addReadPos,
+  removeReadPos,
+  type ReadPosBookmark,
+} from "@/lib/bookmarks";
 
 const PAGE_SIZE = 8;
 const LARGE_FILE_THRESHOLD = 5 * 1024 * 1024; // 5MB 以上视为大文件
@@ -45,6 +54,17 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
   const [usingManifest, setUsingManifest] = useState(false); // 是否走 Range 分片模式
   const [toc, setToc] = useState<ChapterRange[]>([]); // 分片模式目录（字节偏移）
   const chapterCacheRef = useRef<Map<number, string>>(new Map());
+
+  // 书签（书籍收藏 + 阅读位置书签）
+  const bm = useBookmarks();
+  const bookmarked = !!book && bm.some((x) => x.id === book.id);
+  const [readPosList, setReadPosList] = useState<ReadPosBookmark[]>([]);
+  const [showPos, setShowPos] = useState(false);
+
+  // 加载本书已保存的阅读位置书签
+  useEffect(() => {
+    if (book && typeof window !== "undefined") setReadPosList(getReadPos(book.id));
+  }, [book]);
 
   // 记录阅读历史（提取为独立函数，缓存命中和 fetch 成功后都调用）
   const recordRecent = useCallback((b: CatalogEntry) => {
@@ -280,6 +300,35 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     setLoading(true);
     loadContent(book, true);
   }, [book, loadContent]);
+
+  // 书签：收藏切换
+  const toggleBmReader = useCallback(() => {
+    if (!book) return;
+    if (bookmarked) removeBookmark(book.id);
+    else addBookmark({ id: book.id, title: book.title, category: book.category });
+  }, [book, bookmarked]);
+
+  // 书签：保存当前阅读位置
+  const saveReadPos = useCallback(() => {
+    if (!book) return;
+    const label = currentTitle
+      ? `${currentTitle} · 第 ${pageIdx + 1} 页`
+      : `第 ${chapterIdx + 1} 章 · 第 ${pageIdx + 1} 页`;
+    setReadPosList(addReadPos(book.id, { chapterIdx, pageIdx, label }));
+  }, [book, currentTitle, chapterIdx, pageIdx]);
+
+  // 书签：跳转到已保存位置
+  const gotoReadPos = useCallback((p: ReadPosBookmark) => {
+    goChapter(p.chapterIdx);
+    setPageIdx(p.pageIdx);
+    setShowPos(false);
+  }, [goChapter]);
+
+  // 书签：删除已保存位置
+  const deleteReadPos = useCallback((createdAt: number) => {
+    if (!book) return;
+    setReadPosList(removeReadPos(book.id, createdAt));
+  }, [book]);
 
   if (loading) return (
     <div style={{ padding: 60, textAlign: "center" }}>

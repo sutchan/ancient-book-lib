@@ -3,6 +3,27 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.14.3] - 2026-09-13
+
+### 文档（书签功能开发任务清单）
+- 新增 `docs/04-开发任务清单/书签功能开发任务清单.md`：规划「书签」功能（A. 书籍收藏 / B. 阅读位置书签）的分阶段任务清单、数据模型、改动文件映射与验收标准，对齐现有 `localStorage` 持久化与零后端架构约束
+
+### 重构（原型对齐应用代码与规范文档）
+- **导航统一为 6 项**：原型全部 15 个 HTML（prototype.html + 14 个 pages/*.html）主导航与移动菜单统一为与 `components/Navbar.tsx` 一致的 6 项——首页 / 全馆藏 / 检索 / 人物库 / 社会关系 / 帮助；移除 nav 中过时的「人物考据」「数据统计」入口（数据统计保留为页脚链接，与线上 Footer 一致）
+- **首页对齐 `app/page.tsx`**：修订「学术工具」板块为 人物库 / 社会关系溯源 / 数据统计（原误列「人物考据」）；新增 Hero 区 CTA 双按钮（浏览全馆藏 15,694 部 / 人物库 661,350 人）与「趣味探索」板块（随机一书 + 随机一人，复用 `AB.DATA` 样张数据）
+- **人物考据引导页**：`prototype/pages/character.html` 已为静态引导页（数据待接入说明 + 进入人物库按钮），与 `app/character/page.tsx`「已并入人物库」一致；脚本不再依赖已删除的 `view-character.js`
+- **规范文档同步**：更新 `docs/05-设计规范与原型/UI与UX全局设计规范.md` 与 `Figma极简原型建模页面清单.md` 中导航（6 项）、人物考据（已并入人物库，仅保留引导页）、学术工具（人物库/社会关系溯源/数据统计）等陈旧描述，使原型、应用代码、规范文档三方一致
+- `prototype/assets/js/view-home.js` 头注释 v2.2 → v2.3
+
+## [1.14.2] - 2026-09-13
+
+### 文档（目录结构规范校正）
+- 修正 `docs/02-架构与开发规范/项目目录结构规范.md` 过期的目录树：实际仓库为根级 `app/`（Next.js App Router）而非 `src/app/`，并补充真实顶层结构 `components/`、`lib/`（原 `src/utils`）、`public/index/`（原 `src/static-index`）；移除不存在的 `src/hooks/`、`src/styles/`、`tailwind.config.js`，将 `next.config.js` 更正为 `next.config.mjs`
+
+### 清理（原型死代码收尾）
+- 删除 `prototype/assets/js/view-character.js`（人物考据视图，能力已并入人物库 `/people`），并移除 `prototype/assets/js/boot.js` 中 `PAGE_RENDERERS.character` 渲染器（模块注释 v2.2 → v2.3）
+- 同步移除 15 个原型 HTML 页面（prototype.html + 14 个 pages/*.html）中残留的 `<script src=".../view-character.js"></script>` 引入（`AB.DATA.characters` 数据源位于 `data/app-data.js`，删除不影响 `view-people.js`）
+
 ## [1.14.1] - 2026-09-12
 
 ### 修复（清理与一致性收尾）
@@ -566,8 +587,10 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
+[1.14.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.2...v1.14.3
+[1.14.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...v1.14.2
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.2...HEAD
 [1.14.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.0...v1.14.1
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...HEAD
 [1.14.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.2...v1.14.0
 [1.13.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.1...v1.13.2
 [1.13.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.0...v1.13.1

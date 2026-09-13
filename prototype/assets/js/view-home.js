@@ -1,5 +1,5 @@
 /**
- * 原型首页 / 馆藏分类 / 书单视图 v2.2
+ * 原型首页 / 馆藏分类 / 书单视图 v2.3
  */
 (function (AB) {
   "use strict";
@@ -12,6 +12,14 @@
         '<div class="cat-desc">' + AB.esc(c.desc) + '</div>' +
         '</div>';
     }).join("");
+    var rb = AB.DATA.books[Math.floor(Math.random() * AB.DATA.books.length)];
+    var rc = AB.DATA.characters[Math.floor(Math.random() * AB.DATA.characters.length)];
+    var funBook = '<div class="card category-card fade-in" onclick="AB.openBook(\'' + AB.esc(rb.id) + '\')">' +
+      '<div class="cat-icon">📖</div><div class="cat-name">' + AB.toSimplified(rb.title) + '</div>' +
+      '<div class="cat-desc">' + AB.toSimplified(rb.dynasty + ' · ' + rb.author) + '</div></div>';
+    var funChar = '<div class="card category-card fade-in" onclick="location.hash=\'#page-people\'">' +
+      '<div class="cat-icon">🧑</div><div class="cat-name">' + AB.toSimplified(rc.name) + (rc.zi ? ' 字' + AB.toSimplified(rc.zi) : '') + '</div>' +
+      '<div class="cat-desc">' + AB.toSimplified((rc.dynasty || '') + ' · ' + AB.toSimplified('点击进入人物库')) + '</div></div>';
     main.innerHTML =
       '<section>' +
         '<div class="home-hero fade-in">' +
@@ -27,17 +35,24 @@
             '</span>' +
             '<button class="btn btn-primary search-btn" id="home-search-btn" type="submit">' + AB.toSimplified('搜索') + '</button>' +
           '</form>' +
+          '<div style="margin-top:12px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
+            '<a class="btn btn-secondary" style="font-size:14px;" href="#page-book-list">📚 ' + AB.toSimplified('浏览全馆藏（15,694 部）') + '</a>' +
+            '<a class="btn btn-secondary" style="font-size:14px;" href="#page-people">🧑 ' + AB.toSimplified('人物库（661,350 人）') + '</a>' +
+          '</div>' +
         '</div>' +
+        '<h2 class="section-title">' + AB.toSimplified('趣味探索') + '</h2>' +
+        '<p style="font-size:14px;color:var(--color-text-secondary);margin-top:-8px;margin-bottom:16px;">' + AB.toSimplified('不知道读什么？随手翻开一卷，遇见一位古人。') + '</p>' +
+        '<div class="category-grid">' + funBook + funChar + '</div>' +
         '<h2 class="section-title">' + AB.toSimplified('十大馆藏') + '</h2>' +
         '<div class="category-grid">' + cats + '</div>' +
         '<h2 class="section-title">' + AB.toSimplified('学术工具') + '</h2>' +
         '<div class="category-grid">' +
-          '<div class="card category-card fade-in" onclick="location.hash=\'#page-character\'">' +
-            '<div class="cat-icon">考</div><div class="cat-name">' + AB.toSimplified('人物考据') + '</div>' +
-            '<div class="cat-desc">' + AB.toSimplified('历史人物档案与史料聚合（数据待接入）') + '</div></div>' +
+          '<div class="card category-card fade-in" onclick="location.hash=\'#page-people\'">' +
+            '<div class="cat-icon">人</div><div class="cat-name">' + AB.toSimplified('人物库') + '</div>' +
+            '<div class="cat-desc">' + AB.toSimplified('CBDB 历代人物传记：661,350 人按姓氏/朝代检索') + '</div></div>' +
           '<div class="card category-card fade-in" onclick="location.hash=\'#page-relation\'">' +
             '<div class="cat-icon">系</div><div class="cat-name">' + AB.toSimplified('社会关系溯源') + '</div>' +
-            '<div class="cat-desc">' + AB.toSimplified('人物多维关系与双人溯源（数据待接入）') + '</div></div>' +
+            '<div class="cat-desc">' + AB.toSimplified('CBDB 亲属 56.1 万条 + 社会关系 19 万条，支持双人溯源') + '</div></div>' +
           '<div class="card category-card fade-in" onclick="location.hash=\'#page-stats\'">' +
             '<div class="cat-icon">统</div><div class="cat-name">' + AB.toSimplified('数据统计') + '</div>' +
             '<div class="cat-desc">' + AB.toSimplified('馆藏规模与学术价值分析') + '</div></div>' +

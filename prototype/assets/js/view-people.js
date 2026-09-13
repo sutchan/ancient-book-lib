@@ -1,7 +1,7 @@
 /**
  * 原型人物库视图 v1.0
  * 职责：历代人物浏览（demo 数据；正式站接入 CBDB 全量 661,350 人）
- * 与 view-character.js（人物考据）共享数据 AB.DATA.characters，但定位为「按姓氏/朝代浏览」的库
+ * 复用同一份 AB.DATA.characters 样例人物数据（考据视图已并入人物库 /people，数据源自 data/app-data.js），定位为「按姓氏/朝代浏览」的库
  */
 (function (AB) {
   "use strict";

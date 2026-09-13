@@ -1,4 +1,4 @@
-// app/catalog/CatalogInner.tsx v1.4.3
+// app/catalog/CatalogInner.tsx v1.14.3
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -12,6 +12,8 @@ import {
   type DaizhigeCatalog,
 } from "@/lib/catalog";
 import { exportBooklistCsv } from "@/lib/download";
+import { useBookmarks } from "@/lib/useBookmarks";
+import { addBookmark, removeBookmark } from "@/lib/bookmarks";
 
 const PAGE_SIZE = 50;
 
@@ -29,6 +31,13 @@ export default function CatalogInner() {
   const [category, setCategory] = useState(params.get("category") || "");
   const [subcat, setSubcat] = useState("");
   const [page, setPage] = useState(1);
+
+  const bm = useBookmarks();
+  const bmSet = new Set(bm.map((x) => x.id));
+  const toggleBm = (b: { id: string; title: string; category: string }) => {
+    if (bmSet.has(b.id)) removeBookmark(b.id);
+    else addBookmark({ id: b.id, title: b.title, category: b.category });
+  };
 
   useEffect(() => {
     loadCatalog().then(setCatalog).catch((e) => setError(String(e)));

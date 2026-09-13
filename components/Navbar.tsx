@@ -1,10 +1,11 @@
-// components/Navbar.tsx v1.14.1
+// components/Navbar.tsx v1.14.3
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { toSimplified } from "@/lib/t2s";
+import { useBookmarks } from "@/lib/useBookmarks";
 
 interface NavbarProps {
   current?: string;
@@ -17,6 +18,7 @@ const MENU: { key: string; href: string; label: string }[] = [
   { key: "search", href: "/search", label: "检索" },
   { key: "people", href: "/people", label: "人物库" },
   { key: "relation", href: "/relation", label: "社会关系" },
+  { key: "bookmarks", href: "/bookmarks", label: "书签" },
   { key: "help", href: "/help", label: "帮助" },
 ];
 
@@ -31,6 +33,8 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
   const [simplified, setSimplified] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const initialRef = useRef(false);
+  const bookmarks = useBookmarks();
+  const bookmarkCount = bookmarks.length;
 
   useEffect(() => {
     if (initialRef.current) return;

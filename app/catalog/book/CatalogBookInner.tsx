@@ -1,4 +1,4 @@
-// app/catalog/book/CatalogBookInner.tsx v1.4.3
+// app/catalog/book/CatalogBookInner.tsx v1.14.3
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -7,6 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { loadCatalog, findBookById, formatSize, type CatalogEntry } from "@/lib/catalog";
 import { fetchTextWithTimeout } from "@/lib/fetchWithTimeout";
 import { getCachedBook } from "@/lib/idb";
+import { useBookmarks } from "@/lib/useBookmarks";
+import { addBookmark, removeBookmark } from "@/lib/bookmarks";
 
 export default function CatalogBookInner() {
   const params = useSearchParams();
@@ -15,6 +17,9 @@ export default function CatalogBookInner() {
   const [chapters, setChapters] = useState<{ title: string; count: number }[] | null>(null);
   const [loadingChapters, setLoadingChapters] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const bm = useBookmarks();
+  const bookmarked = !!book && bm.some((x) => x.id === book.id);
 
   useEffect(() => {
     if (!id) return;
@@ -103,6 +108,13 @@ export default function CatalogBookInner() {
         </p>
         <div className="book-actions">
           <Link href={`/read/remote?id=${book.id}`} className="btn btn-primary">开始阅读</Link>
+          <button
+            className="btn btn-secondary"
+            id="bookmark-toggle-detail"
+            onClick={() => book && (bookmarked ? removeBookmark(book.id) : addBookmark({ id: book.id, title: book.title, category: book.category }))}
+          >
+            {bookmarked ? "★ 已收藏" : "☆ 加入书签"}
+          </button>
           <a href={book.rawUrl} target="_blank" rel="noopener" className="btn btn-secondary">上游原文</a>
           {book.mirrors?.[0] && (
             <a href={book.mirrors[0]} target="_blank" rel="noopener" className="btn btn-secondary">CDN 镜像</a>

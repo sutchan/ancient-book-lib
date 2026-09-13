@@ -1,5 +1,5 @@
 /**
- * 原型启动与路由模块 v2.2
+ * 原型启动与路由模块 v2.3
  * 职责：全局控件（主题/繁简/设备/汉堡菜单）、导航高亮、哈希路由与独立页初始化
  */
 (function (AB) {
@@ -10,7 +10,6 @@
     category: function (m) { AB.renderCategory(m); },
     "book-list": function (m) { AB.renderBookList(m); },
     search: function (m) { AB.renderSearch(m); },
-    character: function (m) { AB.renderCharacter(m); },
     people: function (m) { AB.renderPeople(m); },
     relation: function (m) { AB.renderRelation(m); },
     help: function (m) { AB.renderHelp(m); },
