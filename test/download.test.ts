@@ -38,3 +38,15 @@ test("下载：空书籍列表安全", () => {
   assert.ok(txt.includes("佛藏·馆藏合集"));
   assert.ok(txt.includes(DOWNLOAD_NOTICE));
 });
+
+test("下载：CSV 导出防御公式注入", () => {
+  const { escapeCsvCell } = require("../lib/download");
+  // 以 = + - @ 开头的单元格前置单引号，避免被 Excel/Sheets 当作公式执行
+  assert.equal(escapeCsvCell("=cmd|'/c..."), "'=cmd|'/c...");
+  assert.equal(escapeCsvCell("+1+1"), "'+1+1");
+  assert.equal(escapeCsvCell("-2+3"), "'-2+3");
+  assert.equal(escapeCsvCell("@SUM(A1)"), "'@SUM(A1)");
+  // 普通文本与含逗号文本不受影响（仅转义引号包裹）
+  assert.equal(escapeCsvCell("論語"), "論語");
+  assert.equal(escapeCsvCell('a"b'), '"a""b"');
+});

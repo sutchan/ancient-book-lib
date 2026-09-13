@@ -1,4 +1,4 @@
-// components/SearchClient.tsx v1.15.0
+// components/SearchClient.tsx 1.15.8
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -17,6 +17,7 @@ import PeopleSearchResults from "@/components/PeopleSearchResults";
 export default function SearchClient() {
   const sp = useSearchParams();
   const [kw, setKw] = useState(sp.get("q") || "论语");
+  const [debouncedKw, setDebouncedKw] = useState(kw);
   const [mode, setMode] = useState<"title" | "full">(sp.get("mode") === "title" ? "title" : "full");
   const [category, setCategory] = useState(sp.get("category") || "");
   const [limit, setLimit] = useState(12);
@@ -26,6 +27,12 @@ export default function SearchClient() {
   const [indexReady, setIndexReady] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // 输入防抖：避免每次按键都触发检索与索引下载（全文模式叠加索引加载尤其昂贵）
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedKw(kw), 250);
+    return () => clearTimeout(t);
+  }, [kw]);
+
   useEffect(() => {
     loadCatalog()
       .then(setCatalog)
@@ -34,7 +41,7 @@ export default function SearchClient() {
 
   useEffect(() => {
     if (!catalog) return;
-    const q = kw.trim();
+    const q = debouncedKw.trim();
     if (!q) {
       setResults([]);
       setTotal(0);
@@ -65,7 +72,7 @@ export default function SearchClient() {
     return () => {
       cancelled = true;
     };
-  }, [kw, mode, category, limit, catalog]);
+  }, [debouncedKw, mode, category, limit, catalog]);
 
   const cats = useMemo(
     () => (catalog ? Object.entries(catalog.stats).map(([name, count]) => ({ name, count })) : []),
@@ -73,7 +80,7 @@ export default function SearchClient() {
   );
 
   return (
-    <section>
+    <section id="search-main">
       <div className="breadcrumb">
         <Link href="/">首页</Link>
         <span className="sep">/</span>
@@ -137,10 +144,10 @@ export default function SearchClient() {
       )}
 
       {/* CBDB 人物匹配（懒加载） */}
-      {kw.trim() && <PeopleSearchResults query={kw} />}
+      {debouncedKw.trim() && <PeopleSearchResults query={debouncedKw} />}
 
       <div className="search-stat">
-        关键词「{kw}」· {mode === "title" ? "标题模式" : "全文模式"} · 命中 {total} 部
+        关键词「{debouncedKw}」· {mode === "title" ? "标题模式" : "全文模式"} · 命中 {total} 部
       </div>
 
       {results.length === 0 ? (
@@ -160,8 +167,8 @@ export default function SearchClient() {
       ) : (
         results.map((r) => {
           const href =
-            mode === "full" && kw.trim()
-              ? `/read/remote?id=${r.id}&q=${encodeURIComponent(kw.trim())}`
+            mode === "full" && debouncedKw.trim()
+              ? `/read/remote?id=${r.id}&q=${encodeURIComponent(debouncedKw.trim())}`
               : `/read/remote?id=${r.id}`;
           return (
             <div className="search-result-item" key={r.id}>

@@ -3,6 +3,11 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.8] - 2026-09-13
+
+### 修复 / 重构 / 规范
+- **页脚区 `.footer-stats` 改为版本号与构建更新日期**：`components/Footer.tsx` 由馆藏/人物统计改为 `v{APP_VERSION} · 更新于 {BUILD_DATE}`，版本号构建时由 `package.json` 注入（单一来源），构建日期随发版同步。
+
 ## [1.15.7] - 2026-09-13
 
 ### 修复 / 重构 / 规范
@@ -731,7 +736,9 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.6...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.8...HEAD
+[1.15.8]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.7...v1.15.8
+[1.15.7]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.6...v1.15.7
 [1.15.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.5...v1.15.6
 [1.15.5]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.4...v1.15.5
 [1.15.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.3...v1.15.4

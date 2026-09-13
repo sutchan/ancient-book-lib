@@ -1,12 +1,11 @@
-// components/Footer.tsx v1.15.1
+// components/Footer.tsx v1.15.8
 import Link from "next/link";
 import EasterEgg from "@/components/EasterEgg";
 
-
-// 真实馆藏总数（与 daizhige-catalog.json 同步；上游 garychowcmu/daizhigev20 15,694 部）
-const TOTAL_BOOKS = 15694;
-// 真实人物总数（与 cbdb meta.json 同步；CBDB 2026-09-05 版 661,350 人）
-const TOTAL_PEOPLE = 661350;
+// 版本号（构建时由 package.json 注入，单一来源）
+const APP_VERSION = process.env.npm_package_version || "1.15.8";
+// 应用构建更新日期（每次发版同步）
+const BUILD_DATE = "2026-09-13";
 
 export default function Footer() {
   return (
@@ -25,7 +24,7 @@ export default function Footer() {
           className="footer-stats"
           title="悄悄说：连续点我几下，有惊喜"
         >
-          馆藏 10 类 · 全馆藏 {TOTAL_BOOKS.toLocaleString()} 部（殆知阁 v20）· 人物 {TOTAL_PEOPLE.toLocaleString()} 人（CBDB）
+          v{APP_VERSION} · 更新于 {BUILD_DATE}
         </p>
         <EasterEgg />
       </div>

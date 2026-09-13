@@ -64,7 +64,7 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
 
   return (
     <>
-      <header className="navbar">
+      <header className="navbar" id="site-navbar">
         <div className="nav-inner">
           <Link className="brand" href="/" id="brand-home-link">
             <img
@@ -74,7 +74,7 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
               alt="古籍通 AncientBook"
             />
           </Link>
-          <nav className="nav-menu">
+          <nav className="nav-menu" id="primary-nav">
             {MENU.map((m) => (
               <Link
                 key={m.key}
@@ -102,7 +102,7 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
           </button>
         </div>
       </header>
-      <nav className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+      <nav className={`mobile-menu ${menuOpen ? "open" : ""}`} id="mobile-nav">
         {MENU.map((m) => (
           <Link key={m.key} href={m.href} className={current === m.key ? "active" : ""} onClick={() => setMenuOpen(false)}>
             {simplified ? toSimplified(m.label) : m.label}

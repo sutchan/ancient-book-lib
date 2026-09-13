@@ -1,4 +1,4 @@
-// lib/download.ts v1.4.3
+// lib/download.ts 1.15.8
 /**
  * 合规下载工具（PRD §4.7 资源下载模块）
  * - 单章节/单本/单馆藏三级粒度
@@ -78,12 +78,17 @@ export interface BooklistRow {
   mirrors: string[];
 }
 
+/** CSV 公式注入防御：单元格以 = + - @ 等开头时，Excel/Sheets 会当作公式执行（如 =cmd 触发）。
+ * 前置单引号使内容按纯文本处理，避免恶意/意外公式执行。 */
+export function escapeCsvCell(s: string): string {
+  let v = String(s);
+  if (/^[=+\-@\t\r]/.test(v)) v = `'${v}`;
+  if (/[",\n]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
+  return v;
+}
+
 /** 将书单导出为 CSV（UTF-8 BOM，Excel 友好），含书名/馆藏/子类/大小/原文直链/镜像直链 */
 export function exportBooklistCsv(rows: BooklistRow[], filename: string): void {
-  const csvCell = (s: string): string => {
-    if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
-    return s;
-  };
   const header = ["书名", "馆藏", "子类", "大小(B)", "原文直链", "镜像直链"];
   const lines = [header.join(",")];
   for (const r of rows) {
@@ -94,7 +99,7 @@ export function exportBooklistCsv(rows: BooklistRow[], filename: string): void {
       String(r.size),
       r.rawUrl,
       (r.mirrors || []).join(" "),
-    ].map(csvCell);
+    ].map(escapeCsvCell);
     lines.push(cells.join(","));
   }
   downloadText(filename, lines.join("\n"));

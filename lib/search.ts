@@ -1,4 +1,4 @@
-// lib/search.ts v1.5.1
+// lib/search.ts 1.15.8
 /**
  * 检索工具（纯静态无数据库）
  * - 标题/元数据检索：始终可用，基于 daizhige-catalog.json（loadCatalog + searchCatalog）
@@ -23,15 +23,21 @@ export interface SearchFilters {
   category?: string;
 }
 
-/** 加载全量倒排索引（缺失返回 null，调用方回退标题检索） */
+let fulltextIndexPromise: Promise<Record<string, string[]> | null> | null = null;
+
+/** 加载全量倒排索引（缺失返回 null，调用方回退标题检索）。模块级 Promise 缓存，避免每次检索重复下载索引 JSON。 */
 export async function loadFulltextIndex(baseUrl = ""): Promise<Record<string, string[]> | null> {
-  try {
-    const res = await fetch(`${baseUrl}/index/fulltext-index.json`);
-    if (!res.ok) return null;
-    return (await res.json()) as Record<string, string[]>;
-  } catch {
-    return null;
-  }
+  if (fulltextIndexPromise) return fulltextIndexPromise;
+  fulltextIndexPromise = (async () => {
+    try {
+      const res = await fetch(`${baseUrl}/index/fulltext-index.json`);
+      if (!res.ok) return null;
+      return (await res.json()) as Record<string, string[]>;
+    } catch {
+      return null;
+    }
+  })();
+  return fulltextIndexPromise;
 }
 
 /**
@@ -73,7 +79,10 @@ export function searchFulltext(
     for (const id of hits) scores.set(id, (scores.get(id) || 0) + 1);
   }
   const idMap = new Map(catalog.books.map((b) => [b.id, b]));
+  // 防御：全文索引与书目不同步（跨版本/索引缺失重建）时，索引里可能含 catalog 中不存在的 id，
+  // 必须过滤缺失项，否则 idMap.get(id)! 会抛 TypeError 导致搜索结果渲染白屏。
   return Array.from(scores.entries())
+    .filter(([id]) => idMap.has(id))
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([id, score]) => {

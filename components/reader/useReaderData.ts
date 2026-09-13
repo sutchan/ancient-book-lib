@@ -11,6 +11,8 @@ import { loadCatalog, findBookById, type CatalogEntry } from "@/lib/catalog";
 import { fetchTextWithTimeout, FetchTimeoutError } from "@/lib/fetchWithTimeout";
 import { getCachedBook, setCachedBook } from "@/lib/idb";
 import { parseChapters } from "@/lib/chapterParse";
+import { recordRecent } from "@/lib/recentBooks";
+import { createChapterCache } from "@/lib/chapterCache";
 import {
   loadChapterManifest,
   buildToc,
@@ -18,6 +20,7 @@ import {
   type ChapterRange,
 } from "@/lib/remoteBook";
 import { CHAPTER_CACHE_MAX, FETCH_TIMEOUT, LARGE_FILE_THRESHOLD } from "./constants";
+import { useConfirmLargeLoad } from "./useConfirmLargeLoad";
 
 export function useReaderData(bookId: string) {
   const [book, setBook] = useState<CatalogEntry | null>(null);
@@ -33,18 +36,7 @@ export function useReaderData(bookId: string) {
   const [toc, setToc] = useState<ChapterRange[]>([]); // 分片模式目录（字节偏移）
   // 章节文本缓存：键必须带 bookId。不同书的章节字节偏移会碰撞（首章 start 常为 0），
   // 仅以 ch.start 为键时切换书目会命中上一本书的正文。
-  const chapterCacheRef = useRef<Map<string, string>>(new Map());
-
-  // 记录阅读历史（缓存命中和 fetch 成功后都调用）
-  const recordRecent = useCallback((b: CatalogEntry) => {
-    if (typeof window === "undefined") return;
-    try {
-      const recent = JSON.parse(localStorage.getItem("ab-recent") || "[]");
-      const filtered = recent.filter((r: { id: string }) => r.id !== b.id);
-      filtered.unshift({ id: b.id, title: b.title, category: b.category, time: Date.now() });
-      localStorage.setItem("ab-recent", JSON.stringify(filtered.slice(0, 10)));
-    } catch { /* ignore */ }
-  }, []);
+  const chapterCacheRef = useRef(createChapterCache(CHAPTER_CACHE_MAX));
 
   // 分片模式：按章节字节区间拉取（带内存缓存，避免重复下载）
   const loadChapter = useCallback(async (b: CatalogEntry, ch: ChapterRange) => {
@@ -63,13 +55,7 @@ export function useReaderData(bookId: string) {
         timeout: FETCH_TIMEOUT,
         onProgress: (loaded, total) => setLoadingProgress(total > 0 ? Math.round((loaded / total) * 100) : 0),
       });
-      const cache = chapterCacheRef.current;
-      cache.set(cacheKey, text);
-      // 超出上限时按插入顺序淘汰最早的一条（Map 保持插入顺序）
-      if (cache.size > CHAPTER_CACHE_MAX) {
-        const oldest = cache.keys().next().value;
-        if (oldest !== undefined) cache.delete(oldest);
-      }
+      chapterCacheRef.current.set(cacheKey, text);
       recordRecent(b);
       setContent(text);
       setLoading(false);
@@ -77,7 +63,7 @@ export function useReaderData(bookId: string) {
       setError(String((e as Error)?.message || e));
       setLoading(false);
     }
-  }, [recordRecent]);
+  }, []);
 
   // 加载原文：优先 Range 分片（超大书），否则回退整本下载 + IDB 缓存 + 大文件警告
   const loadContent = useCallback(async (b: CatalogEntry, force = false, restoredChapter = 0) => {
@@ -208,12 +194,4 @@ export function useReaderData(bookId: string) {
     loadChapter, loadContent, confirmLargeLoad: useConfirmLargeLoad(book, loadContent),
     setError, setLoading,
   };
-}
-
-// 大文件警告确认后加载（force=true 跳过大小检查）
-function useConfirmLargeLoad(book: CatalogEntry | null, loadContent: (b: CatalogEntry, force?: boolean) => Promise<void>) {
-  return useCallback(() => {
-    if (!book) return;
-    loadContent(book, true);
-  }, [book, loadContent]);
 }

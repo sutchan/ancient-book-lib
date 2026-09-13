@@ -5,8 +5,7 @@
  * 远程阅读器（编排层）：数据/搜索/书签/划词逻辑在 components/reader/ 下，
  * 本文件只做状态编排与 JSX 组装。行为与拆分前保持一致。
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { splitParagraphs } from "@/lib/chapterParse";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toSimplified } from "@/lib/t2s";
 import type { ReaderMatch } from "@/lib/readerSearch";
 import ReaderToc from "./ReaderToc";
@@ -14,8 +13,8 @@ import ScrollProgress from "./ScrollProgress";
 import ReaderToolbar from "./ReaderToolbar";
 import ReaderSearchBar from "./ReaderSearchBar";
 import ReaderSelectionMenu from "./ReaderSelectionMenu";
-import { PAGE_SIZE } from "./reader/constants";
 import { useReaderData } from "./reader/useReaderData";
+import { useReaderNavigation } from "./reader/useReaderNavigation";
 import { useReaderSearch } from "./reader/useReaderSearch";
 import { useReaderBookmarks } from "./reader/useReaderBookmarks";
 import { useReaderSelection } from "./reader/useReaderSelection";
@@ -59,37 +58,14 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
     if (typeof window !== "undefined") localStorage.setItem("ab-simple", simple ? "1" : "0");
   }, [simple]);
 
-  // 派生：目录 / 当前章 / 分页
-  const navItems = usingManifest ? toc : chapters;
-  const currentTitle = usingManifest ? toc[chapterIdx]?.title ?? "" : chapters[chapterIdx]?.title ?? "";
-  const paragraphs = usingManifest
-    ? content ? splitParagraphs(content) : []
-    : chapters[chapterIdx]?.paragraphs ?? [];
-  const totalPages = Math.ceil(paragraphs.length / PAGE_SIZE) || 1;
-  const pageParagraphs = paragraphs.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE);
-
-  const goPage = useCallback(
-    (delta: number) => {
-      setPageIdx(Math.max(0, Math.min(totalPages - 1, pageIdx + delta)));
-      window.scrollTo({ top: 0 });
-    },
-    [totalPages, pageIdx, setPageIdx]
-  );
-
-  const goChapter = useCallback(
-    (idx: number) => {
-      const max = (usingManifest ? toc.length : chapters.length) - 1;
-      const clamped = Math.max(0, Math.min(max, idx));
-      setChapterIdx(clamped);
-      setPageIdx(0);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      if (usingManifest && book) {
-        const ch = toc[clamped];
-        if (ch) loadChapter(book, ch);
-      }
-    },
-    [usingManifest, toc, chapters.length, book, loadChapter, setChapterIdx, setPageIdx]
-  );
+  // 目录 / 分页 / 翻页导航（拆入 useReaderNavigation 钩子）
+  const {
+    navItems, currentTitle, paragraphs, totalPages, pageParagraphs,
+    goPage, goChapter, onBodyTouchStart, onBodyTouchEnd, matchLabel,
+  } = useReaderNavigation({
+    usingManifest, chapterIdx, pageIdx, setChapterIdx, setPageIdx,
+    toc, chapters, content, book, loadChapter,
+  });
 
   // 页内搜索：分片模式仅当前章节，整本模式为全书
   const searchChapters = useMemo(
@@ -111,12 +87,6 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
     [usingManifest, goChapter, setPageIdx]
   );
 
-  // 命中处所在章节标题
-  const matchLabel = useCallback(
-    (m: ReaderMatch) => (usingManifest ? currentTitle : chapters[m.chapterIdx]?.title ?? ""),
-    [usingManifest, currentTitle, chapters]
-  );
-
   const bookmarks = useReaderBookmarks({
     bookId: book?.id ?? "",
     bookTitle: book?.title ?? "",
@@ -133,21 +103,6 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
   const handleDownload = useCallback(() => {
     if (book) downloadBookText(book, content, simple, usingManifest);
   }, [book, content, simple, usingManifest]);
-
-  // 移动端左右滑动翻页
-  const touchXRef = useRef<number | null>(null);
-  const onBodyTouchStart = useCallback((x: number) => { touchXRef.current = x; }, []);
-  const onBodyTouchEnd = useCallback(
-    (endX: number) => {
-      const startX = touchXRef.current;
-      touchXRef.current = null;
-      if (startX === null) return;
-      const dx = endX - startX;
-      if (Math.abs(dx) < 50) return;
-      goPage(dx < 0 ? 1 : -1); // 左滑下一页，右滑上一页
-    },
-    [goPage]
-  );
 
   if (loading) return <ReaderLoading fromCache={loadingFromCache} progress={loadingProgress} />;
 

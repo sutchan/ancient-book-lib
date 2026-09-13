@@ -40,6 +40,23 @@ test("splitHighlight 正确切分命中片段", () => {
   ]);
 });
 
+test("buildReaderMatches 简体对照模式+繁体查询仍能居中命中摘要", () => {
+  // 简体对照模式 display = toSimplified(para)，查询为繁体时原实现直接 fallback 失败、
+  // 只返回段落前 40 字（命中词被截断在 40 字之外则摘要丢失命中上下文）。
+  const longChapters = [
+    {
+      title: "千字文",
+      paragraphs: [
+        "天地玄黄宇宙洪荒日月盈昃辰宿列张寒来暑往秋收冬藏闰余成岁律吕调阳雲騰致雨露結為霜金生麗水玉出崑崗。溫故而知新可以為師矣。",
+      ],
+    },
+  ];
+  const r = buildReaderMatches(longChapters, "溫故", 1, true);
+  assert.equal(r.length, 1);
+  // 修正后摘要应居中命中词「温故」，而非仅返回段落开头切片
+  assert.ok(r[0].snippet.includes("温故"));
+});
+
 test("formatCitation 生成《书名·章节》：原文", () => {
   assert.equal(
     formatCitation({ bookTitle: "論語", chapterTitle: "學而", text: "子曰學而時習之" }),

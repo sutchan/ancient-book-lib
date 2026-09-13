@@ -1,6 +1,8 @@
 // components/RelationGraph.tsx —— 人物关系网络图（确定性放射状布局，SVG 自绘，零依赖）
 // 中心 = 当前人物；第一环 = 亲属（青）+ 社会关系（橙）节点；点击节点跳转详情
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 
 export interface GraphNode {
   id: number;
@@ -15,6 +17,7 @@ const KIN_LABEL = "亲属";
 const ASSOC_LABEL = "社会关系";
 
 export default function RelationGraph({ personName, kin, assoc }: { personName: string; kin: GraphNode[]; assoc: GraphNode[] }) {
+  const router = useRouter();
   const nodes: GraphNode[] = [...kin.slice(0, MAX_NODES), ...assoc.slice(0, MAX_NODES)];
   if (nodes.length === 0) return null;
   const totalHidden = kin.length + assoc.length - nodes.length;
@@ -51,7 +54,15 @@ export default function RelationGraph({ personName, kin, assoc }: { personName: 
         {/* 外围节点（Link 包裹，点击跳转） */}
         {pos.map(({ node, x, y }) => (
           <g key={`n-${node.id}`}>
-            <a href={`/people/detail?id=${node.id}`} aria-label={`${node.name}（${node.rel}）`}>
+            <a
+              href={`/people/detail?id=${node.id}`}
+              onClick={(e) => {
+                e.preventDefault();
+                router.push(`/people/detail?id=${node.id}`);
+              }}
+              style={{ cursor: "pointer" }}
+              aria-label={`${node.name}（${node.rel}）`}
+            >
               <circle cx={x} cy={y} r={15} fill={COLORS[node.kind]} opacity={0.92} stroke="#fff" strokeWidth={1.5} />
               <text x={x} y={y + 3} textAnchor="middle" fontSize={10} fill="#fff" fontWeight={500}>
                 {node.name.length > 4 ? `${node.name.slice(0, 4)}…` : node.name}

@@ -8,7 +8,7 @@ import RandomCharacter from "@/components/RandomCharacter";
 
 export default function HomePage() {
   return (
-    <section>
+    <section id="home-main">
       <div className="home-hero">
         <h1 className="hero-title">古籍通</h1>
         <p className="hero-sub">

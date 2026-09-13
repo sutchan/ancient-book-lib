@@ -26,7 +26,7 @@ export default function ReaderToolbar({
   onDownload,
 }: ReaderToolbarProps) {
   return (
-    <div className="reader-toolbar">
+    <div className="reader-toolbar" id="reader-toolbar">
       <div className="ctrl">
         <span>字号</span>
         <button onClick={onFontDec}>A-</button>

@@ -1,4 +1,4 @@
-// lib/readerSearch.ts v1.15.5
+// lib/readerSearch.ts 1.15.8
 /**
  * 阅读器页内搜索（纯函数，便于单测）
  * - 命中判定支持繁简互通：直接匹配，或（繁体正文遇到简体查询时）在简体空间再匹配一次
@@ -27,11 +27,11 @@ function isHit(display: string, q: string): boolean {
   return display.includes(q) || toSimplified(display).includes(toSimplified(q));
 }
 
-/** 截取命中处上下文（前后约 12 字，超出加省略号） */
-function snippetOf(display: string, q: string, simple: boolean): string {
+/** 截取命中处上下文（前后约 12 字，超出加省略号）。始终尝试简体回退，使繁体查询在简体对照模式下也能定位命中上下文。 */
+function snippetOf(display: string, q: string): string {
   let idx = display.indexOf(q);
   let len = q.length;
-  if (idx < 0 && !simple) {
+  if (idx < 0) {
     const ds = toSimplified(display);
     const i = ds.indexOf(toSimplified(q));
     if (i >= 0) {
@@ -63,7 +63,7 @@ export function buildReaderMatches(
         chapterIdx,
         pageIdx: Math.floor(paraIdx / pageSize),
         paraIdx,
-        snippet: snippetOf(display, q, simple),
+        snippet: snippetOf(display, q),
       });
     });
   });

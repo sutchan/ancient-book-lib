@@ -40,3 +40,12 @@ test("searchFulltext 基于倒排索引命中", () => {
 test("searchFulltext 空索引返回空", () => {
   assert.equal(searchFulltext("x", null, catalog).length, 0);
 });
+
+test("searchFulltext 索引含目录不存在的 id 时安全跳过（不崩溃）", () => {
+  // 模拟全文索引与书目不同步：索引含 catalog 中无对应条目的 id
+  const index = { 論: ["dzg-00001", "dzg-99999"], 語: ["dzg-00001"] };
+  const r = searchFulltext("論語", index, catalog);
+  assert.ok(r.length >= 1);
+  assert.ok(r.every((x: SearchResult) => x.id !== "dzg-99999"));
+  assert.ok(r.some((x: SearchResult) => x.id === "dzg-00001"));
+});

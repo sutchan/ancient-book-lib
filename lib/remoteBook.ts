@@ -1,4 +1,4 @@
-// lib/remoteBook.ts v1.5.1
+// lib/remoteBook.ts 1.15.8
 /**
  * 远程书分片加载（超大书 HTTP Range 懒加载）
  * - loadChapterSupport：读取构建期生成的章节清单索引，判断该书是否支持 Range 分片
@@ -57,8 +57,9 @@ export async function fetchChapterText(
   ch: ChapterRange,
   opts: { timeout?: number; onProgress?: (loaded: number, total: number) => void } = {}
 ): Promise<string> {
-  // fetchWithTimeout 内部会补 "bytes=" 前缀，这里只传裸区间，避免出现 bytes=bytes=0-99
-  const range = `${ch.start}-${ch.end}`;
+  // fetchWithTimeout 内部会补 "bytes=" 前缀。chapters.json 的 end 为半开区间上界（不含），
+  // 而 HTTP Range 的 end 为闭区间，故需减 1，否则会多请求下一章首字节（多字节字符末端乱码）。
+  const range = `${ch.start}-${Math.max(ch.start, ch.end - 1)}`;
   const urls = [...(book.mirrors || []), book.rawUrl];
   let lastError: Error | null = null;
   for (const url of urls) {

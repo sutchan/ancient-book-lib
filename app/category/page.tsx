@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function CategoryIndexPage() {
   return (
-    <section>
+    <section id="category-main">
       <div className="breadcrumb">
         <Link href="/">首页</Link>
         <span className="sep">/</span>

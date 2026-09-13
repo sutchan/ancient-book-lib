@@ -1,4 +1,4 @@
-// app/catalog/CatalogInner.tsx v1.15.7
+// app/catalog/CatalogInner.tsx 1.15.8
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
@@ -14,6 +14,7 @@ import {
 import { exportBooklistCsv } from "@/lib/download";
 import { useBookmarks } from "@/lib/useBookmarks";
 import { addBookmark, removeBookmark } from "@/lib/bookmarks";
+import CatalogBookRow from "./CatalogBookRow";
 
 const PAGE_SIZE = 50;
 
@@ -156,46 +157,13 @@ export default function CatalogInner() {
 
       <div style={{ display: "grid", gap: 8 }}>
         {pageItems.map((b) => (
-          <div
+          <CatalogBookRow
             key={b.id}
-            style={{
-              display: "flex", alignItems: "center", gap: 12,
-              padding: "10px 14px", border: "1px solid var(--color-border)",
-              borderRadius: 6, background: "var(--color-card-bg)",
-            }}
-          >
-            <span style={{ fontSize: 18 }}>{CATEGORY_ICONS[b.category] || "📚"}</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <Link href={`/catalog/book?id=${b.id}`} style={{ fontWeight: 600, fontSize: 15, color: "inherit", textDecoration: "none" }}>
-                {b.title}
-              </Link>
-              <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 2 }}>
-                {b.category} › {b.subcategories.join(" › ") || "—"} · {formatSize(b.size)}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 6 }}>
-              <button
-                className="btn btn-secondary"
-                id={`bookmark-toggle-${b.id}`}
-                aria-label={bmSet.has(b.id) ? "移除书签" : "加入书签"}
-                title={bmSet.has(b.id) ? "移除书签" : "加入书签"}
-                onClick={() => toggleBm(b)}
-                style={{ fontSize: 16, padding: "6px 10px", lineHeight: 1 }}
-              >
-                {bmSet.has(b.id) ? "★" : "☆"}
-              </button>
-              <Link
-                href={`/catalog/book?id=${b.id}`}
-                className="btn btn-secondary"
-                style={{ fontSize: 13, padding: "6px 12px", whiteSpace: "nowrap" }}
-              >详情</Link>
-              <Link
-                href={`/read/remote?id=${b.id}`}
-                className="btn btn-primary"
-                style={{ fontSize: 13, padding: "6px 14px", whiteSpace: "nowrap" }}
-              >阅读</Link>
-            </div>
-          </div>
+            book={b}
+            icon={CATEGORY_ICONS[b.category] || "📚"}
+            bookmarked={bmSet.has(b.id)}
+            onToggleBookmark={toggleBm}
+          />
         ))}
       </div>
 

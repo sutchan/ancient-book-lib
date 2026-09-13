@@ -27,6 +27,7 @@ import {
   PeoplePagination,
   type PersonListItem,
 } from "./peopleList";
+import { usePeopleUrlSync } from "./usePeopleUrlSync";
 
 const PAGE_SIZE = 50;
 const SEARCH_LIMIT = 100; // 人名搜索单次取数上限，超出时提示细化关键词
@@ -55,35 +56,11 @@ export default function PeopleInner() {
     loadCbdbMeta().then(setMeta).catch((e) => setError(String(e)));
   }, []);
 
-  // 浏览器前进/后退时：URL → state 同步（与下面的 state → URL 互相幂等，不会循环）
-  useEffect(() => {
-    const s = params.get("surname") || "";
-    const d = params.get("dynasty") || "";
-    const f = params.get("female") === "1";
-    const q = params.get("q") || "";
-    const p = Math.max(1, Math.floor(Number(params.get("page")) || 1));
-    if (s !== surname) setSurname(s);
-    if (d !== dynasty) setDynasty(d);
-    if (f !== femaleOnly) setFemaleOnly(f);
-    if (q !== kw) {
-      setInputKw(q);
-      setKw(q);
-    }
-    if (p !== page) setPage(p);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
-
-  // 浏览/搜索状态同步到 URL（支持分享链接与浏览器前进后退）
-  useEffect(() => {
-    const qs = new URLSearchParams();
-    if (surname) qs.set("surname", surname);
-    if (dynasty) qs.set("dynasty", dynasty);
-    if (femaleOnly) qs.set("female", "1");
-    if (kw) qs.set("q", kw);
-    if (page > 1) qs.set("page", String(page));
-    const s = qs.toString();
-    router.replace(s ? `/people?${s}` : "/people", { scroll: false });
-  }, [surname, dynasty, femaleOnly, kw, page, router]);
+  // 浏览/搜索状态与 URL 双向同步（拆入 usePeopleUrlSync）
+  usePeopleUrlSync({
+    surname, setSurname, dynasty, setDynasty, femaleOnly, setFemaleOnly,
+    kw, setKw, inputKw, setInputKw, page, setPage,
+  });
 
   // 搜索防抖
   useEffect(() => {
