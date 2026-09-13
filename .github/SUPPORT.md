@@ -8,6 +8,7 @@
    - `01-项目基础说明`：项目简介、品牌定名、开源合规
    - `02-架构与开发规范`：架构、目录结构、代码规范、分片请求、性能
    - `03-产品需求PRD`：V1.0 上线版需求（终审）
+   - `04-开发任务清单`：开发进度清单、剩余开发任务清单、书签功能任务清单
    - `05-设计规范与原型`：UI/UX 全局设计规范、原型清单
    - `06-部署与迭代`：部署上线、版本迭代
    - `07-环境搭建手册`：本地开发环境搭建 FAQ
@@ -36,7 +37,7 @@
 `npm run build` 产物在 `out/`（开启了 `output: export`），用 `npx serve out` 等任意静态服务器预览。
 
 **Q：怎么更新馆藏 / 人物数据？**
-改唯一数据源 `prototype/data/app-data.js`，然后执行 `npm run build:index` 重新生成 `lib/data-generated.ts`。
+书目数据来自殆知阁 v20，执行 `npm run build:catalog` 重建 `public/index/daizhige-catalog.json`；人物数据来自哈佛 CBDB，执行 `npm run build:cbdb*` 系列脚本重建。
 
 **Q：检索很慢 / 结果为空？**
 先确认静态索引已生成且未损坏；检索性能基线为 20–80ms，明显超出请按 Bug 模板提交环境信息。

@@ -1,4 +1,4 @@
-// components/RemoteReader.tsx v1.14.3
+// components/RemoteReader.tsx v1.15.0
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
@@ -18,6 +18,8 @@ import {
 import ReaderToc from "./ReaderToc";
 import ScrollProgress from "./ScrollProgress";
 import ReaderToolbar from "./ReaderToolbar";
+import ReaderSearchBar from "./ReaderSearchBar";
+import ReaderSelectionMenu from "./ReaderSelectionMenu";
 import { useBookmarks } from "@/lib/useBookmarks";
 import {
   addBookmark,
@@ -27,6 +29,8 @@ import {
   removeReadPos,
   type ReadPosBookmark,
 } from "@/lib/bookmarks";
+import { buildReaderMatches, splitHighlight, type ReaderMatch } from "@/lib/readerSearch";
+import { formatCitation, copyText } from "@/lib/citation";
 
 const PAGE_SIZE = 8;
 const LARGE_FILE_THRESHOLD = 5 * 1024 * 1024; // 5MB 以上视为大文件
@@ -38,7 +42,7 @@ function safeHttpUrl(url: string | undefined): string | null {
   return url;
 }
 
-export default function RemoteReader({ bookId }: { bookId: string }) {
+export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: string; initialQuery?: string }) {
   const [book, setBook] = useState<CatalogEntry | null>(null);
   const [content, setContent] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +64,27 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
   const bookmarked = !!book && bm.some((x) => x.id === book.id);
   const [readPosList, setReadPosList] = useState<ReadPosBookmark[]>([]);
   const [showPos, setShowPos] = useState(false);
+
+  // 页内搜索 + 引用复制
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+  const touchXRef = useRef<number | null>(null);
+
+  // 由检索结果带入关键词：自动打开页内搜索
+  useEffect(() => {
+    if (initialQuery) {
+      setShowSearch(true);
+      setSearchQuery(initialQuery);
+      setSubmittedQuery(initialQuery);
+    }
+  }, [initialQuery]);
+
+  // 小屏（<420px）初始字号自适应
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 420) setFontSize(15);
+  }, []);
 
   // 加载本书已保存的阅读位置书签
   useEffect(() => {
@@ -227,6 +252,27 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
   const totalPages = Math.ceil(paragraphs.length / PAGE_SIZE) || 1;
   const pageParagraphs = paragraphs.slice(pageIdx * PAGE_SIZE, (pageIdx + 1) * PAGE_SIZE);
 
+  // 页内搜索：分片模式仅当前章节，整本模式为全书
+  const searchChapters = useMemo(
+    () =>
+      usingManifest
+        ? [{ title: currentTitle, paragraphs }]
+        : chapters.map((c) => ({ title: c.title, paragraphs: c.paragraphs })),
+    [usingManifest, currentTitle, paragraphs, chapters]
+  );
+  const matches = useMemo(
+    () => (submittedQuery ? buildReaderMatches(searchChapters, submittedQuery, PAGE_SIZE, simple) : []),
+    [searchChapters, submittedQuery, simple]
+  );
+
+  const goPage = useCallback(
+    (delta: number) => {
+      setPageIdx((p) => Math.max(0, Math.min(totalPages - 1, p + delta)));
+      window.scrollTo({ top: 0 });
+    },
+    [totalPages]
+  );
+
   // 进度缓存
   useEffect(() => {
     if (book && typeof window !== "undefined") {
@@ -256,6 +302,33 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
       if (ch) loadChapter(book, ch);
     }
   }, [usingManifest, toc, chapters.length, book, loadChapter]);
+
+  // 页内搜索：跳转到命中处（分片模式命中只在当前章节，跳页即可）
+  const jumpToMatch = useCallback(
+    (m: ReaderMatch) => {
+      if (!usingManifest) goChapter(m.chapterIdx);
+      setPageIdx(m.pageIdx);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [usingManifest, goChapter]
+  );
+
+  // 命中处所在章节标题
+  const matchLabel = useCallback(
+    (m: ReaderMatch) => (usingManifest ? currentTitle : chapters[m.chapterIdx]?.title ?? ""),
+    [usingManifest, currentTitle, chapters]
+  );
+
+  // 正文高亮渲染（有已提交关键词时）
+  const renderText = useCallback(
+    (text: string) => {
+      if (!submittedQuery) return text;
+      return splitHighlight(text, submittedQuery).map((seg, i) =>
+        seg.hit ? <mark key={i}>{seg.text}</mark> : <span key={i}>{seg.text}</span>
+      );
+    },
+    [submittedQuery]
+  );
 
   const handleDownload = useCallback(() => {
     if (!book) return;
@@ -292,6 +365,22 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
     document.addEventListener("mouseup", handler);
     return () => document.removeEventListener("mouseup", handler);
   }, []);
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2000);
+  }, []);
+
+  // 划词：复制学术引用（《书名·章节》：原文）
+  const copyCitation = useCallback(
+    async (text: string) => {
+      if (!book) return;
+      const ok = await copyText(formatCitation({ bookTitle: book.title, chapterTitle: currentTitle, text }));
+      setSelBtn(null);
+      showToast(ok ? "已复制引用" : "复制失败，请手动选择复制");
+    },
+    [book, currentTitle, showToast]
+  );
 
   // 大文件警告确认后加载（force=true 跳过大小检查）
   const confirmLargeLoad = useCallback(() => {
@@ -415,7 +504,23 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         <button className="btn btn-secondary" id="reader-pos-toggle" onClick={() => setShowPos(!showPos)} style={{ fontSize: 13, padding: "6px 12px" }}>
           阅读书签{readPosList.length > 0 ? ` (${readPosList.length})` : ""}
         </button>
+        <button className="btn btn-secondary" id="reader-search-toggle" onClick={() => setShowSearch((v) => !v)} aria-pressed={showSearch} style={{ fontSize: 13, padding: "6px 12px" }}>
+          页内搜索
+        </button>
       </div>
+
+      {showSearch && (
+        <ReaderSearchBar
+          query={searchQuery}
+          onQuery={setSearchQuery}
+          onSubmit={() => setSubmittedQuery(searchQuery.trim())}
+          onClose={() => { setShowSearch(false); setSubmittedQuery(""); }}
+          matches={matches}
+          onJump={jumpToMatch}
+          labelOf={matchLabel}
+          submitted={!!submittedQuery}
+        />
+      )}
 
       {showPos && (
         <div className="card" style={{ padding: 14, marginBottom: 12 }}>
@@ -451,7 +556,7 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         onDownload={handleDownload}
       />
 
-      {/* 阅读进度条 */}
+      {/* 阅读进度条（可拖拽跳章，移动端友好） */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--color-text-secondary)", marginBottom: 4 }}>
           <span>阅读进度</span>
@@ -460,40 +565,66 @@ export default function RemoteReader({ bookId }: { bookId: string }) {
         <div style={{ background: "var(--color-border,#eee)", borderRadius: 4, height: 6, overflow: "hidden" }}>
           <div style={{ background: "var(--color-primary,#8C3130)", height: "100%", width: `${navItems.length > 0 ? ((chapterIdx + 1) / navItems.length) * 100 : 0}%`, transition: "width 0.3s" }} />
         </div>
+        {navItems.length > 1 && (
+          <input
+            type="range"
+            id="reader-progress-slider"
+            className="reader-progress-slider"
+            min={0}
+            max={navItems.length - 1}
+            value={chapterIdx}
+            onChange={(e) => goChapter(parseInt(e.target.value, 10))}
+            aria-label="拖拽跳转章节"
+          />
+        )}
       </div>
 
       <ReaderToc items={navItems} current={chapterIdx} onSelect={goChapter} disabled={loading} />
 
-      {/* 正文 */}
+      {/* 正文（移动端支持左右滑动翻页） */}
       <div
         className="reader-body"
         style={{ fontSize, lineHeight, userSelect: "text" }}
         onMouseUp={() => { /* selection handler above */ }}
+        onTouchStart={(e) => { touchXRef.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          const startX = touchXRef.current;
+          touchXRef.current = null;
+          if (startX === null) return;
+          const dx = e.changedTouches[0].clientX - startX;
+          if (Math.abs(dx) < 50) return;
+          goPage(dx < 0 ? 1 : -1); // 左滑下一页，右滑上一页
+        }}
       >
         <h3 style={{ textAlign: "center", marginBottom: 20, fontSize: 18 }}>{currentTitle}</h3>
         {pageParagraphs.map((p, i) => (
-          <p key={i}>{simple ? toSimplified(p) : p}</p>
+          <p key={i}>{renderText(simple ? toSimplified(p) : p)}</p>
         ))}
       </div>
 
       {/* 分页 */}
       {totalPages > 1 && (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 32 }}>
-          <button className="btn btn-secondary" disabled={pageIdx === 0} onClick={() => { setPageIdx(pageIdx - 1); window.scrollTo({ top: 0 }); }} style={{ fontSize: 13 }}>上一页</button>
+          <button className="btn btn-secondary" disabled={pageIdx === 0} onClick={() => goPage(-1)} style={{ fontSize: 13 }}>上一页</button>
           <span style={{ fontSize: 14 }}>第 {pageIdx + 1} / {totalPages} 页</span>
-          <button className="btn btn-secondary" disabled={pageIdx >= totalPages - 1} onClick={() => { setPageIdx(pageIdx + 1); window.scrollTo({ top: 0 }); }} style={{ fontSize: 13 }}>下一页</button>
+          <button className="btn btn-secondary" disabled={pageIdx >= totalPages - 1} onClick={() => goPage(1)} style={{ fontSize: 13 }}>下一页</button>
         </div>
       )}
 
       {selBtn && (
+        <ReaderSelectionMenu
+          sel={selBtn}
+          onSearch={(t) => { window.open(`/search?q=${encodeURIComponent(t)}&mode=full`, "_blank"); setSelBtn(null); }}
+          onCite={copyCitation}
+        />
+      )}
+
+      {toast && (
         <div
-          style={{ position: "absolute", left: selBtn.x, top: selBtn.y, transform: "translateX(-50%)", zIndex: 50 }}
+          id="reader-toast"
+          style={{ position: "fixed", left: "50%", bottom: 40, transform: "translateX(-50%)", background: "var(--color-primary,#8C3130)", color: "#fff", padding: "8px 16px", borderRadius: 6, fontSize: 13, zIndex: 100 }}
         >
-          <button
-            className="btn btn-primary"
-            style={{ fontSize: 12, padding: "4px 10px" }}
-            onClick={() => { window.open(`/search?q=${encodeURIComponent(selBtn.text)}&mode=full`, "_blank"); setSelBtn(null); }}
-          >检索「{selBtn.text}」</button>
+          {toast}
         </div>
       )}
     </div>

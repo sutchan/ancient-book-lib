@@ -1,4 +1,4 @@
-// components/SearchClient.tsx v1.4.3
+// components/SearchClient.tsx v1.15.0
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -158,17 +158,23 @@ export default function SearchClient() {
           </div>
         </div>
       ) : (
-        results.map((r) => (
-          <div className="search-result-item" key={r.id}>
-            <div className="result-title">
-              <Link href={`/read/remote?id=${r.id}`}>{toSimplified(r.book)}</Link>
+        results.map((r) => {
+          const href =
+            mode === "full" && kw.trim()
+              ? `/read/remote?id=${r.id}&q=${encodeURIComponent(kw.trim())}`
+              : `/read/remote?id=${r.id}`;
+          return (
+            <div className="search-result-item" key={r.id}>
+              <div className="result-title">
+                <Link href={href}>{toSimplified(r.book)}</Link>
+              </div>
+              <div className="path-info">
+                <span>{toSimplified(r.path)}</span>
+                <span className="score-badge">{r.score}</span>
+              </div>
             </div>
-            <div className="path-info">
-              <span>{toSimplified(r.path)}</span>
-              <span className="score-badge">{r.score}</span>
-            </div>
-          </div>
-        ))
+          );
+        })
       )}
     </section>
   );

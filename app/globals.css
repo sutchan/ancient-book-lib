@@ -230,6 +230,12 @@ label.btn-toggle:has(input:focus-visible){outline:2px solid var(--color-primary)
 .reader-body mark{background:var(--color-highlight);padding:0 2px;border-radius:2px;}
 .reader-nav{display:flex;justify-content:space-between;gap:12px;margin:40px auto 0;max-width:720px;}
 .reader-progress{text-align:center;font-size:13px;color:var(--color-text-secondary);margin-top:20px;}
+.reader-body{touch-action:pan-y;}
+.reader-progress-slider{width:100%;margin-top:8px;accent-color:var(--color-primary,#8C3130);cursor:pointer;}
+@media(max-width:480px){
+  .reader-title{font-size:20px;}
+  .reader-sub{margin-bottom:20px;}
+}
 
 /* 影像对照 */
 .image-compare{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start;}

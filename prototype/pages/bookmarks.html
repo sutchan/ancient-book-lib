@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>数据统计｜古籍通 AncientBook 高保真原型</title>
+<title>我的书架｜古籍通 AncientBook 高保真原型</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
 <meta property="og:image" content="../assets/brand/og-image.png"/>
 <meta name="twitter:card" content="summary_large_image"/>
 </head>
-<body data-theme="light" data-device="desktop" data-page="stats">
+<body data-theme="light" data-device="desktop" data-page="bookmarks">
 <div class="app-container">
   <div class="device-bar">
     <span style="font-size:13px;color:var(--color-text-secondary);margin-right:6px;">预览设备</span>
@@ -41,7 +41,7 @@
         <a href="./search.html">检索</a>
         <a href="./people.html">人物库</a>
         <a href="./relation.html">社会关系</a>
-        <a href="./bookmarks.html">书签</a>
+        <a href="./bookmarks.html" class="active">书签</a>
         <a href="./help.html">帮助</a>
       </nav>
       <div class="nav-actions">
@@ -57,10 +57,64 @@
         <a href="./search.html">检索</a>
         <a href="./people.html">人物库</a>
         <a href="./relation.html">社会关系</a>
-        <a href="./bookmarks.html">书签</a>
+        <a href="./bookmarks.html" class="active">书签</a>
         <a href="./help.html">帮助</a>
       </nav>
-  <main class="main-content" id="page-body"></main>
+  <main class="main-content" id="page-body">
+    <!-- 原型静态演示：正式站点由 app/bookmarks/page.tsx 渲染，数据存 localStorage -->
+    <div class="breadcrumb">
+      <a href="./index.html">首页</a>
+      <span class="sep">/</span>
+      <span>我的书架</span>
+    </div>
+    <h2 style="margin-bottom:4px;">我的书架</h2>
+    <p style="color:var(--color-text-secondary);margin-bottom:20px;font-size:14px;">
+      原型演示：正式站点中，书籍收藏与阅读位置书签保存在本机浏览器（localStorage），跨会话保留；书签页支持「导出 / 导入 JSON」跨设备迁移。
+    </p>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+      <button class="btn btn-secondary" style="font-size:13px;padding:6px 12px;">导出书签 JSON</button>
+      <button class="btn btn-secondary" style="font-size:13px;padding:6px 12px;">导入书签 JSON</button>
+      <button class="btn btn-secondary" style="font-size:13px;padding:6px 12px;">清空</button>
+    </div>
+
+    <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:15px;margin-bottom:4px;">論語</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">儒藏 · 刚刚</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <a class="btn btn-primary" style="font-size:13px;padding:5px 12px;" href="./read.html">阅读</a>
+          <a class="btn btn-secondary" style="font-size:13px;padding:5px 12px;" href="./book-list.html">详情</a>
+          <button class="btn btn-secondary" style="font-size:13px;padding:5px 12px;">移除</button>
+        </div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:15px;margin-bottom:4px;">金剛經</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">佛藏 · 3 分钟前</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <a class="btn btn-primary" style="font-size:13px;padding:5px 12px;" href="./read.html">阅读</a>
+          <a class="btn btn-secondary" style="font-size:13px;padding:5px 12px;" href="./book-list.html">详情</a>
+          <button class="btn btn-secondary" style="font-size:13px;padding:5px 12px;">移除</button>
+        </div>
+      </div>
+      <div class="card" style="padding:14px;">
+        <div style="font-weight:600;font-size:15px;margin-bottom:4px;">史記</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:10px;">史藏 · 1 天前</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <a class="btn btn-primary" style="font-size:13px;padding:5px 12px;" href="./read.html">阅读</a>
+          <a class="btn btn-secondary" style="font-size:13px;padding:5px 12px;" href="./book-list.html">详情</a>
+          <button class="btn btn-secondary" style="font-size:13px;padding:5px 12px;">移除</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:14px;margin-top:20px;">
+      <strong>阅读位置书签</strong>
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-top:6px;margin-bottom:0;">
+        阅读页可点「保存当前位置」记录当前章节与页码，并在书签面板一键跳回（正式站点 `components/RemoteReader.tsx`）。
+      </p>
+    </div>
+  </main>
   <footer class="footer">
     <div class="footer-inner">
       <div class="foot-links">
@@ -79,12 +133,6 @@
 <script src="../data/app-data.js"></script>
 <script src="../assets/js/t2s-map.js"></script>
 <script src="../assets/js/core.js"></script>
-<script src="../assets/js/view-home.js"></script>
-<script src="../assets/js/view-read.js"></script>
-<script src="../assets/js/view-search.js"></script>
-<script src="../assets/js/view-relation.js"></script>
-<script src="../assets/js/view-help.js"></script>
-<script src="../assets/js/view-stats.js"></script>
 <script src="../assets/js/boot.js"></script>
 </body>
 </html>

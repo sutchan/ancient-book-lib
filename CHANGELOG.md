@@ -3,6 +3,39 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.0] - 2026-09-13
+
+### 新增（阅读体验补强，对应剩余任务 R1–R4）
+- **R1 阅读器内页面搜索**：阅读页新增「页内搜索」面板（新增 `lib/readerSearch.ts` + `components/ReaderSearchBar.tsx`），命中处 `<mark>` 高亮，并可按「章 / 页」一键跳转；分片模式检索当前章节、整本模式检索全书；繁简互通（繁体正文可用简体查询）
+- **R2 引用格式一键复制**：阅读页划词浮层新增「复制引用」（新增 `lib/citation.ts`），生成「《书名·章节》：原文」规范引用文本并写入剪贴板（Clipboard API + `execCommand` 降级），复制后轻提示；划词浮层抽为 `components/ReaderSelectionMenu.tsx`
+- **R3 检索结果定位跳转**：全文检索结果链接携带关键词（`?q=`），跳转阅读页后自动打开页内搜索并列出命中，用户可直达命中处（`components/SearchClient.tsx`、`app/read/remote/page.tsx`）。注：现有倒排索引为「词 → 书 ID」粒度、不含章节，故定位在阅读器内完成；章节级直达需后续扩展章节感知索引
+- **R4 移动端阅读优化**：正文支持左右滑动翻页、阅读进度条可拖拽跳章、`<420px` 自动采用小屏字号；`app/globals.css` 补充 `touch-action: pan-y` 与 ≤480px 响应式样式
+
+### 测试
+- 新增 `test/reader-tools.test.ts`（6 用例：命中定位 / 繁简互通 / 页码换算 / 高亮切分 / 引用格式）
+- 验证：`tsc --noEmit` 0 错误 · `npm test` **53/53 全绿**
+
+### 工程与文档债（对应 R24、R25）
+- **R25 原型导航同步**：新增原型页 `prototype/pages/bookmarks.html`（我的书架静态演示）；15 个原型 HTML 的导航与移动菜单插入「书签」第 7 项，与应用端 `components/Navbar.tsx` 及 `docs/05` 规范三方一致
+- **R24 补打 Git 标签**：本地补建 `v1.14.1`（`bf08411`）、`v1.14.3`（`175d647`）annotated 标签；`v1.14.2` 无对应提交（改动已并入 1.14.3 提交），故不虚标
+
+## [1.14.4] - 2026-09-13
+
+### 文档（剩余开发任务清单）
+- 新增 `docs/04-开发任务清单/剩余开发任务清单.md`：核对 v1.14.3 现状（HEAD `175d647`、85 提交、47 用例通过、`tsc` 0 错误、与 `origin/main` 同步），汇总剩余 **27 项任务**（P0 5 / P1 8 / P2 10 / 工程与文档债 4）；来源涵盖《需求洞察与优先级报告》D1–D15、《古籍资源增量价值补充》2.1–2.8、《V1.0 精简版任务清单》§6 与源码实测，并给出 v1.15.0 建议范围（R1–R5 + R24–R27）
+- 同时记录两项待办事实：Git 标签止于 `v1.14.0`（`v1.14.1`–`v1.14.3` 未打标签，见 R24）；`/help` 与 `.github/` 文档存在陈旧文案（见 R5、R27）
+
+### 文档（全量同步至 v1.14.3 现状）
+- 《开发进度清单》全量刷新：版本 1.14.0 → 1.14.3，测试 39 → **47**（含书签用例，实跑 47/47），新增「书签（v1.14.3 新增）」功能完成度小节，遗留清单新增「原型未同步书签」「馆藏古籍关联人物（规划）」两项；不再固化易失真的 HEAD 哈希与提交总数
+- 版本标注统一：「适配代码版本」由 v1.3.6 / v1.3.7 → **v1.14.3**（校订日期 2026-09-13），覆盖 `项目整体概述` / `README-项目简介` / `项目品牌定名规范` / `开源合规声明规范` / `项目架构设计文档` / `代码开发规范` / `性能优化开发规范` / `资源分片请求规范` / `静态索引预处理规范`
+- 功能特性补充书签：`README.md`、`项目整体概述.md`、`README-项目简介.md`、`项目架构设计文档.md`（展示层本地缓存）、`开源合规声明规范.md`（隐私条款「书签与收藏仅本地缓存」）
+- 陈旧描述修正：① 人物考据「数据待接入」→ CBDB 全量 661,350 人已接入（`项目整体概述` / `README-项目简介` / `项目架构设计文档`）；② 索引路径 `src/static-index/` → `public/index/`（`项目部署上线规范` / `本地开发环境搭建FAQ` / `静态索引预处理规范`）；③ `代码开发规范` 修正技术栈中不存在的 TailwindCSS 描述
+- 导航项数校正：`UI与UX全局设计规范` 顶部导航由「6 项」→ **7 项**（新增「书签」，含收藏数角标）
+- `版本迭代管理规范` 标注「收藏（书签）」已于 v1.14.3 落地
+- **`.github/` 社区文档校正（R27）**：`CONTRIBUTING.md` / `SUPPORT.md` / `PULL_REQUEST_TEMPLATE.md` 中已废弃的 `npm run build:index` 与 `lib/data-generated.ts` 引用，改为 `npm run build:catalog` / `public/index/daizhige-catalog.json` / `public/index/cbdb/`；`CONTRIBUTING.md` 的数据来源章节与目录结构速览同步更新，`SUPPORT.md` 文档导航补充 `04-开发任务清单`
+- **`/help` 帮助页文案校正（R5）**：移除已过时的「以上标注『待接入』的模块当前为占位」与 FAQ「人物考据、社会关系、数据统计为什么显示『待接入』」，改为现状描述；新增「书籍收藏 / 阅读位置书签 / 跨设备迁移」使用说明（`app/help/page.tsx` v1.4.3 → v1.14.4）
+- `剩余开发任务清单.md` 将 R26（刷新《开发进度清单》）标记为已完成
+
 ## [1.14.3] - 2026-09-13
 
 ### 文档（书签功能开发任务清单）
@@ -598,9 +631,8 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[1.14.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.2...v1.14.3
-[1.14.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...v1.14.2
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.2...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.3...HEAD
+[1.14.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.1...v1.14.3
 [1.14.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.2...v1.14.0
 [1.13.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.13.1...v1.13.2
@@ -642,7 +674,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）

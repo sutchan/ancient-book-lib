@@ -16,7 +16,7 @@
 | 禁止引入后端检索 | 全部检索逻辑运行在前端内存，禁止新增后端接口 |
 | 禁止动态 SSR | 所有页面必须 SSG 静态预渲染（`next.config.mjs` 已开启 `output: "export"`） |
 | 禁止线上直读超大原文 | 大文件一律走 HTTP Range 分片懒加载 |
-| 禁止服务端存储用户数据 | 用户配置（主题、繁简、字号、阅读进度）只进本地缓存 |
+| 禁止服务端存储用户数据 | 用户配置（主题、繁简、字号、阅读进度、书签与收藏）只进本地缓存 |
 | 禁止商业化改动 | 不得引入广告、付费、注册登录、数据统计埋点、用户内容上传 |
 | 古籍原文保持保真 | 不篡改、不删改、不做通用繁简强制转换 |
 
@@ -50,7 +50,7 @@ npm run dev          # http://localhost:3000
 | 命令 | 作用 |
 | - | - |
 | `npm run dev` | 本地开发 |
-| `npm run build:index` | 由 `prototype/data/app-data.js` 生成 `lib/data-generated.ts` |
+| `npm run build:catalog` | 生成全量书目索引 `public/index/daizhige-catalog.json`（15,694 部） |
 | `npm run build` | 静态构建（产物输出到 `out/`） |
 | `npx serve out` | 预览静态产物（本项目开启 `output: export`，`next start` 不适用） |
 | `npm run lint` | 代码检查（仓库尚未内置 ESLint 配置，首次运行按提示初始化） |
@@ -62,12 +62,14 @@ npm run dev          # http://localhost:3000
 
 ## 四、数据来源与索引同步（重要）
 
-- **唯一数据源**：`prototype/data/app-data.js`（馆藏、典籍、人物、关系数据）。
-- **禁止手改** `lib/data-generated.ts`，它由 `scripts/build-index.mjs` 自动生成。
-- 修改了原型数据后，必须执行：
+- **书目数据源**：殆知阁 v20（上游仓库 `garychowcmu/daizhigev20`），由 `npm run build:catalog` 调 GitHub Trees API 生成 `public/index/daizhige-catalog.json`（15,694 部，约 5.7 MB，入库）。
+- **人物数据源**：哈佛 CBDB（`cbdb-project/cbdb_sqlite`），由 `npm run build:cbdb*` 系列脚本生成 `public/index/cbdb/` 下各索引（已入库）。
+- **禁止手改** `public/index/` 下的生成产物，它们由 `scripts/build-*.mjs` 自动生成。
+- 上游数据更新后，按需执行：
 
 ```bash
-npm run build:index
+npm run build:catalog   # 重建书目索引
+# CBDB 系列：build:cbdb / build:cbdb-rel / build:cbdb-offices / ...（按需）
 ```
 
 - 5GB 古籍原文**不入库、不提交仓库**，线上通过索引字节定位 + 远程 Range 分片调用。
@@ -78,11 +80,11 @@ npm run build:index
 
 ```plain
 ancient-book-lib/
-├── app/            # Next.js App Router 页面（book-list / category / character /
-│                   # help / read / relation / search / stats，全部 SSG）
+├── app/            # Next.js App Router 页面（catalog / bookmarks / search / read /
+│                   # people / relation / help / stats …，全部 SSG）
 ├── components/     # 全局公共组件（Navbar、Footer、ReaderClient、SearchClient...）
-├── lib/            # 类型定义、检索引擎、繁简映射、生成数据
-├── scripts/        # 离线预处理脚本（build-index.mjs）
+├── lib/            # 类型定义、检索引擎、繁简映射、CBDB 工具、书签存储
+├── scripts/        # 构建与索引脚本（build-daizhige-catalog.mjs、build-cbdb-*.mjs 等）
 ├── prototype/      # 高保真可交互原型（prototype.html + pages/ + data/）
 ├── public/         # 静态资源
 ├── docs/           # 全套项目规范、PRD、任务清单、原型设计文档
@@ -129,7 +131,7 @@ type 取值：`feat` / `fix` / `style` / `docs` / `refactor` / `perf` / `build` 
 - [ ] `npx tsc --noEmit` 通过
 - [ ] `npm run build` 构建无报错
 - [ ] 三套主题 + 移动端表现正常
-- [ ] 改动过原型数据 → 已执行 `npm run build:index`
+- [ ] 改动过书目 / 人物数据源 → 已执行对应 `npm run build:*` 重建索引
 - [ ] 无 `console.log`、无密钥、无敏感信息
 - [ ] 涉及文档/功能的改动已同步更新 `docs/` 与 `CHANGELOG.md`
 - [ ] 未引入数据库、后端接口、广告、埋点、注册登录

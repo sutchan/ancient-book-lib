@@ -1,4 +1,4 @@
-// app/read/remote/page.tsx v1.4.3
+// app/read/remote/page.tsx v1.15.0
 "use client";
 
 import { Suspense } from "react";
@@ -8,7 +8,8 @@ import RemoteReader from "@/components/RemoteReader";
 function RemoteReaderInner() {
   const params = useSearchParams();
   const id = params.get("id") || "";
-  return <RemoteReader bookId={id} />;
+  const q = params.get("q") || "";
+  return <RemoteReader bookId={id} initialQuery={q} />;
 }
 
 export default function RemoteReadPage() {

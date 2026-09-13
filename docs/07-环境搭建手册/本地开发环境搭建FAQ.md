@@ -1,6 +1,7 @@
 # 古籍通 AncientBook｜本地开发环境搭建FAQ
 
 **文档版本**：V1.0 正式定稿
+**适配代码版本**：v1.14.3　**最近校订**：2026-09-13
 
 本手册面向零基础开发者，逐步完成本地环境搭建、依赖安装、项目启动、常见问题排查。
 
@@ -71,7 +72,7 @@ npm run start
 
 - 检查是否遗留 console.log、未使用的导入等 lint 问题
 - 检查 TypeScript 类型错误：`npx tsc --noEmit`
-- 检查静态索引文件是否已放入 src/static-index/
+- 检查静态索引资源是否已生成（`public/index/`，如运行 `npm run build:catalog`）
 
 ### Q4：为什么项目没有数据库配置？
 
