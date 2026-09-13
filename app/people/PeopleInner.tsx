@@ -235,7 +235,7 @@ export default function PeopleInner() {
             ))}
             {surnameKw && meta.surnames.filter((s) => s.surname.startsWith(surnameKw)).length === 0 && (
               <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
-                前 200 大姓中无「{surnameKw}」开头的姓氏；小姓人物可通过上方搜索框按姓名查找
+                姓氏库中无「{surnameKw}」开头的姓氏；小姓人物可通过上方搜索框按姓名查找
               </span>
             )}
           </div>

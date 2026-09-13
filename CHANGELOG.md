@@ -3,6 +3,31 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.5] - 2026-09-13
+
+### 修复（bug 专项审查确认的缺陷）
+- **CBDB 人物不可达（39,850 人 / 全库 6.03%）**：`scripts/build-cbdb-index.mjs` 的分片循环对**所有** `count ≥ 50` 的姓氏都写了独立分片（实测 481 个），但 `meta.json` 把 `surnames` 截断为前 200 条（`slice(0, 200)`）。落在 200 名之后、人数却 ≥50 的姓氏因此「分片存在但 meta 查不到」，前端 `loadSurnamePersons` 只能回退 `_others.json`，而这些人并不在那里 → 搜索能命中、点进 `/people/detail` 却报「未找到 CBDB ID X 对应的人物」。
+  - 移除截断（`surnames: surnameMeta`），并加入构建期断言：`meta.surnames.length !== meta.surnameTotal` 时直接 `exit(1)`，杜绝静默丢人。
+  - 新增 `scripts/rebuild-cbdb-surnames-meta.mjs`（`npm run repair:cbdb-meta`）：从磁盘分片产物重建 `meta.surnames` 并自校验，**无需重跑 5GB 上游 sqlite** 即可修复已发布索引。实测补回 **2059 个姓氏 / 52,509 位人物**（其中 281 个姓氏 / 39,850 人此前完全不可达）；三项自校验通过（`2259 = 独立分片 481 + 小姓 1778`；`648,691 + 12,659 = 661,350 = meta.total`）。
+  - `rebuild-cbdb.yml` 的 Verify index 步骤追加 `--check`，作为 CI 长期守卫。
+- **章节识别丢弃 61% 的真实标题**（`lib/chapterParse.ts`）：标题识别曾以「行首缩进 = 正文」为由直接否决整行，但殆知阁的佛经品题、章回标题**普遍以全角空格缩进**（「　　行品第一」「第七回　林琼玉孝让分财」）。40 部真实语料实测：正则命中 70 行、仅 27 行成章。
+  - 移除该规则后：有章节的书 **4/40 → 8/40**、识别标题 **27 → 66 条**，抽样人工核对全部是真标题。正文行仍由「2–20 字 + 无标点 + 命中章节模式 + 上下文校验」四重条件拦下。
+  - **有意未收紧章节正则**：收紧后 40 部真实语料召回下降 **48.1%**（失去的 13 条全是真佛经品题），而合成用例中的误判在真实语料中并未出现。该局限已在 `test/fix-regressions.test.ts` 中固化为「已知局限」用例，待有语料证据时再改。
+- **卷首（序/前言）被并入第一章**（`lib/chapterParse.ts`）：`flush()` 为 `if (current && buf.length>0)`，首个标题出现时 `current` 仍为 `null` → 缓冲区未清空 → 卷首内容在下一个标题处被推入**第一章**。实测 `章「卷一」段落=["序文第一行","序文第二行"]`。现与 `buildToc` 的「（卷首/序）」语义对齐，卷首自成章；影响约 75% 走 fallback 解析的书（12 部抽样仅 3 部有章节清单）。
+- **`chapterBoundaries` 末章偏移越界 1 个字符**：末行之后并无 `\n`，`charPos += line.length + 1` 使最后一章的 `charEnd` 越过文末（此前靠消费方 `slice` 自动截断才未暴露）。改为精确偏移。
+- **页内搜索繁简双向不对称**（`lib/readerSearch.ts`）：`isHit` 有繁简回退而 `splitHighlight` 没有，且 `isHit` 在 `simple` 模式下提前 `return false`。实测：① 繁体正文 + 简体查询 → 命中 1 条但高亮片段为 **0**（跳转后正文零高亮，用户会以为功能坏了）；② 简体对照模式 + 繁体查询 → **完全漏检**。现统一为双方都走 `toSimplified` 归一化；`toSimplified` 是逐字符 1:1 映射、长度不变，故可「在归一化文本上定位、在原文本上切片」，索引天然对齐。
+- **关系溯源可能张冠李戴**（`components/RelationClient.tsx` + `app/people/detail/PeopleDetailInner.tsx`）：详情页链接原为 `/relation?name=<姓名>`，关系页用 `searchPersons(name, 5)` 取 **`r[0]`（首个命中）** 作溯源起点。CBDB 同名者众多（王维/李密/张衡…），会静默对**另一个人**做关系溯源。现详情页改传权威 `?id=<CBDB ID>`，关系页优先按 id 载入；仅在无 id 时才回退姓名匹配，且回退时显式提示「按姓名匹配到 X（共 N 个同名/近似结果）」。
+- **阅读章节缓存键缺 bookId**（`components/RemoteReader.tsx`）：`chapterCacheRef` 仅以字节偏移 `ch.start` 为键，不同书的同偏移会互相命中（首章 `start` 常为 0）。键改为 `${bookId}:${ch.start}`，并加 30 条上限，避免长书读完后整本正文驻留内存。
+- **阅读位置书签 `createdAt` 同毫秒碰撞**（`lib/bookmarks.ts`）：`Date.now()` 同时充当 React key 与 `removeReadPos` 的删除依据，同一毫秒保存两次会产生相同 key（React 重复 key）且删除一条会**连带删掉另一条**。改为在已有最大值上严格递增，并新增 20 条上限（`MAX_READ_POS`）避免 localStorage 无限增长。
+
+### 测试
+- 新增 `test/fix-regressions.test.ts`（13 条用例），覆盖上述章节识别、卷首归属、`chapterBoundaries` 偏移、页内搜索繁简对称与阅读位置书签唯一性；此前 53 个用例对这些缺陷**零覆盖**。
+- 门禁：`tsc --noEmit` 0 错误 · `npm test` **66/66** 全绿。
+
+### 文档
+- `app/people/PeopleInner.tsx` 姓氏筛选空结果文案「前 200 大姓中无…」→「姓氏库中无…」（截断已移除）。
+- `lib/cbdb.ts` 修正把上述截断描述成设计意图的注释。
+
 ## [1.15.4] - 2026-09-13
 
 ### 修复（CI 构建超时：全文索引缓存键永不命中）
@@ -686,7 +711,8 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.3...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.4...HEAD
+[1.15.4]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.3...v1.15.4
 [1.15.3]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.2...v1.15.3
 [1.15.2]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.1...v1.15.2
 [1.15.1]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.0...v1.15.1
@@ -733,7 +759,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.4
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.5
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）

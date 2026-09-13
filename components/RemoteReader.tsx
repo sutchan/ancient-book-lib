@@ -1,4 +1,4 @@
-// components/RemoteReader.tsx v1.15.0
+// components/RemoteReader.tsx v1.15.5
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
@@ -57,7 +57,10 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
   const [lineHeight, setLineHeight] = useState(1.8);
   const [usingManifest, setUsingManifest] = useState(false); // 是否走 Range 分片模式
   const [toc, setToc] = useState<ChapterRange[]>([]); // 分片模式目录（字节偏移）
-  const chapterCacheRef = useRef<Map<number, string>>(new Map());
+  // 章节文本缓存：键必须带 bookId。不同书的章节字节偏移会碰撞（首章 start 常为 0），
+  // 仅以 ch.start 为键时切换书目会命中上一本书的正文。
+  const CHAPTER_CACHE_MAX = 30; // 上限，避免长书读完全程后把整本正文留在内存
+  const chapterCacheRef = useRef<Map<string, string>>(new Map());
 
   // 书签（书籍收藏 + 阅读位置书签）
   const bm = useBookmarks();
@@ -108,7 +111,8 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
     setError(null);
     setLoadingProgress(0);
     try {
-      const cached = chapterCacheRef.current.get(ch.start);
+      const cacheKey = `${b.id}:${ch.start}`;
+      const cached = chapterCacheRef.current.get(cacheKey);
       if (cached !== undefined) {
         setContent(cached);
         setLoading(false);
@@ -118,7 +122,13 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
         timeout: FETCH_TIMEOUT,
         onProgress: (loaded, total) => setLoadingProgress(total > 0 ? Math.round((loaded / total) * 100) : 0),
       });
-      chapterCacheRef.current.set(ch.start, text);
+      const cache = chapterCacheRef.current;
+      cache.set(cacheKey, text);
+      // 超出上限时按插入顺序淘汰最早的一条（Map 保持插入顺序）
+      if (cache.size > CHAPTER_CACHE_MAX) {
+        const oldest = cache.keys().next().value;
+        if (oldest !== undefined) cache.delete(oldest);
+      }
       recordRecent(b);
       setContent(text);
       setLoading(false);

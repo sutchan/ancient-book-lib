@@ -146,7 +146,8 @@ export default function PeopleDetailInner() {
           <Link href={`/search?q=${encodeURIComponent(name)}&mode=full`} className="btn btn-primary">
             在古籍中检索「{name}」
           </Link>
-          <Link href={`/relation?name=${encodeURIComponent(name)}`} className="btn btn-secondary">
+          {/* 传 CBDB 权威 ID 而非姓名：CBDB 同名者众多，按姓名回流会被解析成「首个命中」 */}
+          <Link href={`/relation?id=${pid}`} className="btn btn-secondary">
             关系溯源
           </Link>
           <Link href={`/search?q=${encodeURIComponent(name)}`} className="btn btn-secondary">

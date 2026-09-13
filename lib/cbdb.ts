@@ -1,4 +1,4 @@
-// lib/cbdb.ts v1.5.1
+// lib/cbdb.ts v1.15.5
 /**
  * CBDB（中国历代人物传记资料库）索引加载工具
  * 数据来源：cbdb-project/cbdb_sqlite 2026-09-05 版（661,350 人）
@@ -92,7 +92,9 @@ export async function loadSurnamePersons(
   surname: string
 ): Promise<CbdbPerson[]> {
   const entry = meta.surnames.find((s) => s.surname === surname);
-  // meta.surnames 只收录前 200 大姓：entry 缺失或非独立分片时，统一回退 _others.json
+  // meta.surnames 收录**全部**姓氏（构建期曾误截断为前 200，导致 281 个姓氏 / 39,850 人不可达）。
+  // 非独立分片（人数 < 50）的姓氏统一聚合在 _others.json，故只需回退那一种情况；
+  // entry 缺失意味着 meta 与磁盘分片不一致，属数据缺陷而非正常路径。
   if (!entry || !entry.standalone) {
     const all = await loadOthers();
     return all.filter((p) => p[0] === surname).map((p) => p.slice(1) as CbdbPerson);

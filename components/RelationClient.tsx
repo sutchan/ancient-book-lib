@@ -1,10 +1,11 @@
-// components/RelationClient.tsx v1.5.0
+// components/RelationClient.tsx v1.15.5
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
+  findPersonById,
   findRelationPath,
   getPersonRelations,
   loadRelMeta,
@@ -50,19 +51,42 @@ export default function RelationClient() {
     loadRelMeta().then(setMeta).catch((e) => setError(String(e)));
   }, []);
 
-  // 初始 ?name= 参数：自动选中第一个匹配人物
+  // 初始人物：优先 ?id=（CBDB 权威 ID，人物详情页即由它跳转而来）。
+  // 只有当 URL 没有 id 时，才回退到 ?name= 的模糊匹配——且回退时必须显式提示。
+  // 原实现只认 ?name= 并直接取首个命中 payload r[0]，而 CBDB 同名者众多
+  // （王维 / 李密 / 张衡…），会静默对**另一个人的关系网络**做溯源，用户无从察觉。
   useEffect(() => {
-    const init = sp.get("name");
-    if (init) {
-      searchPersons(init, 5)
-        .then((r) => {
-          if (r.length) {
-            setASelected({ id: r[0].id, name: r[0].name });
-            setAInput(r[0].name);
+    const initId = Number(sp.get("id") || 0);
+    if (initId) {
+      findPersonById(initId)
+        .then((p) => {
+          if (!p) {
+            setPathMsg(`未找到 CBDB ID ${initId} 对应的人物`);
+            return;
           }
+          setASelected({ id: p[0], name: p[1] });
+          setAInput(p[1]);
         })
-        .catch(() => {});
+        .catch((e) => setPathMsg(`人物加载失败：${String((e as Error)?.message || e)}`));
+      return;
     }
+    const init = sp.get("name");
+    if (!init) return;
+    searchPersons(init, 5)
+      .then((r) => {
+        if (!r.length) {
+          setPathMsg(`未找到与「${init}」匹配的人物`);
+          return;
+        }
+        setASelected({ id: r[0].id, name: r[0].name });
+        setAInput(r[0].name);
+        if (r.length > 1) {
+          setPathMsg(
+            `按姓名「${init}」匹配到 ${r[0].name}（CBDB ID ${r[0].id}），共 ${r.length} 个同名/近似结果；若其人非本人，请改用上方输入框选择。`
+          );
+        }
+      })
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

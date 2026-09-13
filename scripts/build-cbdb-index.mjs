@@ -167,11 +167,26 @@ const meta = {
   source: SOURCE,
   generatedAt: new Date().toISOString().slice(0, 10),
   dynasty: dynastyList,
-  surnames: surnameMeta.slice(0, 200), // 前 200 个姓氏
+  // 必须收录**全部**姓氏条目：分片循环对所有 count ≥ THRESHOLD(50) 的姓氏都写了独立文件，
+  // 一旦在此截断，落在 200 名之后、人数却 ≥50 的姓氏就会「分片存在但 meta 查不到」，
+  // 前端只能回退 _others.json，而这些人并不在那里 → 人物不可达（详情页报「未找到」）。
+  // 曾用 slice(0, 200)，实测造成 281 个姓氏 / 39,850 位人物丢失（约占全库 6%）。
+  surnames: surnameMeta,
+  surnameTotal: surnameList.length,
   surnameTotal: surnameList.length,
   searchIndexSize: searchIndex.length,
   note: "人物数据字段: [id, 姓名, 拼音, 生年, 卒年, 指数年, 性别(1女), 朝代, 籍贯]",
 };
+
+// 防回归断言：meta.surnames 必须与姓氏总数一致。
+// 二者不一致即意味着有姓氏「分片已写盘但 meta 查不到」→ 前端回退 _others.json 也找不到
+// （那些人不在 others 里）→ 人物不可达。宁可让构建失败，也不要产出静默丢人的索引。
+if (meta.surnames.length !== meta.surnameTotal) {
+  console.error(
+    `❌ meta.surnames(${meta.surnames.length}) 与 surnameTotal(${meta.surnameTotal}) 不一致，索引不完整`
+  );
+  process.exit(1);
+}
 
 writeFileSync(join(OUT_DIR, "meta.json"), JSON.stringify(meta), "utf8");
 
@@ -190,7 +205,7 @@ for (const f of [
 console.log("=== 完成 ===");
 console.log(`总人物: ${meta.total.toLocaleString()}`);
 console.log(`女性: ${meta.female.toLocaleString()}`);
-console.log(`姓氏数量: ${meta.surnameTotal}（前 200 列于 meta.json）`);
+console.log(`姓氏数量: ${meta.surnameTotal}（全部列于 meta.json）`);
 console.log(`独立分片: ${surnameMeta.filter((s) => s.standalone).length} 个 + others`);
 console.log(`搜索索引: ${searchIndex.length.toLocaleString()} 条`);
 console.log(`总大小: ${(totalBytes / 1024 / 1024).toFixed(1)} MB`);

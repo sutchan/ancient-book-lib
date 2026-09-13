@@ -76,6 +76,9 @@ jobs:
       - name: Verify index
         run: |
           node -e "const m=require('./public/index/cbdb/meta.json'); const r=require('./public/index/cbdb/rel/rel-meta.json'); const o=require('./public/index/cbdb/offices/offices-meta.json'); const g=require('./public/index/cbdb/geo/geo-meta.json'); const a=require('./public/index/cbdb/altnames/altnames-meta.json'); const e=require('./public/index/cbdb/entry/entry-meta.json'); const s=require('./public/index/cbdb/sources/sources-meta.json'); const y=require('./public/index/cbdb/person-years.json'); console.log('total:', m.total, '| kin:', r.stats.kinTotal, '| offices:', o.stats.officeTotal, '| geo:', g.stats.personTotal, '| altnames:', a.stats.altnameTotal, '| entry:', e.stats.entryTotal, '| sources:', s.stats.sourceTotal, '| years:', y.stats.withYear); if(m.total < 600000 || r.stats.kinTotal < 500000 || o.stats.officeTotal < 500000 || g.stats.personTotal < 300000 || a.stats.altnameTotal < 150000 || e.stats.entryTotal < 200000 || s.stats.sourceTotal < 400000 || y.stats.withYear < 250000) { console.error('数据量异常，中止'); process.exit(1); }"
+          # meta.surnames 完整性校验：必须是「全部姓氏」而非截断子集。
+          # 曾因 slice(0,200) 造成 281 个姓氏 / 39,850 位人物不可达（分片存在但 meta 查不到）。
+          node scripts/rebuild-cbdb-surnames-meta.mjs --check
 
       - name: Commit index
         run: |

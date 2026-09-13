@@ -1,4 +1,4 @@
-// lib/readerSearch.ts v1.15.0
+// lib/readerSearch.ts v1.15.5
 /**
  * 阅读器页内搜索（纯函数，便于单测）
  * - 命中判定支持繁简互通：直接匹配，或（繁体正文遇到简体查询时）在简体空间再匹配一次
@@ -18,11 +18,13 @@ export interface SearchableChapter {
   paragraphs: string[];
 }
 
-/** 命中判定：直接匹配优先；繁体正文遇到简体查询时在简体空间再匹配一次 */
-function isHit(display: string, q: string, simple: boolean): boolean {
-  if (display.includes(q)) return true;
-  if (simple) return false;
-  return toSimplified(display).includes(toSimplified(q));
+/**
+ * 命中判定：直接匹配优先，否则在简体空间再比一次。
+ * 必须是**双向**的：繁体正文 + 简体查询要能命中，简体正文 + 繁体查询也要能命中。
+ * 原实现在 simple=true（简体对照模式）时提前 return false，导致后者完全漏检。
+ */
+function isHit(display: string, q: string): boolean {
+  return display.includes(q) || toSimplified(display).includes(toSimplified(q));
 }
 
 /** 截取命中处上下文（前后约 12 字，超出加省略号） */
@@ -56,7 +58,7 @@ export function buildReaderMatches(
   chapters.forEach((ch, chapterIdx) => {
     ch.paragraphs.forEach((para, paraIdx) => {
       const display = simple ? toSimplified(para) : para;
-      if (!isHit(display, q, simple)) return;
+      if (!isHit(display, q)) return;
       out.push({
         chapterIdx,
         pageIdx: Math.floor(paraIdx / pageSize),
@@ -68,21 +70,32 @@ export function buildReaderMatches(
   return out;
 }
 
-/** 将文本按查询词切分为「命中 / 非命中」片段，供渲染 <mark> 高亮 */
+/**
+ * 将文本按查询词切分为「命中 / 非命中」片段，供渲染 <mark> 高亮（繁简互通）。
+ *
+ * 必须与上面的 isHit 用同一套归一化，否则会出现「命中列表有结果、点跳转后正文零高亮」：
+ * 原实现只在原文上做 indexOf，繁体正文 + 简体查询时命中判定（有繁简回退）通过、
+ * 高亮切分却返回空，用户以为功能坏了。
+ *
+ * toSimplified 是逐字符 1:1 映射（lib/t2s.ts），长度与下标均不变，
+ * 因此可以「在归一化文本上定位、在原文本上切片」，索引天然对齐。
+ */
 export function splitHighlight(text: string, query: string): { text: string; hit: boolean }[] {
   const q = query.trim();
   if (!q) return [{ text, hit: false }];
+  const hay = toSimplified(text);
+  const needle = toSimplified(q);
   const parts: { text: string; hit: boolean }[] = [];
   let i = 0;
-  while (i < text.length) {
-    const idx = text.indexOf(q, i);
+  while (i < hay.length) {
+    const idx = hay.indexOf(needle, i);
     if (idx < 0) {
       parts.push({ text: text.slice(i), hit: false });
       break;
     }
     if (idx > i) parts.push({ text: text.slice(i, idx), hit: false });
-    parts.push({ text: text.slice(idx, idx + q.length), hit: true });
-    i = idx + q.length;
+    parts.push({ text: text.slice(idx, idx + needle.length), hit: true });
+    i = idx + needle.length;
   }
   return parts;
 }

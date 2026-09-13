@@ -1,4 +1,4 @@
-// lib/bookmarks.ts v1.14.3
+// lib/bookmarks.ts v1.15.5
 /**
  * 书签持久化（纯静态 / 零后端，仅 localStorage）
  * - 书籍收藏：ab-bookmarks（JSON 数组）
@@ -112,15 +112,25 @@ export function getReadPos(bookId: string): ReadPosBookmark[] {
   return safeParse<ReadPosBookmark[]>(localStorage.getItem(posKey(bookId)), []);
 }
 
+/** 单本书的阅读位置书签上限：超出后丢弃最早的记录，避免 localStorage 无限增长 */
+export const MAX_READ_POS = 20;
+
 export function addReadPos(
   bookId: string,
   p: Omit<ReadPosBookmark, "createdAt">
 ): ReadPosBookmark[] {
   if (typeof window === "undefined" || !bookId) return [];
   const list = getReadPos(bookId);
-  const next = [...list, { ...p, createdAt: Date.now() }];
-  localStorage.setItem(posKey(bookId), JSON.stringify(next));
-  return next;
+  // createdAt 同时充当唯一键（React key 以及 removeReadPos 的删除依据）。
+  // 直接取 Date.now() 时，同一毫秒内保存两次会得到相同 key —— React 报重复 key，
+  // 且删除其中一条会连带删掉另一条。改为在现有最大值上严格递增。
+  const maxId = list.reduce((m, x) => (x.createdAt > m ? x.createdAt : m), 0);
+  const now = Date.now();
+  const id = now > maxId ? now : maxId + 1;
+  const next = [...list, { ...p, createdAt: id }];
+  const trimmed = next.length > MAX_READ_POS ? next.slice(next.length - MAX_READ_POS) : next;
+  localStorage.setItem(posKey(bookId), JSON.stringify(trimmed));
+  return trimmed;
 }
 
 export function removeReadPos(bookId: string, createdAt: number): ReadPosBookmark[] {
