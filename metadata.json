@@ -1,0 +1,6 @@
+{
+  "name": "古籍通 AncientBook",
+  "description": "开源古籍文献检索阅读与考据平台",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

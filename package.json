@@ -4,27 +4,10 @@
   "private": true,
   "description": "古籍通 AncientBook 开源古籍文献检索阅读平台（纯静态无数据库架构）",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build",
-    "postbuild": "node scripts/generate-sitemap.mjs",
     "start": "next start",
-    "lint": "next lint",
-    "build:catalog": "node scripts/build-daizhige-catalog.mjs",
-    "build:fulltext": "tsx scripts/build-fulltext-index.mjs",
-    "build:characters": "node scripts/build-characters.mjs",
-    "build:book-samples": "node scripts/build-book-samples.mjs",
-    "test": "tsx --test test/*.test.ts",
-    "export": "next build && next export",
-    "build:cbdb": "node scripts/build-cbdb-index.mjs",
-    "repair:cbdb-meta": "node scripts/rebuild-cbdb-surnames-meta.mjs",
-    "build:cbdb-rel": "node scripts/build-cbdb-relations.mjs",
-    "build:cbdb-offices": "node scripts/build-cbdb-offices.mjs",
-    "build:cbdb-analysis": "node scripts/build-cbdb-analysis.mjs",
-    "build:cbdb-altnames": "node scripts/build-cbdb-altnames.mjs",
-    "build:cbdb-entry": "node scripts/build-cbdb-entry.mjs",
-    "build:cbdb-sources": "node scripts/build-cbdb-sources.mjs",
-    "build:cbdb-years": "node scripts/build-cbdb-years.mjs",
-    "sync:changelog": "node scripts/sync-changelog-links.mjs"
+    "lint": "next lint"
   },
   "dependencies": {
     "next": "^14.2.15",
@@ -35,7 +18,8 @@
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "better-sqlite3": "^13.0.3",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.15",
     "tsx": "^4.23.13",
     "typescript": "^5.5.0"
   }

@@ -4,8 +4,7 @@
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 const nextConfig = {
-  // 纯静态 SSG：产物为静态文件，可部署 Vercel / 任意静态托管
-  output: "export",
+  output: "standalone",
   images: { unoptimized: true },
   trailingSlash: true,
   basePath: basePath || undefined,
