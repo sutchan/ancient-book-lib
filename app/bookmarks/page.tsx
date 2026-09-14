@@ -19,6 +19,7 @@ const CHART_COLORS = ["#8C3130", "#CEA76A", "#704030", "#B89A68", "#4A6B5D", "#5
 export default function BookmarksPage() {
   const bookmarks = useBookmarks();
   const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("全部");
 
   // 预览模态框状态
   const [previewId, setPreviewId] = useState<string | null>(null);
@@ -77,6 +78,10 @@ export default function BookmarksPage() {
 
   const chartData = Object.entries(categoryCounts).map(([name, value]) => ({ name, value }));
   const mostActiveCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "暂无";
+
+  const filteredBookmarks = selectedCategory === "全部"
+    ? bookmarks
+    : bookmarks.filter((b) => (b.category || "未分类") === selectedCategory);
 
   const fmtTime = (ts: number) => {
     const diff = Date.now() - ts;
@@ -176,6 +181,30 @@ export default function BookmarksPage() {
         </div>
       )}
 
+      {/* 分类筛选栏 */}
+      {bookmarks.length > 0 && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20, alignItems: "center" }}>
+          <span style={{ fontSize: 13, color: "var(--color-text-secondary)", fontWeight: 500 }}>分类筛选：</span>
+          <button
+            onClick={() => setSelectedCategory("全部")}
+            className={`btn ${selectedCategory === "全部" ? "btn-primary" : "btn-secondary"}`}
+            style={{ fontSize: 13, padding: "5px 12px", borderRadius: 16 }}
+          >
+            全部 ({bookmarks.length})
+          </button>
+          {Object.entries(categoryCounts).map(([cat, count]) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`btn ${selectedCategory === cat ? "btn-primary" : "btn-secondary"}`}
+              style={{ fontSize: 13, padding: "5px 12px", borderRadius: 16 }}
+            >
+              {cat} ({count})
+            </button>
+          ))}
+        </div>
+      )}
+
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
         <button className="btn btn-secondary" style={{ fontSize: 13, padding: "6px 12px" }} onClick={handleExport}>
           导出书签 JSON
@@ -206,9 +235,15 @@ export default function BookmarksPage() {
           <div className="empty-title">还没有收藏任何书</div>
           <div>在全馆藏或书籍详情页点击「☆」即可加入书架；收藏后会显示在这里。</div>
         </div>
+      ) : filteredBookmarks.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <div className="empty-title">该分类下暂无收藏</div>
+          <div>当前分类「{selectedCategory}」没有找到匹配的书签。</div>
+        </div>
       ) : (
         <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
-          {bookmarks.map((b) => (
+          {filteredBookmarks.map((b) => (
             <div key={b.id} className="card" style={{ padding: 14, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{b.title}</div>
