@@ -3,6 +3,16 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.9] - 2026-09-14
+
+### 修复 / 重构 / 规范
+- **深色模式缺陷修复（部分 UI 仍浅色 / 显示不佳）**：
+  - 主题挂载点由 `<body>` 上移到 `<html>`（`layout.tsx` FOUC 脚本 + `Navbar.tsx` `applyTheme` 改为 `documentElement.dataset.theme`），移除 `<html>` 写死的 `data-theme="light"`；修复深色/护眼下 `<html>` 浅色背景渗漏（短内容页底部、滚动区露白）问题。
+  - **首页 Hero 硬编码浅色渐变**：`.home-hero` 背景改为按主题取 `var(--hero-bg)`（`[data-theme="dark"]` 为深灰渐变、`paper` 为淡苔绿、`light` 维持米色），`.home-hero::before` 光晕与 `.hero-badge` 文字/底/边均改用主题变量，消除深色下「文字变白、看不见」的致命对比问题。
+  - **`.chapter-item:hover` 悬浮浅色**：原 `var(--color-bg-secondary,#f4f3ee)` 因变量未定义，三主题都回退浅色；新增 `--color-bg-secondary` 三套定义，深色下为深灰。
+  - **原生控件未跟随深色**：`:root / [data-theme="paper"] / [data-theme="dark"]` 分别声明 `color-scheme: light / light / dark`，使原生 `<select>` 下拉、滚动条、自动填充在深色下不再破功为浅色。
+- 版本号随改动升至 v1.15.9；被改文件头注释（layout / Navbar）同步更新。
+
 ## [1.15.8] - 2026-09-13
 
 ### 修复 / 重构 / 规范
@@ -753,7 +763,8 @@
 - 全套项目文档 `docs/`（基础说明、架构规范、PRD、任务清单、设计规范、部署迭代、环境手册、技术研究）
 
 <!-- 版本比较链接：由 scripts/sync-changelog-links.mjs 生成，勿手改；新增版本后重跑该脚本 -->
-[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.8...HEAD
+[未发布]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.9...HEAD
+[1.15.9]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.8...v1.15.9
 [1.15.8]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.7...v1.15.8
 [1.15.7]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.6...v1.15.7
 [1.15.6]: https://github.com/sutchan/ancient-book-lib/compare/v1.15.5...v1.15.6

@@ -1,4 +1,4 @@
-// components/Navbar.tsx v1.15.8
+// components/Navbar.tsx v1.15.9
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -43,12 +43,12 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
     const savedSimple = localStorage.getItem("ab-simple") === "1";
     setTheme(savedTheme);
     setSimplified(savedSimple);
-    document.body.dataset.theme = savedTheme;
+    document.documentElement.dataset.theme = savedTheme;
   }, []);
 
   const applyTheme = useCallback((t: "light" | "paper" | "dark") => {
     setTheme(t);
-    document.body.dataset.theme = t;
+    document.documentElement.dataset.theme = t;
     localStorage.setItem("ab-theme", t);
   }, []);
 
