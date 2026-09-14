@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://guji.ewuse.com/sitemap.xml
