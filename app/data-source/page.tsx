@@ -1,10 +1,16 @@
 // app/data-source/page.tsx v1.15.1
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  BOOK_COUNT_LABEL,
+  PERSON_COUNT_LABEL,
+  DATA_SOURCE,
+  DATA_SIZE_GB,
+} from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "数据来源｜古籍通 AncientBook",
-  description: "古籍通数据来源：殆知阁 v20 全量古籍书目原文、哈佛 CBDB 人物考据等权威数据源与溯源说明。",
+  description: `古籍通数据来源：${DATA_SOURCE} 全量古籍书目原文、哈佛 CBDB 人物考据等权威数据源与溯源说明。`,
 };
 
 export default function DataSourcePage() {
@@ -21,9 +27,9 @@ export default function DataSourcePage() {
       </p>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
-        <h3 className="section-title">古籍书目与原文（殆知阁 v20）</h3>
+        <h3 className="section-title">古籍书目与原文（{DATA_SOURCE}）</h3>
         <p>
-          全馆藏 15,694 部古籍书目与原文来自殆知阁 v20（原始数据约 4.9 GB），阅读时按需拉取，保障原文保真。
+          全馆藏 {BOOK_COUNT_LABEL} 部古籍书目与原文来自 {DATA_SOURCE}（原始数据约 {DATA_SIZE_GB} GB），阅读时按需拉取，保障原文保真。
         </p>
       </div>
 
@@ -32,14 +38,14 @@ export default function DataSourcePage() {
         <p>
           人物考据档案来自哈佛 CBDB（Chinese Biographical Database），遵循{" "}
           <strong>CC BY-NC-SA 4.0</strong> 授权，使用时须署名。人物考据已并入{" "}
-          <Link href="/people">人物库</Link>（CBDB 全量 661,350 位）。
+          <Link href="/people">人物库</Link>（CBDB 全量 {PERSON_COUNT_LABEL} 位）。
         </p>
       </div>
 
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15, marginBottom: 16 }}>
         <h3 className="section-title">人物库与关系网络（CBDB 全量）</h3>
         <p>
-          人物库 <Link href="/people">661,350 位历代人物</Link>（姓名、拼音、生卒年、指数年、性别、朝代、籍贯）来自
+          人物库 <Link href="/people">{PERSON_COUNT_LABEL} 位历代人物</Link>（姓名、拼音、生卒年、指数年、性别、朝代、籍贯）来自
           CBDB 官方数据包（2026-09-05 版），遵循 CBDB 授权条款。亲属与社会关系、生平任职、籍贯分布、字/號/別名、科舉/入仕、史料來源与人物时间分布等维度，均由 CBDB 提供并经提取索引后随站加载。
         </p>
       </div>

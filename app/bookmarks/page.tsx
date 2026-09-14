@@ -74,7 +74,7 @@ export default function BookmarksPage() {
       </div>
       <h2 style={{ marginBottom: 4 }}>我的书架</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 16, fontSize: 14 }}>
-        收藏保存在本机浏览器，跨会话保留，不与服务器同步。
+        收藏仅保存在本机浏览器，不跨设备同步。
       </p>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>

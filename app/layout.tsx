@@ -4,17 +4,18 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Analytics from "@/components/Analytics";
+import { BRAND_FULL, DATA_SOURCE, BOOK_COUNT_LABEL } from "@/lib/constants";
 
-const SITE_TITLE = "古籍通 AncientBook｜开源古籍文献检索阅读平台";
+const SITE_TITLE = `${BRAND_FULL}｜开源古籍文献检索阅读平台`;
 const SITE_DESC =
-  "古籍通 AncientBook：开源公益古籍检索阅读与考据平台。殆知阁 v20 全量 15,694 部古籍在线（原始数据托管于上游，阅读按需加载），繁简保真阅读，毫秒级检索，CBDB 人文考据。";
+  `${BRAND_FULL}：开源公益古籍检索阅读与考据平台。${DATA_SOURCE} 全量 ${BOOK_COUNT_LABEL} 部古籍在线（原始数据托管于上游，阅读按需加载），繁简保真阅读，毫秒级检索，CBDB 人文考据。`;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://guji.ewuse.com"),
   title: SITE_TITLE,
   description: SITE_DESC,
   keywords: ["古籍", "古文", "国学", "四库全书", "繁体字", "古籍检索", "AncientBook", "殆知阁"],
-  applicationName: "古籍通 AncientBook",
+  applicationName: BRAND_FULL,
   manifest: "/site.webmanifest",
   // 绝对地址：相对 "/" 在部分爬虫/社会化分享下会解析为当前页 URL，导致 canonical 失效
   alternates: { canonical: "https://guji.ewuse.com/" },
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://guji.ewuse.com/",
     locale: "zh-CN",
-    siteName: "古籍通 AncientBook",
+    siteName: BRAND_FULL,
     title: SITE_TITLE,
     description: SITE_DESC,
   },

@@ -28,6 +28,7 @@ import {
   type PersonListItem,
 } from "./peopleList";
 import { usePeopleUrlSync } from "./usePeopleUrlSync";
+import { PERSON_COUNT_LABEL } from "@/lib/constants";
 
 const PAGE_SIZE = 50;
 const SEARCH_LIMIT = 100; // 人名搜索单次取数上限，超出时提示细化关键词
@@ -115,7 +116,7 @@ export default function PeopleInner() {
   const pageItems = paged.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (error) return <div style={{ padding: 40, color: "#c00" }}>加载失败：{error}</div>;
-  if (!meta) return <div style={{ padding: 60, textAlign: "center" }}>正在加载 661,350 位人物索引...</div>;
+  if (!meta) return <div style={{ padding: 60, textAlign: "center" }}>正在加载 {PERSON_COUNT_LABEL} 位人物索引...</div>;
 
   const summaryText = kw
     ? `“${kw}” 共匹配 ${searchResults ? searchResults.length : "..."} 位人物${

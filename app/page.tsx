@@ -2,6 +2,15 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
 import { toSimplified } from "@/lib/t2s";
+import {
+  BOOK_COUNT_LABEL,
+  PERSON_COUNT_LABEL,
+  DATA_SOURCE,
+  DATA_SIZE_GB,
+  REL_KIN_COUNT,
+  REL_SOC_COUNT,
+  SEARCH_PLACEHOLDER,
+} from "@/lib/constants";
 import RecentBooks from "@/components/RecentBooks";
 import RandomBook from "@/components/RandomBook";
 import RandomCharacter from "@/components/RandomCharacter";
@@ -12,14 +21,14 @@ export default function HomePage() {
       <div className="home-hero">
         <h1 className="hero-title">古籍通</h1>
         <p className="hero-sub">
-          开源公益古籍检索阅读与考据平台 · 殆知阁 v20 全量 <strong>15,694</strong> 部古籍在线
+          开源公益古籍检索阅读与考据平台 · {DATA_SOURCE} 全量 <strong>{BOOK_COUNT_LABEL}</strong> 部古籍在线
         </p>
-        <p className="hero-badge">原始数据 4.9GB 托管于上游数据源 · 阅读时按需加载</p>
+        <p className="hero-badge">原始数据约 {DATA_SIZE_GB}GB · 阅读时按需加载</p>
         <form className="search-box hero-search" action="/search" method="get">
           <input
             className="input-text"
             name="q"
-            placeholder="检索古籍书名、内容、人物"
+            placeholder={SEARCH_PLACEHOLDER}
             aria-label="检索关键词"
             defaultValue=""
           />
@@ -39,10 +48,10 @@ export default function HomePage() {
         </form>
         <div style={{ marginTop: 12, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/catalog" className="btn btn-secondary" style={{ fontSize: 14 }}>
-            📚 浏览全馆藏（15,694 部）
+            📚 浏览全馆藏（{BOOK_COUNT_LABEL} 部）
           </Link>
           <Link href="/people" className="btn btn-secondary" style={{ fontSize: 14 }}>
-            🧑 人物库（661,350 人）
+            🧑 人物库（{PERSON_COUNT_LABEL} 人）
           </Link>
         </div>
       </div>
@@ -76,13 +85,13 @@ export default function HomePage() {
         <Link href="/people" className="card category-card">
           <div className="cat-icon">人</div>
           <div className="cat-name">人物库</div>
-          <div className="cat-desc">CBDB 历代人物传记：661,350 人按姓氏/朝代检索</div>
+          <div className="cat-desc">CBDB 历代人物传记：{PERSON_COUNT_LABEL} 人按姓氏/朝代检索</div>
         </Link>
 
         <Link href="/relation" className="card category-card">
           <div className="cat-icon">系</div>
           <div className="cat-name">社会关系溯源</div>
-          <div className="cat-desc">CBDB 亲属 56.1 万条 + 社会关系 19 万条，支持双人溯源</div>
+          <div className="cat-desc">CBDB 亲属 {REL_KIN_COUNT} 条 + 社会关系 {REL_SOC_COUNT} 条，支持双人溯源</div>
         </Link>
         <Link href="/stats" className="card category-card">
           <div className="cat-icon">统</div>

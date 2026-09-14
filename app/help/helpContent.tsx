@@ -1,6 +1,14 @@
 // app/help/helpContent.tsx v1.15.8 —— 帮助页内容（从 help/page.tsx 拆出，内容数据与渲染分离）
 import type { ReactNode } from "react";
 import Link from "next/link";
+import {
+  BOOK_COUNT_LABEL,
+  PERSON_COUNT_LABEL,
+  DATA_SOURCE,
+  DATA_SIZE_GB,
+  REL_KIN_COUNT,
+  REL_SOC_COUNT,
+} from "@/lib/constants";
 
 export interface HelpSection {
   id: string;
@@ -28,7 +36,7 @@ export const HELP_SECTIONS: HelpSection[] = [
     title: "二、浏览全馆藏",
     body: (
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
-        <p><Link href="/catalog">全馆藏</Link> 收录殆知阁 v20 全量 <strong>15,694 部</strong>古籍书目索引（约 5.7 MB，随本站一同加载）。你可以：</p>
+        <p><Link href="/catalog">全馆藏</Link> 收录 {DATA_SOURCE} 全量 <strong>{BOOK_COUNT_LABEL} 部</strong>古籍书目索引（约 5.7 MB，随本站一同加载）。你可以：</p>
         <ul style={{ paddingLeft: 20, margin: "4px 0" }}>
           <li><strong>书名搜索</strong>：输入框输入书名片段（如「金刚经」「史记」），250 毫秒防抖后实时过滤。</li>
           <li><strong>馆藏筛选</strong>：点击顶部标签按十大藏库（儒藏、史藏、子藏、集藏、佛藏、道藏、医藏、易藏、艺藏、诗藏）浏览，并支持二级子类进一步收窄。</li>
@@ -100,12 +108,12 @@ export const HELP_SECTIONS: HelpSection[] = [
     body: (
       <div className="card stat-panel" style={{ lineHeight: 2, fontSize: 15 }}>
         <ul style={{ paddingLeft: 20, margin: "4px 0" }}>
-          <li><strong>人物库</strong>：已接入 CBDB 全量 661,350 位历代人物（姓名、拼音、生卒年、指数年、性别、朝代、籍贯、字/號/別名），支持人名与别名搜索、朝代筛选与姓氏浏览；详情页含科舉檔案（26.5 万条）、生平任职（59.1 万条）、人物关系与史料來源，可一键在古籍中检索该人物并跳转 CBDB 官方档案。</li>
-          <li><strong>人物考据（已并入人物库）</strong>：精选 28 位历史名人档案（字、号、籍贯、生卒、官职、著作与史料出处）现已并入人物库（CBDB 全量 661,350 位），可在人物库中按朝代+籍贯+官职多维区分重名人物。</li>
-          <li><strong>社会关系</strong>：已接入 CBDB 亲属关系 56.1 万条与社会关系 19 万条，支持按人物查看关系网络与双人溯源（直接/2-3 级中间关系，深度可选）。</li>
+          <li><strong>人物库</strong>：已接入 CBDB 全量 {PERSON_COUNT_LABEL} 位历代人物（姓名、拼音、生卒年、指数年、性别、朝代、籍贯、字/號/別名），支持人名与别名搜索、朝代筛选与姓氏浏览；详情页含科舉檔案（26.5 万条）、生平任职（59.1 万条）、人物关系与史料來源，可一键在古籍中检索该人物并跳转 CBDB 官方档案。</li>
+          <li><strong>人物考据（已并入人物库）</strong>：精选 28 位历史名人档案（字、号、籍贯、生卒、官职、著作与史料出处）现已并入人物库（CBDB 全量 {PERSON_COUNT_LABEL} 位），可在人物库中按朝代+籍贯+官职多维区分重名人物。</li>
+          <li><strong>社会关系</strong>：已接入 CBDB 亲属关系 {REL_KIN_COUNT} 条与社会关系 {REL_SOC_COUNT} 条，支持按人物查看关系网络与双人溯源（直接/2-3 级中间关系，深度可选）。</li>
           <li><strong>数据统计</strong>：已可查看馆藏规模、十大藏库分布、人物朝代分布、关系与任职概览、人物籍贯分布（按朝代筛选省/道/路）、官职-朝代联动分析、科举-朝代分析与历代人物时间分布（指数年按世纪）。</li>
         </ul>
-        <p>以上模块均已接入真实数据（人物库 661,350 人、社会关系 56.1 万 + 19 万条、任职 59.1 万条、数据统计多维分析），可直接使用。</p>
+        <p>以上模块均已接入真实数据（人物库 {PERSON_COUNT_LABEL} 人、社会关系 {REL_KIN_COUNT} + {REL_SOC_COUNT} 条、任职 59.1 万条、数据统计多维分析），可直接使用。</p>
       </div>
     ),
   },
@@ -153,14 +161,14 @@ export const HELP_SECTIONS: HelpSection[] = [
         <p><strong>Q：看到乱码或生僻字无法正常显示怎么办？</strong></p>
         <p>A：请确认使用较新的浏览器（Chrome / Edge / Safari / Firefox 等），并确保系统装有中文字体。原文为 UTF‑8 编码、下载文件带 BOM，Windows 记事本也能正确识别。个别极生僻字若设备缺字库可能显示为方框，属系统字体限制而非数据缺失。</p>
 
-        <p><strong>Q：人物库的 66 万人物数据是哪来的？准确吗？</strong></p>
-        <p>A：来自 CBDB（中国历代人物传记资料库，哈佛大学/北京大学/中研院合作项目）官方数据包（2026-09-05 版，661,350 人）。原始数据由 CBDB 官方维护，未做任何虚构或篡改；「指数年」为 CBDB 推算的编年基准，并非真实出生年。</p>
+        <p><strong>Q：人物库的 {PERSON_COUNT_LABEL} 位人物数据是哪来的？准确吗？</strong></p>
+        <p>A：来自 CBDB（中国历代人物传记资料库，哈佛大学/北京大学/中研院合作项目）官方数据包（2026-09-05 版，{PERSON_COUNT_LABEL} 人）。原始数据由 CBDB 官方维护，未做任何虚构或篡改；「指数年」为 CBDB 推算的编年基准，并非真实出生年。</p>
 
         <p><strong>Q：书签（收藏）会同步到其他设备吗？</strong></p>
         <p>A：书签、阅读进度与主题偏好一样，仅保存在当前浏览器本地，不跨设备、不跨账号自动同步。若需迁移，可在「书签」页使用「导出 / 导入 JSON」手动转移收藏。</p>
 
         <p><strong>Q：为什么网站需要联网才能读原文？为什么不用数据库？</strong></p>
-        <p>A：古籍原文（约 4.9 GB）存储在上游数据源，本站阅读时按需拉取，因此需要联网。</p>
+        <p>A：古籍原文（约 {DATA_SIZE_GB} GB）存储在上游数据源，本站阅读时按需拉取，因此需要联网。</p>
 
         <p><strong>Q：古籍版权归谁？可以商用吗？</strong></p>
         <p>A：古籍原文为公有领域资源，版权归原始数据源所有；整理文本遵循上游授权协议。本站资源<strong>仅供学术研究与个人学习</strong>，商用或二次售卖需自行核实版权状态并获授权。</p>
@@ -178,7 +186,7 @@ export const HELP_SECTIONS: HelpSection[] = [
         <p>本站运营相关的详细声明已拆分为独立页面，便于查阅与引用：</p>
         <ul style={{ paddingLeft: 20, margin: "4px 0" }}>
           <li><Link href="/license">开源协议</Link>：授权方式、非商用定位与数据使用条款。</li>
-          <li><Link href="/data-source">数据来源</Link>：殆知阁 v20 书目原文、CBDB 全量人物库与人物考据等数据源与溯源。</li>
+          <li><Link href="/data-source">数据来源</Link>：{DATA_SOURCE} 书目原文、CBDB 全量人物库与人物考据等数据源与溯源。</li>
           <li><Link href="/disclaimer">免责声明</Link>：非商用、内容仅供参考、使用责任归属。</li>
           <li><Link href="/feedback">反馈渠道</Link>：勘误、建议与问题反馈方式。</li>
         </ul>

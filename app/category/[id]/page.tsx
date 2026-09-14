@@ -25,7 +25,7 @@ export default function CategoryPage({ params }: Props) {
         该分类已合并至「全馆藏」书目页，可按馆藏筛选浏览：
       </p>
       <Link href={href} className="btn btn-primary">
-        前往全馆藏书目
+        前往全馆藏
       </Link>
     </section>
   );

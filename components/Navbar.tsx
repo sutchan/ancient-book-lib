@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { toSimplified } from "@/lib/t2s";
 import { useBookmarks } from "@/lib/useBookmarks";
+import { BRAND_FULL } from "@/lib/constants";
 
 interface NavbarProps {
   current?: string;
@@ -71,7 +72,7 @@ export default function Navbar({ current: currentProp = "home" }: NavbarProps) {
               id="brand-logo"
               className="brand-logo"
               src={theme === "dark" ? "/brand/logo-full-light-512.png" : "/brand/logo-full-512.png"}
-              alt="古籍通 AncientBook"
+              alt={BRAND_FULL}
             />
           </Link>
           <nav className="nav-menu" id="primary-nav">

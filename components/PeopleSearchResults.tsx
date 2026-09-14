@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { searchPersons } from "@/lib/cbdb";
+import { PERSON_COUNT_LABEL } from "@/lib/constants";
 
 interface Hit {
   id: number;
@@ -56,7 +57,7 @@ export default function PeopleSearchResults({ query }: { query: string }) {
         ))}
       </div>
       <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginTop: 10 }}>
-        数据来源：CBDB 中国历代人物传记资料库（661,350 人，含 163,634 条字/号/諡號别名检索）
+        数据来源：CBDB 中国历代人物传记资料库（{PERSON_COUNT_LABEL} 人，含 163,634 条字/号/諡號别名检索）
       </div>
     </div>
   );

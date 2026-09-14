@@ -15,6 +15,14 @@ import { exportBooklistCsv } from "@/lib/download";
 import { useBookmarks } from "@/lib/useBookmarks";
 import { addBookmark, removeBookmark } from "@/lib/bookmarks";
 import CatalogBookRow from "./CatalogBookRow";
+import EmptyState from "@/components/EmptyState";
+import {
+  BOOK_COUNT_LABEL,
+  DATA_SOURCE,
+  SEARCH_PLACEHOLDER,
+  EMPTY_RESULT_TITLE,
+  EMPTY_RESULT_HINT,
+} from "@/lib/constants";
 
 const PAGE_SIZE = 50;
 
@@ -83,15 +91,15 @@ export default function CatalogInner() {
   }, [catalog, filtered, category]);
 
   if (error) return <div style={{ padding: 40, color: "#c00" }}>索引加载失败：{error}</div>;
-  if (!catalog) return <div style={{ padding: 40 }}>正在加载 15,694 部古籍书目索引...</div>;
+  if (!catalog) return <div style={{ padding: 40 }}>正在加载 {BOOK_COUNT_LABEL} 部古籍书目索引...</div>;
 
   return (
     <section id="catalog-main">
       <div className="breadcrumb">
-        <Link href="/">首页</Link><span className="sep">/</span><span>全馆藏书目</span>
+        <Link href="/">首页</Link><span className="sep">/</span><span>全馆藏</span>
       </div>
 
-      <h2 style={{ marginBottom: 4 }}>全馆藏书目（殆知阁 v20）</h2>
+      <h2 style={{ marginBottom: 4 }}>全馆藏（{DATA_SOURCE}）</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 14 }}>
         共 <strong>{catalog.total.toLocaleString()}</strong> 部古籍
       </p>
@@ -101,7 +109,7 @@ export default function CatalogInner() {
           className="input-text"
           value={inputKw}
           onChange={(e) => setInputKw(e.target.value)}
-          placeholder="搜索书名（如：论语、金刚经、史记）"
+          placeholder={SEARCH_PLACEHOLDER}
           style={{ maxWidth: 360 }}
         />
         <span style={{ fontSize: 13, color: "var(--color-text-secondary)" }}>
@@ -168,11 +176,7 @@ export default function CatalogInner() {
       </div>
 
       {pageItems.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">未找到匹配古籍</div>
-          <div>请尝试更换关键词或筛选条件</div>
-        </div>
+        <EmptyState icon="🔍" title={EMPTY_RESULT_TITLE} description={EMPTY_RESULT_HINT} />
       )}
 
       {totalPages > 1 && (

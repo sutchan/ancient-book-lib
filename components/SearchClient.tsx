@@ -13,6 +13,8 @@ import {
 } from "@/lib/search";
 import { toSimplified } from "@/lib/t2s";
 import PeopleSearchResults from "@/components/PeopleSearchResults";
+import EmptyState from "@/components/EmptyState";
+import { SEARCH_PLACEHOLDER, EMPTY_RESULT_TITLE, EMPTY_RESULT_HINT } from "@/lib/constants";
 
 export default function SearchClient() {
   const sp = useSearchParams();
@@ -91,7 +93,7 @@ export default function SearchClient() {
           className="input-text"
           value={kw}
           onChange={(e) => setKw(e.target.value)}
-          placeholder="输入关键词，如：论语、仁义、孔子"
+          placeholder={SEARCH_PLACEHOLDER}
           aria-label="检索关键词"
         />
         <button className="btn btn-primary search-btn">搜索</button>
@@ -151,10 +153,11 @@ export default function SearchClient() {
       </div>
 
       {results.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🔍</div>
-          <div className="empty-title">未寻得此卷</div>
-          <div>书海无涯——换个关键词，或减少筛选条件再试试</div>
+        <EmptyState
+          icon="🔍"
+          title={EMPTY_RESULT_TITLE}
+          description={EMPTY_RESULT_HINT}
+        >
           <div className="empty-suggest">
             试试：
             {["仁", "君子", "天下"].map((w) => (
@@ -163,7 +166,7 @@ export default function SearchClient() {
               </Link>
             ))}
           </div>
-        </div>
+        </EmptyState>
       ) : (
         results.map((r) => {
           const href =

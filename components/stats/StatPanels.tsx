@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { formatSize } from "@/lib/catalog";
 import type { RelMeta, OfficesMeta } from "@/lib/cbdb";
+import { DATA_SOURCE, DATA_SIZE_GB } from "@/lib/constants";
 
 /** KPI 指标行 */
 export function StatKpis({
@@ -59,14 +60,14 @@ export function OverviewPanel({
 }) {
   return (
     <div className="card stat-panel" style={{ marginTop: 20, padding: "16px 20px" }} id="stats-overview">
-      <div className="stat-panel-title">全量数据概览（殆知阁 v20 + CBDB · 原始数据托管于上游）</div>
+      <div className="stat-panel-title">全量数据概览（{DATA_SOURCE} + CBDB · 原始数据托管于上游）</div>
       <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 12 }}>
         <div>
           <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>{total.toLocaleString()}</span>{" "}
           <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>部古籍</span>
         </div>
         <div>
-          <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>4.9</span>{" "}
+          <span style={{ fontSize: 24, fontWeight: 700, color: "var(--color-primary)" }}>{DATA_SIZE_GB}</span>{" "}
           <span style={{ color: "var(--color-text-secondary)", fontSize: 13 }}>GB 原始 TXT</span>
         </div>
         <div>
@@ -97,7 +98,7 @@ export function OverviewPanel({
       <div style={{ marginTop: 10, fontSize: 12, color: "var(--color-text-secondary)" }}>
         数据源：
         <a href="https://github.com/garychowcmu/daizhigev20" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>
-          殆知阁 v20 开源古籍库
+          {DATA_SOURCE} 开源古籍库
         </a>
         {" · "}
         <a href="https://cbdb.hsites.harvard.edu/" target="_blank" rel="noopener" style={{ color: "var(--color-primary)" }}>

@@ -34,7 +34,7 @@ export function ReaderLargeWarning({ book, onConfirm }: { book: CatalogEntry; on
           <strong>{book.title}</strong> 原文约 <strong>{formatSize(book.size)}</strong>，加载可能需要较长时间。
         </p>
         <p style={{ marginBottom: 16, fontSize: 14, color: "var(--color-text-secondary)" }}>
-          建议在 Wi-Fi 环境下阅读。加载后会自动缓存到本地，下次访问无需重新下载。
+          建议在 Wi-Fi 下阅读；加载后自动缓存本地，下次免重下。
         </p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button className="btn btn-primary" onClick={onConfirm}>仍然在线阅读</button>

@@ -9,6 +9,7 @@ import { fetchTextWithTimeout } from "@/lib/fetchWithTimeout";
 import { getCachedBook } from "@/lib/idb";
 import { useBookmarks } from "@/lib/useBookmarks";
 import { addBookmark, removeBookmark } from "@/lib/bookmarks";
+import { DATA_SOURCE } from "@/lib/constants";
 
 export default function CatalogBookInner() {
   const params = useSearchParams();
@@ -104,7 +105,7 @@ export default function CatalogBookInner() {
           <span className="tag">{formatSize(book.size)}</span>
         </div>
         <p className="book-detail-desc">
-          本书来自殆知阁 v20 开源古籍库，原始文本托管于上游数据源。阅读时按需加载原文，自动缓存至本地。
+          本书原文来自 {DATA_SOURCE}，阅读时按需加载并自动缓存至本地。
         </p>
         <div className="book-actions">
           <Link href={`/read/remote?id=${book.id}`} className="btn btn-primary">开始阅读</Link>

@@ -14,7 +14,7 @@ export default function CategoryIndexPage() {
         馆藏总览已合并至「全馆藏」书目页：
       </p>
       <Link href="/catalog" className="btn btn-primary">
-        前往全馆藏书目
+        前往全馆藏
       </Link>
     </section>
   );

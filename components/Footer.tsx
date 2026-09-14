@@ -1,6 +1,7 @@
 // components/Footer.tsx v1.15.8
 import Link from "next/link";
 import EasterEgg from "@/components/EasterEgg";
+import { BRAND_FULL } from "@/lib/constants";
 
 // 版本号（构建时由 package.json 注入，单一来源）
 const APP_VERSION = process.env.npm_package_version || "1.15.8";
@@ -19,7 +20,7 @@ export default function Footer() {
           <Link href="/stats">数据统计</Link>
           <Link href="/people">人物库</Link>
         </div>
-        <p>古籍通 AncientBook · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
+        <p>{BRAND_FULL} · 开源公益古籍阅读与考据平台 | 数据仅供学术参考</p>
         <p
           className="footer-stats"
           title="悄悄说：连续点我几下，有惊喜"

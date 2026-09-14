@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import PeopleInner from "./PeopleInner";
+import { PERSON_COUNT_LABEL } from "@/lib/constants";
 
 export const metadata = {
   title: "人物库 · 古籍通",
   description:
-    "661,350 位中国历代人物传记数据（CBDB 中国历代人物传记资料库），按姓氏/朝代浏览、检索。",
+    `${PERSON_COUNT_LABEL} 位中国历代人物传记数据（CBDB 中国历代人物传记资料库），按姓氏/朝代浏览、检索。`,
 };
 
 export default function PeoplePage() {

@@ -5,11 +5,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import fs from "fs";
 import path from "path";
+import { PERSON_COUNT_LABEL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "人物考据已并入人物库｜古籍通 AncientBook",
   description:
-    "人物考据功能已统一接入 CBDB 全量人物索引（661,350 位历代人物），可在此进入人物库浏览、检索并查看考据详情。",
+    `人物考据功能已统一接入 CBDB 全量人物索引（${PERSON_COUNT_LABEL} 位历代人物），可在此进入人物库浏览、检索并查看考据详情。`,
 };
 
 interface LegacyChar {
@@ -42,11 +43,11 @@ export default function CharacterPage() {
       </div>
       <h2 style={{ marginBottom: 8 }}>人物考据已并入人物库</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 20, fontSize: 15 }}>
-        人物考据已统一接入 CBDB 全量人物索引（661,350 位历代人物）：姓名/别名检索、重名消歧、生卒与任职、亲属社会关系与典籍联动，均可在「人物库」完成。
+        人物考据已统一接入 CBDB 全量人物索引（{PERSON_COUNT_LABEL} 位历代人物）：姓名/别名检索、重名消歧、生卒与任职、亲属社会关系与典籍联动，均可在「人物库」完成。
       </p>
       <div style={{ marginBottom: 28 }}>
         <Link href="/people" className="btn btn-primary">
-          进入人物库（661,350 人）
+          进入人物库（{PERSON_COUNT_LABEL} 人）
         </Link>
       </div>
 

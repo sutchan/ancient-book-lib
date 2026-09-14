@@ -17,6 +17,7 @@ import {
 import { BarChart } from "./stats/BarChart";
 import { StatKpis, OverviewPanel, RelPanel, OfficesPanel } from "./stats/StatPanels";
 import { GeoPanel, OfficeDynastyPanel, EntryDynastyPanel, PersonYearsPanel } from "./stats/DynastyPanels";
+import { DATA_SOURCE } from "@/lib/constants";
 
 export default function StatsClient() {
   const [catalog, setCatalog] = useState<DaizhigeCatalog | null>(null);
@@ -102,7 +103,7 @@ export default function StatsClient() {
       </div>
       <h2 style={{ marginBottom: 8 }}>馆藏数据统计与分析</h2>
       <p style={{ color: "var(--color-text-secondary)", marginBottom: 24 }}>
-        基于殆知阁 v20 全量 {total.toLocaleString()} 部古籍与 CBDB 全量人物传记数据的真实统计
+        基于 {DATA_SOURCE} 全量 {total.toLocaleString()} 部古籍与 CBDB 全量人物传记数据的真实统计
       </p>
 
       <StatKpis

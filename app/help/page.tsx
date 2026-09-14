@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HELP_SECTIONS } from "./helpContent";
+import { BOOK_COUNT_LABEL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "帮助与说明｜古籍通 AncientBook",
@@ -37,7 +38,7 @@ export default function HelpPage() {
         <strong>三步开始阅读：</strong>
         <ol style={{ paddingLeft: 22, margin: "6px 0 0" }}>
           <li>在首页或 <Link href="/search">检索</Link> 页输入关键词（如「论语」「仁义」）查找古籍；</li>
-          <li>在 <Link href="/catalog">全馆藏</Link> 中按馆藏分类浏览 15,694 部书目；</li>
+          <li>在 <Link href="/catalog">全馆藏</Link> 中按馆藏分类浏览 {BOOK_COUNT_LABEL} 部书目；</li>
           <li>点击任意书籍的「阅读」，即可在线阅读，支持繁简对照、字号调节与下载。</li>
         </ol>
       </div>
