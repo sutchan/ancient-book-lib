@@ -3,6 +3,13 @@
 本项目的所有重要变更都会记录在此文件中。
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.15.10] - 2026-09-14
+
+### 文档
+- 刷新 `docs/04-开发任务清单/剩余开发任务清单.md` 与 `开发进度清单.md` 至 v1.15.9 现状（`npm test` 69/69、`tsc --noEmit` 0 错误，无代码变更）。
+- 新增文档债项 **R28（UI 文案常量化）**（来源字符串审计 S-16）；R6–R23 待办状态经源码实测确认不变（合计 28 项：已完成 9 · 待办 19）。
+- 补记 v1.15.9 的文案常量化重构（`bf34870`）至下方 `[1.15.9]` 小节（原提交未单独记账）。
+
 ## [1.15.9] - 2026-09-14
 
 ### 修复 / 重构 / 规范
@@ -12,6 +19,7 @@
   - **`.chapter-item:hover` 悬浮浅色**：原 `var(--color-bg-secondary,#f4f3ee)` 因变量未定义，三主题都回退浅色；新增 `--color-bg-secondary` 三套定义，深色下为深灰。
   - **原生控件未跟随深色**：`:root / [data-theme="paper"] / [data-theme="dark"]` 分别声明 `color-scheme: light / light / dark`，使原生 `<select>` 下拉、滚动条、自动填充在深色下不再破功为浅色。
 - 版本号随改动升至 v1.15.9；被改文件头注释（layout / Navbar）同步更新。
+- **文案常量化重构（`bf34870`，同日）**：新增 `lib/constants.ts`（`BOOK_COUNT` / `PERSON_COUNT` / `DATA_SOURCE` / `DATA_SIZE_GB` / `REL_KIN_COUNT` / `REL_SOC_COUNT` / `BRAND` / `BRAND_FULL` / `SEARCH_PLACEHOLDER` / `EMPTY_RESULT_*`）与 `components/EmptyState.tsx`、`components/ErrorBlock.tsx`；将首页 / 馆藏 / 检索 / 人物 / 帮助 / 错误页等约 20 个文件的硬编码数字、品牌名与重复文案改为常量引用，落地文案审计 `docs/string-audit-2026-09-14.md` 的 S-01~S-15（S-16 按钮标签常量化暂缓）。纯重构，无功能变更。
 
 ## [1.15.8] - 2026-09-13
 
@@ -816,7 +824,7 @@
 <!--
   以下版本在 CHANGELOG 中有条目，但提交信息与 package.json 均无可靠落点，
   故不打标签、不生成链接：
-  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.7
+  1.1.1 / 1.2.1 / 1.2.4 / 1.2.5 / 1.2.7 / 1.2.10 / 1.4.4 / 1.5.0 / 1.6.0 / 1.7.0 / 1.14.2 / 1.14.4 / 1.15.10
 
   以下版本因目标提交已被其它版本认领而让位（避免同一 commit 承载两个版本号）：
   1.2.1（package.json 落点 903cd36 已被 v1.2.0 占用） / 1.4.4（package.json 落点 9b61040 已被 v1.8.0 占用）
