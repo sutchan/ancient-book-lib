@@ -11,6 +11,7 @@ export interface Bookmark {
   title: string;
   category: string;
   time: number;
+  note?: string;
 }
 
 export interface ReadPosBookmark {
@@ -76,6 +77,13 @@ export function addBookmark(b: Omit<Bookmark, "time">): Bookmark[] {
 
 export function removeBookmark(id: string): Bookmark[] {
   const next = readBookmarks().filter((b) => b.id !== id);
+  writeBookmarks(next);
+  return next;
+}
+
+export function updateBookmarkNote(id: string, note: string): Bookmark[] {
+  const list = readBookmarks();
+  const next = list.map((b) => (b.id === id ? { ...b, note } : b));
   writeBookmarks(next);
   return next;
 }

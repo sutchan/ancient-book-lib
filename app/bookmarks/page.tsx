@@ -1,5 +1,6 @@
-// app/bookmarks/page.tsx v1.17.0
+// app/bookmarks/page.tsx v1.18.1
 "use client";
+
 import { useState, useEffect, type ChangeEvent } from "react";
 import Link from "next/link";
 import { useBookmarks } from "@/lib/useBookmarks";
@@ -8,18 +9,22 @@ import {
   importBookmarks,
   removeBookmark,
   clearBookmarks,
+  updateBookmarkNote,
+  type Bookmark,
 } from "@/lib/bookmarks";
 import { downloadText } from "@/lib/download";
-import { loadCatalog, findBookById, formatSize, type CatalogEntry } from "@/lib/catalog";
-import { DATA_SOURCE } from "@/lib/constants";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
-
-const CHART_COLORS = ["#8C3130", "#CEA76A", "#704030", "#B89A68", "#4A6B5D", "#5A6152", "#9E6B55", "#C9605E"];
+import { loadCatalog, findBookById, type CatalogEntry } from "@/lib/catalog";
+import BookmarksStats from "./BookmarksStats";
+import BookmarkPreviewModal from "./BookmarkPreviewModal";
 
 export default function BookmarksPage() {
   const bookmarks = useBookmarks();
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("全部");
+
+  // 备注编辑状态
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteInput, setNoteInput] = useState("");
 
   // 预览模态框状态
   const [previewId, setPreviewId] = useState<string | null>(null);
@@ -76,8 +81,8 @@ export default function BookmarksPage() {
     return acc;
   }, {} as Record<string, number>);
 
-  const chartData = Object.entries(categoryCounts).map(([name, value]) => ({ name, value }));
   const mostActiveCategory = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "暂无";
+  const recentBookmarks = [...bookmarks].sort((a, b) => b.time - a.time).slice(0, 5);
 
   const filteredBookmarks = selectedCategory === "全部"
     ? bookmarks
@@ -119,12 +124,13 @@ export default function BookmarksPage() {
           id: string;
           title?: string;
           category?: string;
+          note?: string;
         }[];
         if (!Array.isArray(incoming)) throw new Error("格式不正确");
         const count = importBookmarks(
           incoming
             .filter((b) => b && b.id)
-            .map((b) => ({ id: b.id, title: b.title || "", category: b.category || "" }))
+            .map((b) => ({ id: b.id, title: b.title || "", category: b.category || "", note: b.note }))
         );
         setImportMsg(`已合并 ${count.length} 条书签（自动去重）`);
       } catch {
@@ -133,6 +139,17 @@ export default function BookmarksPage() {
     };
     reader.readAsText(file);
     e.target.value = "";
+  };
+
+  const startEditNote = (b: { id: string; note?: string }) => {
+    setEditingNoteId(b.id);
+    setNoteInput(b.note || "");
+  };
+
+  const saveNote = (id: string) => {
+    updateBookmarkNote(id, noteInput);
+    setEditingNoteId(null);
+    setNoteInput("");
   };
 
   return (
@@ -145,45 +162,18 @@ export default function BookmarksPage() {
         收藏仅保存在本机浏览器，不跨设备同步。
       </p>
 
-      {/* 统计区域 */}
-      {bookmarks.length > 0 && (
-        <div className="card" style={{ padding: 20, marginBottom: 24, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, alignItems: "center" }}>
-          <div>
-            <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: "var(--color-text)" }}>书架数据概览</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 14, color: "var(--color-text-secondary)" }}>
-              <div>收藏总数：<strong style={{ color: "var(--color-primary)", fontSize: 16 }}>{bookmarks.length}</strong> 部</div>
-              <div>涉及分类数：<strong style={{ color: "var(--color-text)" }}>{Object.keys(categoryCounts).length}</strong> 个</div>
-              <div>最活跃类别：<strong style={{ color: "var(--color-primary)" }}>{mostActiveCategory}</strong></div>
-            </div>
-          </div>
-          <div style={{ height: 180, width: "100%" }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={65}
-                  innerRadius={30}
-                  paddingAngle={2}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
+      {/* 统计区域与最近收藏 */}
+      <BookmarksStats
+        bookmarks={bookmarks}
+        categoryCounts={categoryCounts}
+        mostActiveCategory={mostActiveCategory}
+        recentBookmarks={recentBookmarks}
+        fmtTime={fmtTime}
+      />
 
       {/* 分类筛选栏 */}
       {bookmarks.length > 0 && (
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20, alignItems: "center" }}>
+        <div id="category-filter-bar" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20, alignItems: "center" }}>
           <span style={{ fontSize: 13, color: "var(--color-text-secondary)", fontWeight: 500 }}>分类筛选：</span>
           <button
             onClick={() => setSelectedCategory("全部")}
@@ -205,7 +195,7 @@ export default function BookmarksPage() {
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
+      <div id="bookmark-actions-row" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
         <button className="btn btn-secondary" style={{ fontSize: 13, padding: "6px 12px" }} onClick={handleExport}>
           导出书签 JSON
         </button>
@@ -224,33 +214,99 @@ export default function BookmarksPage() {
       </div>
 
       {importMsg && (
-        <div className="empty-state" style={{ padding: 12, marginBottom: 16 }}>
+        <div id="import-msg-banner" className="empty-state" style={{ padding: 12, marginBottom: 16 }}>
           <div className="empty-title" style={{ fontSize: 14 }}>{importMsg}</div>
         </div>
       )}
 
       {bookmarks.length === 0 ? (
-        <div className="empty-state">
+        <div id="empty-bookmarks" className="empty-state">
           <div className="empty-icon">⭐</div>
           <div className="empty-title">还没有收藏任何书</div>
           <div>在全馆藏或书籍详情页点击「☆」即可加入书架；收藏后会显示在这里。</div>
         </div>
       ) : filteredBookmarks.length === 0 ? (
-        <div className="empty-state">
+        <div id="empty-filtered-bookmarks" className="empty-state">
           <div className="empty-icon">🔍</div>
           <div className="empty-title">该分类下暂无收藏</div>
           <div>当前分类「{selectedCategory}」没有找到匹配的书签。</div>
         </div>
       ) : (
-        <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
+        <div id="bookmarks-grid" style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
           {filteredBookmarks.map((b) => (
-            <div key={b.id} className="card" style={{ padding: 14, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div key={b.id} id={`bookmark-card-${b.id}`} className="card" style={{ padding: 16, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{b.title}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
+                  <div style={{ fontWeight: 600, fontSize: 15 }}>{b.title}</div>
+                  <button
+                    className="btn btn-secondary"
+                    style={{ fontSize: 12, padding: "2px 6px", flexShrink: 0 }}
+                    onClick={() => startEditNote(b)}
+                    title="编辑备注"
+                  >
+                    ✏️ 备注
+                  </button>
+                </div>
                 <div style={{ fontSize: 12, color: "var(--color-text-secondary)", marginBottom: 10 }}>
                   {b.category} · {fmtTime(b.time)}
                 </div>
+
+                {/* 备注区域 */}
+                {editingNoteId === b.id ? (
+                  <div style={{ marginBottom: 12, display: "flex", gap: 6, flexDirection: "column" }}>
+                    <textarea
+                      value={noteInput}
+                      onChange={(e) => setNoteInput(e.target.value)}
+                      placeholder="输入阅读心得或备忘..."
+                      style={{
+                        width: "100%",
+                        padding: 8,
+                        fontSize: 13,
+                        borderRadius: 6,
+                        border: "1px solid var(--color-border)",
+                        background: "var(--color-bg)",
+                        color: "var(--color-text)",
+                        resize: "vertical",
+                        minHeight: 60,
+                      }}
+                    />
+                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+                      <button
+                        className="btn btn-secondary"
+                        style={{ fontSize: 12, padding: "3px 8px" }}
+                        onClick={() => setEditingNoteId(null)}
+                      >
+                        取消
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        style={{ fontSize: 12, padding: "3px 8px" }}
+                        onClick={() => saveNote(b.id)}
+                      >
+                        保存
+                      </button>
+                    </div>
+                  </div>
+                ) : b.note ? (
+                  <div
+                    style={{
+                      background: "var(--color-bg)",
+                      border: "1px solid var(--color-border)",
+                      borderRadius: 6,
+                      padding: "8px 10px",
+                      fontSize: 13,
+                      color: "var(--color-text)",
+                      marginBottom: 12,
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-all",
+                    }}
+                  >
+                    <span style={{ color: "var(--color-primary)", fontWeight: 500, marginRight: 4 }}>备注：</span>
+                    {b.note}
+                  </div>
+                ) : null}
               </div>
+
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
                 <Link href={`/read/remote?id=${b.id}`} className="btn btn-primary" style={{ fontSize: 13, padding: "5px 10px" }}>
                   阅读
@@ -278,117 +334,13 @@ export default function BookmarksPage() {
         </div>
       )}
 
-      {/* 预览详情模态框 */}
-      {previewId && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.5)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-            backdropFilter: "blur(2px)",
-          }}
-          onClick={() => setPreviewId(null)}
-        >
-          <div
-            style={{
-              background: "var(--color-card-bg)",
-              border: "1px solid var(--color-border)",
-              borderRadius: 8,
-              maxWidth: 580,
-              width: "100%",
-              maxHeight: "85vh",
-              overflowY: "auto",
-              padding: 24,
-              boxShadow: "0 12px 36px rgba(0,0,0,0.25)",
-              position: "relative",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
-                {loadingPreview ? "加载中..." : previewBook?.title || previewId}
-              </h3>
-              <button
-                className="btn btn-secondary"
-                style={{ fontSize: 14, padding: "2px 8px", borderRadius: 4 }}
-                onClick={() => setPreviewId(null)}
-              >
-                ✕
-              </button>
-            </div>
-
-            {loadingPreview ? (
-              <div style={{ padding: 40, textAlign: "center", color: "var(--color-text-secondary)" }}>
-                正在获取该书馆藏元数据…
-              </div>
-            ) : previewBook ? (
-              <div>
-                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-                  <span className="tag">{previewBook.category}</span>
-                  {previewBook.subcategories?.map((s, i) => (
-                    <span key={i} className="tag">{s}</span>
-                  ))}
-                  {previewBook.size > 0 && <span className="tag">{formatSize(previewBook.size)}</span>}
-                </div>
-
-                <div style={{ fontSize: 14, lineHeight: 1.8, color: "var(--color-text)", marginBottom: 20 }}>
-                  <p style={{ marginBottom: 10 }}>
-                    <strong>数据来源：</strong>{DATA_SOURCE} 全量古籍书目。原文支持在线保真阅读、按需加载与离线缓存。
-                  </p>
-                  <p style={{ marginBottom: 10 }}>
-                    <strong>标识 ID：</strong><code>{previewBook.id}</code>
-                  </p>
-                  {previewBook.rawUrl && (
-                    <p style={{ wordBreak: "break-all", fontSize: 13, color: "var(--color-text-secondary)" }}>
-                      <strong>上游原文链接：</strong>
-                      <a href={previewBook.rawUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-primary)", marginLeft: 4 }}>
-                        {previewBook.rawUrl}
-                      </a>
-                    </p>
-                  )}
-                </div>
-
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", borderTop: "1px solid var(--color-border)", paddingTop: 16 }}>
-                  <Link
-                    href={`/read/remote?id=${previewBook.id}`}
-                    className="btn btn-primary"
-                    onClick={() => setPreviewId(null)}
-                  >
-                    开始阅读
-                  </Link>
-                  <Link
-                    href={`/catalog/book?id=${previewBook.id}`}
-                    className="btn btn-secondary"
-                    onClick={() => setPreviewId(null)}
-                  >
-                    前往完整详情页
-                  </Link>
-                  {previewBook.rawUrl && (
-                    <a
-                      href={previewBook.rawUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-secondary"
-                    >
-                      访问上游原文
-                    </a>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div style={{ padding: 30, textAlign: "center", color: "var(--color-text-secondary)" }}>
-                未找到该书的馆藏元数据。
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* 预览详情模态框组件 */}
+      <BookmarkPreviewModal
+        previewId={previewId}
+        previewBook={previewBook}
+        loadingPreview={loadingPreview}
+        onClose={() => setPreviewId(null)}
+      />
     </section>
   );
 }
-

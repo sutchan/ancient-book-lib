@@ -1,12 +1,11 @@
-// components/RemoteReader.tsx v1.15.8
+// components/RemoteReader.tsx v1.18.1
 "use client";
 
 /**
- * 远程阅读器（编排层）：数据/搜索/书签/划词逻辑在 components/reader/ 下，
+ * 远程阅读器（编排层）：数据/搜索/书签/划词/语音合成等逻辑在 components/reader/ 下，
  * 本文件只做状态编排与 JSX 组装。行为与拆分前保持一致。
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { toSimplified } from "@/lib/t2s";
 import type { ReaderMatch } from "@/lib/readerSearch";
 import ReaderToc from "./ReaderToc";
 import ScrollProgress from "./ScrollProgress";
@@ -18,6 +17,7 @@ import { useReaderNavigation } from "./reader/useReaderNavigation";
 import { useReaderSearch } from "./reader/useReaderSearch";
 import { useReaderBookmarks } from "./reader/useReaderBookmarks";
 import { useReaderSelection } from "./reader/useReaderSelection";
+import { useSpeechSynthesis } from "./reader/useSpeechSynthesis";
 import { downloadBookText } from "./reader/download";
 import {
   ReaderLoading,
@@ -58,7 +58,7 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
     if (typeof window !== "undefined") localStorage.setItem("ab-simple", simple ? "1" : "0");
   }, [simple]);
 
-  // 目录 / 分页 / 翻页导航（拆入 useReaderNavigation 钩子）
+  // 目录 / 分页 / 翻页导航
   const {
     navItems, currentTitle, paragraphs, totalPages, pageParagraphs,
     goPage, goChapter, onBodyTouchStart, onBodyTouchEnd, matchLabel,
@@ -67,7 +67,7 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
     toc, chapters, content, book, loadChapter,
   });
 
-  // 页内搜索：分片模式仅当前章节，整本模式为全书
+  // 页内搜索
   const searchChapters = useMemo(
     () =>
       usingManifest
@@ -77,7 +77,6 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
   );
   const search = useReaderSearch({ initialQuery, searchChapters, simple });
 
-  // 页内搜索：跳转到命中处（分片模式命中只在当前章节，跳页即可）
   const jumpToMatch = useCallback(
     (m: ReaderMatch) => {
       if (!usingManifest) goChapter(m.chapterIdx);
@@ -99,6 +98,7 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
   });
 
   const selection = useReaderSelection(book, currentTitle);
+  const { isSpeaking, isPaused, handleToggleSpeech, handleStopSpeech } = useSpeechSynthesis(pageParagraphs, simple, chapterIdx, pageIdx);
 
   const handleDownload = useCallback(() => {
     if (book) downloadBookText(book, content, simple, usingManifest);
@@ -164,6 +164,10 @@ export default function RemoteReader({ bookId, initialQuery = "" }: { bookId: st
         onLineInc={() => setLineHeight(Math.min(2.4, +(lineHeight + 0.1).toFixed(1)))}
         onToggleSimple={setSimple}
         onDownload={handleDownload}
+        isSpeaking={isSpeaking}
+        isPaused={isPaused}
+        onToggleSpeech={handleToggleSpeech}
+        onStopSpeech={handleStopSpeech}
       />
 
       <ReaderProgressBar total={navItems.length} current={chapterIdx} onSeek={goChapter} />
